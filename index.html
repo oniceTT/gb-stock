@@ -107,7 +107,7 @@
         <button class="filter-btn" style="width:100%; margin-bottom:15px; background:#e0f7fa; color:#00838f; border-color:#00acc1;" onclick="refreshData()">🔄 โหลดข้อมูลล่าสุด (Refresh)</button>
       </div>
 
-      <div id="tabBorrow" style="display:none;">
+      <div id="tabBorrow" class="tab-content" style="display:none;">
         <div class="controls">
           <input type="text" placeholder="ค้นหาอุปกรณ์..." id="searchInput" onkeyup="renderEquipment()">
           <div class="filters">
@@ -119,7 +119,7 @@
         <div class="equipment-grid" id="equipmentGrid"></div>
       </div>
 
-      <div id="tabReturn" style="display:none;">
+      <div id="tabReturn" class="tab-content" style="display:none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
           <h3 style="margin:0;">อุปกรณ์ที่คุณกำลังใช้งานอยู่</h3>
           <button class="btn-warning" onclick="openScanner('return')">📷 สแกนคืนอุปกรณ์</button>
@@ -128,7 +128,7 @@
         <div id="myReturnList"></div>
       </div>
 
-      <div id="tabProfile" style="display:none;">
+      <div id="tabProfile" class="tab-content" style="display:none;">
         <h3 style="margin-top:0;">จัดการบัญชีส่วนตัว</h3>
         <p style="font-size: 14px; color: #666;">คุณสามารถเปลี่ยนชื่อ รหัสผ่าน และแผนกได้ที่นี่</p>
         <div class="list-card" style="display: flex; flex-direction: column; gap: 5px;">
@@ -173,7 +173,7 @@
        </div>
       </div>
 
-      <div id="tabAdmin" style="display:none;">
+      <div id="tabAdmin" class="tab-content" style="display:none;">
         <h3 style="margin-top:0;">จัดการระบบส่วนกลาง</h3>
         <div class="filters" style="margin-bottom: 15px;" id="adminNavFilters">
           <button class="filter-btn active" onclick="showAdminSubTab('return')">📦 ของค้างคืน</button>
@@ -455,8 +455,12 @@
     if (tabName !== 'tabPOS' && posHtml5QrcodeScanner) {
         stopPOSScanner();
     }
-    document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none'); 
-    document.getElementById(tabName).style.display = 'block'; 
+    ['tabBorrow','tabReturn','tabPOS','tabProfile','tabAdmin'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.style.display = 'none';
+    });
+    const target = document.getElementById(tabName);
+    if(target) target.style.display = 'block';
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); 
     if(navElement) navElement.classList.add('active'); 
     updateCartFloat(); 
@@ -475,7 +479,7 @@
     window.history.replaceState({ tab: 'borrow' }, '', '#borrow');
   }
 
-  function refreshData() { showLoading('กำลังโหลดข้อมูลระบบ...'); google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; hideLoading(); renderEquipment(); if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } else if (document.getElementById('tabAdmin').style.display === 'block') { showAdminSubTab('return'); } else if (document.getElementById('tabProfile').style.display === 'block') { } else if (document.getElementById('tabPOS').style.display === 'block') { renderPOSCart(); } else if (document.getElementById('tabBorrow').style.display !== 'block') { document.getElementById('tabBorrow').style.display = 'block'; document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); const firstNav = document.querySelector('.nav-item'); if(firstNav) firstNav.classList.add('active'); } }).withFailureHandler(showError).getInitialData(); }
+  function refreshData() { showLoading('กำลังโหลดข้อมูลระบบ...'); google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; hideLoading(); renderEquipment(); if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } else if (document.getElementById('tabAdmin').style.display === 'block') { showAdminSubTab('return'); } else if (document.getElementById('tabProfile').style.display === 'block') { } else if (document.getElementById('tabPOS').style.display === 'block') { renderPOSCart(); } else if (document.getElementById('tabBorrow').style.display === 'block') { /* already showing */ } else { ['tabBorrow','tabReturn','tabPOS','tabProfile','tabAdmin'].forEach(id => { const el = document.getElementById(id); if(el) el.style.display = 'none'; }); document.getElementById('tabBorrow').style.display = 'block'; document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); const firstNav = document.querySelector('.nav-item'); if(firstNav) firstNav.classList.add('active'); } }).withFailureHandler(showError).getInitialData(); }
   function logout() { if(!confirm('ยืนยันการออกจากระบบ?')) return; if(posHtml5QrcodeScanner) stopPOSScanner(); currentUser = null; cart = {}; safeRemoveStorage('myAppUser'); document.getElementById('authSection').style.display = 'block'; document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('mainNav').style.display = 'none'; document.getElementById('tabBorrow').style.display = 'none'; document.getElementById('tabReturn').style.display = 'none'; document.getElementById('tabProfile').style.display = 'none'; document.getElementById('tabAdmin').style.display = 'none'; document.getElementById('tabPOS').style.display = 'none'; document.getElementById('logoutBtn').style.display = 'none'; document.getElementById('welcomeText').innerText = ''; document.getElementById('cartFloat').style.display = 'none'; }
   
   function saveMyProfile() { const u = document.getElementById('myProfileUsername').value; const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!u || !p || !n) return alert('กรุณากรอก Username รหัสผ่าน และชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); alert(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, p, d); }
