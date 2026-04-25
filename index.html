@@ -464,6 +464,14 @@
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); 
     if(navElement) navElement.classList.add('active'); 
     updateCartFloat(); 
+    // Render data for the selected tab
+    if (tabName === 'tabReturn') {
+        renderMyReturnData();
+    } else if (tabName === 'tabAdmin') {
+        showAdminSubTab('return');
+    } else if (tabName === 'tabPOS') {
+        renderPOSCart();
+    }
     if (!isHistoryBack) window.history.pushState({ tab: tabName }, '', '#' + tabName);
   }
 
