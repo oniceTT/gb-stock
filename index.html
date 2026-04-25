@@ -129,7 +129,7 @@
         <h3 style="margin-top:0;">จัดการบัญชีส่วนตัว</h3>
         <p style="font-size: 14px; color: #666;">คุณสามารถเปลี่ยนชื่อ รหัสผ่าน และแผนกได้ที่นี่</p>
         <div class="list-card" style="display: flex; flex-direction: column; gap: 5px;">
-          <label>Username (แก้ไขไม่ได้)</label><input type="text" id="myProfileUsername" disabled style="background:#efefef; color:#8e8e8e;">
+          <label>Username (สำหรับเข้าสู่ระบบ)</label><input type="text" id="myProfileUsername" placeholder="Username">
           <label>รหัสผ่าน</label><input type="text" id="myProfilePassword" placeholder="รหัสผ่านใหม่">
           <label>ชื่อ-นามสกุล</label><input type="text" id="myProfileName" placeholder="ชื่อ-นามสกุล">
           <label>แผนก</label>
@@ -334,7 +334,7 @@
     if (actionName === 'getInitialData' || actionName === 'getActiveTransactions' || actionName === 'getAllUsers') { } 
     else if (actionName === 'loginUser') { payload.username = args[0]; payload.password = args[1]; } 
     else if (actionName === 'registerUser') { payload.username = args[0]; payload.password = args[1]; payload.name = args[2]; payload.department = args[3]; } 
-    else if (actionName === 'updateMyProfile') { payload.userId = args[0]; payload.name = args[1]; payload.password = args[2]; payload.department = args[3]; } 
+    else if (actionName === 'updateMyProfile') { payload.userId = args[0]; payload.username = args[1]; payload.name = args[2]; payload.password = args[3]; payload.department = args[4]; } 
     else if (actionName === 'processReturn') { payload.row = args[0]; payload.eqId = args[1]; payload.qty = args[2]; payload.locId = args[3]; payload.photoUrl = args[4]; } 
     else if (actionName === 'uploadImageToDrive') { payload.base64Data = args[0]; payload.filename = args[1]; } 
     else if (actionName === 'submitBorrow') { payload.userId = args[0]; payload.cart = args[1]; } 
@@ -449,7 +449,7 @@
     if (!isHistoryBack) window.history.pushState({ tab: tabName }, '', '#' + tabName);
   }
 
-  function saveMyProfile() { const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!p || !n) return alert('กรุณากรอกรหัสผ่านและชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); alert('✅ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } }).withFailureHandler(showError).updateMyProfile(currentUser.id, n, p, d); }
+  function saveMyProfile() { const u = document.getElementById('myProfileUsername').value; const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!u || !p || !n) return alert('กรุณากรอก Username รหัสผ่าน และชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); alert(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, p, d); }
   function loadTransactions(isAdminView) { google.script.run.withSuccessHandler(data => { allTransactions = data || []; hideLoading(); if(isAdminView) renderAdminData(); else renderMyReturnData(); }).withFailureHandler(showError).getActiveTransactions(); }
   function renderMyReturnData() { const listDiv = document.getElementById('myReturnList'); if(!listDiv) return; listDiv.innerHTML = ''; const myItems = allTransactions.filter(item => item.userId === currentUser.id); if(myItems.length === 0) { listDiv.innerHTML = '<div style="text-align:center; padding: 20px; color:#8e8e8e;">🎉 คุณไม่มีอุปกรณ์ที่ค้างคืนอยู่ครับ</div>'; return; } myItems.forEach(item => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong style="color:#e6683c;">🔴 กำลังยืม</strong><br><strong>อุปกรณ์:</strong> ' + item.eqName + ' (x' + item.qty + ')</div><button class="btn-success" onclick="prepareReturn(' + item.row + ', \'' + item.eqId + '\', ' + item.qty + ', \'' + item.eqName + '\')">คืนอุปกรณ์</button>'; listDiv.appendChild(card); }); }
   function prepareReturn(row, eqId, qty, eqName) { 
