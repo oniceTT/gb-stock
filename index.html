@@ -17,11 +17,13 @@
   #authSection { text-align: center; margin-top: 50px; background: white; padding: 30px; border-radius: 8px; border: 1px solid #dbdbdb; }
   input[type="text"], input[type="password"], input[type="number"], select, input[type="file"] { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #dbdbdb; border-radius: 4px; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
   button { font-family: 'Kanit', sans-serif; }
-  button.btn-primary { background-color: #0095f6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px;}
-  button.btn-success { background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;}
-  button.btn-danger { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;}
-  button.btn-warning { background-color: #ffc107; color: #212529; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 500;}
-  button.btn-text { background: none; border: none; color: #0095f6; cursor: pointer; margin-top: 15px;}
+  .btn-primary { background-color: #0095f6; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; display: inline-block; text-align: center; box-sizing: border-box; font-family: 'Kanit', sans-serif;}
+  .btn-success { background-color: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; display: inline-block; text-align: center; box-sizing: border-box; font-family: 'Kanit', sans-serif;}
+  .btn-danger { background-color: #dc3545; color: white; border: none; padding: 10px 15px; border-radius: 8px; cursor: pointer; display: inline-block; text-align: center; box-sizing: border-box; font-family: 'Kanit', sans-serif;}
+  .btn-warning { background-color: #ffc107; color: #212529; border: none; padding: 10px 16px; border-radius: 20px; cursor: pointer; font-weight: 500; display: inline-block; text-align: center; box-sizing: border-box; font-family: 'Kanit', sans-serif;}
+  .btn-text { background: none; border: none; color: #0095f6; cursor: pointer; margin-top: 15px;}
+  .upload-zone { border: 2px dashed #0095f6; background-color: #f0f8ff; color: #0095f6; padding: 20px; border-radius: 8px; cursor: pointer; display: block; text-align: center; font-weight: 500; transition: all 0.3s; margin-bottom: 10px; }
+  .upload-zone:hover { background-color: #e6f2ff; border-color: #007bb5; }
   .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;}
   .nav-btn { flex: 1; padding: 10px; border: 1px solid #dbdbdb; background: white; border-radius: 8px; cursor: pointer; font-weight: 500; white-space: nowrap; text-align: center;}
   .nav-btn.active { background: #262626; color: white; border-color: #262626; }
@@ -199,8 +201,9 @@
         <button class="btn-warning" style="width:100%; margin-bottom: 20px;" onclick="openScanner('loc')">📷 สแกน QR ประจำจุดวาง</button>
         
         <h3 style="margin-top:10px; margin-bottom: 5px;">📸 ถ่ายรูปหลักฐานการคืน</h3>
-        <label class="btn-primary" style="width:100%; margin-bottom:10px; display:block; text-align:center; padding:10px; cursor:pointer; border-radius:4px; box-sizing:border-box;">
-          ถ่ายรูปด้วยแอปกล้อง
+        <label class="upload-zone">
+          <span style="font-size: 28px; display: block; margin-bottom: 8px;">📷</span>
+          แตะเพื่อถ่ายรูปด้วยแอปกล้อง
           <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleReturnPhoto(event)">
         </label>
         <img id="returnImagePreview" style="width:100%; display:none; border-radius:8px; margin-bottom:15px;">
@@ -222,12 +225,12 @@
         
         <label>📸 รูปภาพอุปกรณ์ (ถ่ายเอง หรืออัปโหลด)</label>
         <div style="display:flex; gap:10px; margin-top:5px; margin-bottom:15px;">
-          <label class="btn-primary" style="flex:1; text-align:center; padding:10px; cursor:pointer; border-radius:4px;">
-            ถ่ายรูป
+          <label class="btn-primary" style="flex:1; margin-top: 0; padding: 12px; font-weight: 500;">
+            📷 ถ่ายรูป
             <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleEqPhoto(event)">
           </label>
-          <label class="btn-success" style="flex:1; text-align:center; padding:10px; cursor:pointer; border-radius:4px;">
-            เลือกจากเครื่อง
+          <label class="btn-success" style="flex:1; margin-top: 0; padding: 12px; font-weight: 500; background-color: #17a2b8;">
+            🖼️ เลือกจากเครื่อง
             <input type="file" accept="image/*" style="display:none;" onchange="handleEqPhoto(event)">
           </label>
         </div>
