@@ -709,6 +709,131 @@
     showLoading('กำลังวาดรูปป้ายและสร้างไฟล์ ZIP...\n(อาจใช้เวลาสักครู่)');
     try { var zip = new JSZip(); var eqFolder = zip.folder("QR_อุปกรณ์"); var locFolder = zip.folder("QR_จุดวาง"); function createTicketBase64(name, id) { const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 500; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 400, 500); ctx.strokeStyle = '#0095f6'; ctx.lineWidth = 6; ctx.setLineDash([15, 10]); ctx.strokeRect(15, 15, 370, 470); ctx.fillStyle = '#262626'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, 200, 75, 340); const qr = new QRious({ value: id, size: 260, level: 'H' }); ctx.drawImage(qr.canvas, 70, 110); ctx.fillStyle = '#8e8e8e'; ctx.font = '22px sans-serif'; ctx.fillText('รหัสอ้างอิง: ' + id, 200, 420); return canvas.toDataURL('image/png').split(',')[1]; } allEquipment.forEach(eq => { var base64Data = createTicketBase64(eq.name, eq.id); var safeName = (eq.name + "_" + eq.id).replace(/[\/\\]/g, '-'); eqFolder.file(safeName + ".png", base64Data, {base64: true}); }); allLocations.forEach(loc => { var base64Data = createTicketBase64(loc.name, loc.id); var safeName = (loc.name + "_" + loc.id).replace(/[\/\\]/g, '-'); locFolder.file(safeName + ".png", base64Data, {base64: true}); }); var content = await zip.generateAsync({type:"blob"}); var link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = "QR_Codes_Tickets.zip"; link.click(); hideLoading(); alert('✅ ดาวน์โหลดไฟล์ .ZIP สำเร็จแล้ว!'); } catch(error) { hideLoading(); alert('❌ เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: ' + error.message); }
   }
+
+  // ==========================================
+  // POS Scanner Logic
+  // ==========================================
+  let posLastScannedId = null;
+  let posLastScannedTime = 0;
+
+  function startPOSScanner() {
+     if (posHtml5QrcodeScanner) return;
+     posHtml5QrcodeScanner = new Html5Qrcode("posReader");
+     const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+     
+     posHtml5QrcodeScanner.start({ facingMode: "environment" }, config, (decodedText) => {
+         const now = new Date().getTime();
+         if (posLastScannedId === decodedText && (now - posLastScannedTime) < 2000) {
+             return;
+         }
+         posLastScannedId = decodedText;
+         posLastScannedTime = now;
+         handlePOSScan(decodedText);
+     }).then(() => {
+         document.getElementById('posReader').style.border = 'none';
+         document.getElementById('btnStartPOS').style.display = 'none';
+         document.getElementById('btnStopPOS').style.display = 'block';
+     }).catch(err => {
+         alert("ไม่สามารถเปิดกล้องได้ กรุณาตรวจสอบการอนุญาตการเข้าถึงกล้อง");
+     });
+  }
+
+  function stopPOSScanner() {
+     if (posHtml5QrcodeScanner) {
+         posHtml5QrcodeScanner.stop().then(() => {
+             posHtml5QrcodeScanner.clear();
+             posHtml5QrcodeScanner = null;
+             document.getElementById('posReader').style.border = '2px dashed #0095f6';
+             document.getElementById('posReader').innerHTML = '<span style="color:#0095f6; font-weight:500;">บริเวณแสดงภาพจากกล้อง</span>';
+             document.getElementById('btnStartPOS').style.display = 'block';
+             document.getElementById('btnStopPOS').style.display = 'none';
+         }).catch(err => { posHtml5QrcodeScanner = null; });
+     }
+  }
+
+  function handlePOSScan(qrText) {
+     let eqId = qrText;
+     try {
+        let data = JSON.parse(qrText);
+        if (data.type === 'eq') eqId = data.id;
+     } catch(e) {}
+     
+     const eq = allEquipment.find(e => e.id === eqId);
+     if (eq) {
+         const currentQty = cart[eqId] || 0;
+         if (currentQty < eq.available) {
+             cart[eqId] = currentQty + 1;
+             updateCartFloat();
+             renderPOSCart();
+             playPOSBeep();
+         } else {
+             alert('อุปกรณ์ ' + eq.name + ' มีจำนวนไม่พอเบิก (เหลือ ' + eq.available + ')');
+         }
+     } else {
+         alert('ไม่พบอุปกรณ์นี้ในระบบ');
+     }
+  }
+
+  function renderPOSCart() {
+     const listDiv = document.getElementById('posCartList');
+     if (!listDiv) return;
+     listDiv.innerHTML = '';
+     let hasItems = false;
+     
+     for (let eqId in cart) {
+         if (cart[eqId] > 0) {
+             hasItems = true;
+             const eq = allEquipment.find(e => e.id === eqId);
+             if (eq) {
+                 const itemDiv = document.createElement('div');
+                 itemDiv.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid #efefef;';
+                 itemDiv.innerHTML = '<div style="font-weight:500;">' + eq.name + '</div><div class="cart-controls" style="margin:0;"><button class="qty-btn" onclick="updateCart(\'' + eqId + '\', -1); renderPOSCart();">-</button><span style="margin:0 10px;">' + cart[eqId] + '</span><button class="qty-btn" onclick="updateCart(\'' + eqId + '\', 1); renderPOSCart();">+</button></div>';
+                 listDiv.appendChild(itemDiv);
+             }
+         }
+     }
+     
+     if (!hasItems) {
+         listDiv.innerHTML = '<p style="color:#8e8e8e; text-align:center; margin-top: 50px;">ยังไม่มีอุปกรณ์</p>';
+     }
+  }
+
+  function posCheckout() {
+     let hasItems = false;
+     for (let k in cart) { if(cart[k] > 0) hasItems = true; }
+     if (!hasItems) return alert('ไม่มีอุปกรณ์ในรายการ');
+     
+     if(!confirm('ยืนยันเบิกอุปกรณ์ที่สแกนทั้งหมด?')) return; 
+     showLoading('กำลังบันทึก...'); 
+     google.script.run.withSuccessHandler(res => { 
+        hideLoading();
+        if(res.success) { 
+           cart = {}; 
+           updateCartFloat(); 
+           renderPOSCart();
+           alert('✅ ทำรายการสำเร็จ!'); 
+           refreshData(); 
+        } else {
+           alert('❌ ' + (res.message || 'เกิดข้อผิดพลาด'));
+        }
+     }).withFailureHandler(showError).submitBorrow(currentUser.id, cart);
+  }
+
+  function playPOSBeep() {
+     try {
+         const ctx = new (window.AudioContext || window.webkitAudioContext)();
+         const osc = ctx.createOscillator();
+         const gain = ctx.createGain();
+         osc.connect(gain);
+         gain.connect(ctx.destination);
+         osc.type = 'sine';
+         osc.frequency.setValueAtTime(800, ctx.currentTime);
+         gain.gain.setValueAtTime(1, ctx.currentTime);
+         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+         osc.start(ctx.currentTime);
+         osc.stop(ctx.currentTime + 0.1);
+     } catch (e) { /* Audio not supported */ }
+  }
 </script>
 
   
