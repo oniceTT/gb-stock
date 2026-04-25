@@ -97,11 +97,12 @@
       </div>
 
       <div id="mainNav" style="display:none;">
-        <div class="nav-tabs">
-          <button class="nav-btn active" id="btnTabBorrow" onclick="switchTab('borrow')">🛒 เบิกอุปกรณ์</button>
-          <button class="nav-btn" id="btnTabReturn" onclick="switchTab('return')">🔄 คืนอุปกรณ์</button>
-          <button class="nav-btn" id="btnTabProfile" onclick="switchTab('profile')">👤 โปรไฟล์</button>
-          <button class="nav-btn admin-btn" id="btnTabAdmin" style="display:none;" onclick="switchTab('admin')">⚙️ จัดการระบบ</button>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+          <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">🛒<br>เบิกอุปกรณ์</button>
+          <button class="nav-item" onclick="switchTab('tabReturn', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📦<br>คืนอุปกรณ์</button>
+          <button class="nav-item" onclick="switchTab('tabPOS', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">💻<br>โหมด POS</button>
+          <button class="nav-item" onclick="switchTab('tabProfile', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">👤<br>โปรไฟล์</button>
+          <button class="nav-item" id="navAdmin" style="display:none; flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;" onclick="switchTab('tabAdmin', this)">⚙️<br>จัดการระบบ</button>
         </div>
         <button class="filter-btn" style="width:100%; margin-bottom:15px; background:#e0f7fa; color:#00838f; border-color:#00acc1;" onclick="refreshData()">🔄 โหลดข้อมูลล่าสุด (Refresh)</button>
       </div>
