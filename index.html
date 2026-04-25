@@ -150,6 +150,7 @@
         <h3 style="margin-top:0;">จัดการระบบส่วนกลาง</h3>
         <div class="filters" style="margin-bottom: 15px;" id="adminNavFilters">
           <button class="filter-btn active" onclick="showAdminSubTab('return')">📦 ของค้างคืน</button>
+          <button class="filter-btn" onclick="showAdminSubTab('history')">📜 ประวัติทั้งหมด</button>
           <button class="filter-btn" onclick="showAdminSubTab('users')">👥 จัดการผู้ใช้</button>
           <button class="filter-btn" onclick="showAdminSubTab('equipments')">🎒 จัดการอุปกรณ์</button>
           <button class="filter-btn" onclick="showAdminSubTab('locations')">📍 จัดการจุดวาง</button>
@@ -185,6 +186,16 @@
           <div id="adminQRResult" style="text-align: center; margin-top: 20px;"></div>
           <hr style="margin: 30px 0; border-top: 1px solid #dbdbdb;">
           <button class="btn-success" style="width: 100%; padding: 12px; font-size: 16px; border-radius: 8px;" onclick="downloadAllQRs()">📦 ดาวน์โหลด QR ทั้งหมดเป็นไฟล์ .ZIP</button>
+        </div>
+        
+        <div id="adminTabHistory" style="display:none;">
+          <h4 style="margin-top:0; color:#8e8e8e;">ประวัติการทำรายการล่าสุด (10 รายการ/หน้า)</h4>
+          <div id="adminHistoryList"></div>
+          <div style="display:flex; justify-content:center; gap:15px; margin-top:15px; align-items:center;">
+             <button class="btn-primary" style="width:auto; padding:8px 20px; margin-top:0;" onclick="loadHistoryPage(-1)">◀ ก่อนหน้า</button>
+             <span id="historyPageLabel" style="font-weight:500;">หน้า 1 / 1</span>
+             <button class="btn-primary" style="width:auto; padding:8px 20px; margin-top:0;" onclick="loadHistoryPage(1)">ถัดไป ▶</button>
+          </div>
         </div>
       </div>
     </div>
@@ -349,6 +360,7 @@
     else if (actionName === 'deleteEquipmentData') { payload.id = args[0]; } 
     else if (actionName === 'saveLocationData') { payload.data = args[0]; } 
     else if (actionName === 'deleteLocationData') { payload.id = args[0]; }
+    else if (actionName === 'getTransactionHistory') { payload.page = args[0]; payload.limit = args[1]; }
 
     fetch(SCRIPT_URL, {
       method: 'POST',
@@ -489,8 +501,61 @@
     }).uploadImageToDrive(base64Data, "RET_" + pendingReturnData.eqId + "_" + new Date().getTime());
   }
 
-  function showAdminSubTab(tab) { document.getElementById('adminTabReturn').style.display = tab === 'return' ? 'block' : 'none'; document.getElementById('adminTabUsers').style.display = tab === 'users' ? 'block' : 'none'; document.getElementById('adminTabEq').style.display = tab === 'equipments' ? 'block' : 'none'; document.getElementById('adminTabLoc').style.display = tab === 'locations' ? 'block' : 'none'; document.getElementById('adminTabQR').style.display = tab === 'qr' ? 'block' : 'none'; const btns = document.querySelectorAll('#adminNavFilters .filter-btn'); btns.forEach(b => b.classList.remove('active')); if(tab === 'return') { btns[0].classList.add('active'); showLoading('กำลังโหลด...'); loadTransactions(true); } if(tab === 'users') { btns[1].classList.add('active'); showLoading('กำลังโหลด...'); loadUsersData(); } if(tab === 'equipments') { btns[2].classList.add('active'); renderAdminEqData(); } if(tab === 'locations') { btns[3].classList.add('active'); renderAdminLocData(); } if(tab === 'qr') { btns[4].classList.add('active'); } }
+  function showAdminSubTab(tab) { document.getElementById('adminTabReturn').style.display = tab === 'return' ? 'block' : 'none'; document.getElementById('adminTabUsers').style.display = tab === 'users' ? 'block' : 'none'; document.getElementById('adminTabEq').style.display = tab === 'equipments' ? 'block' : 'none'; document.getElementById('adminTabLoc').style.display = tab === 'locations' ? 'block' : 'none'; document.getElementById('adminTabQR').style.display = tab === 'qr' ? 'block' : 'none'; document.getElementById('adminTabHistory').style.display = tab === 'history' ? 'block' : 'none'; const btns = document.querySelectorAll('#adminNavFilters .filter-btn'); btns.forEach(b => b.classList.remove('active')); if(tab === 'return') { btns[0].classList.add('active'); showLoading('กำลังโหลด...'); loadTransactions(true); } if(tab === 'history') { btns[1].classList.add('active'); currentHistoryPage = 1; fetchHistoryData(); } if(tab === 'users') { btns[2].classList.add('active'); showLoading('กำลังโหลด...'); loadUsersData(); } if(tab === 'equipments') { btns[3].classList.add('active'); renderAdminEqData(); } if(tab === 'locations') { btns[4].classList.add('active'); renderAdminLocData(); } if(tab === 'qr') { btns[5].classList.add('active'); } }
   function renderAdminData() { const listDiv = document.getElementById('adminList'); if(!listDiv) return; const searchTxt = document.getElementById('adminSearch').value.toLowerCase(); listDiv.innerHTML = ''; const filtered = allTransactions.filter(item => String(item.transId).toLowerCase().includes(searchTxt) || String(item.userName).toLowerCase().includes(searchTxt) || String(item.eqName).toLowerCase().includes(searchTxt)); if(filtered.length === 0) { listDiv.innerHTML = '<p>ไม่มีรายการค้างคืนในระบบ</p>'; return; } filtered.forEach(item => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>ผู้เบิก:</strong> ' + item.userName + '<br><strong>อุปกรณ์:</strong> ' + item.eqName + ' (x' + item.qty + ')</div><button class="btn-warning" onclick="prepareReturn(' + item.row + ', \'' + item.eqId + '\', ' + item.qty + ', \'' + item.eqName + '\')">บังคับรับคืน</button>'; listDiv.appendChild(card); }); }
+
+  let currentHistoryPage = 1;
+  let totalHistoryPages = 1;
+
+  function loadHistoryPage(direction) {
+     let newPage = currentHistoryPage + direction;
+     if (newPage < 1 || newPage > totalHistoryPages) return;
+     currentHistoryPage = newPage;
+     fetchHistoryData();
+  }
+
+  function fetchHistoryData() {
+     showLoading('กำลังโหลดประวัติ...');
+     google.script.run.withSuccessHandler(res => {
+         hideLoading();
+         if(res.success) {
+            totalHistoryPages = res.totalPages;
+            document.getElementById('historyPageLabel').innerText = 'หน้า ' + res.currentPage + ' / ' + (res.totalPages || 1);
+            renderHistoryData(res.data);
+         }
+     }).withFailureHandler(showError).getTransactionHistory(currentHistoryPage, 10);
+  }
+
+  function renderHistoryData(data) {
+     const listDiv = document.getElementById('adminHistoryList');
+     listDiv.innerHTML = '';
+     if(!data || data.length === 0) { listDiv.innerHTML = '<p style="text-align:center; padding:20px; color:#8e8e8e;">ไม่มีประวัติการทำรายการ</p>'; return; }
+     data.forEach(item => {
+         const card = document.createElement('div');
+         card.className = 'list-card';
+         let dateStr = new Date(item.timestamp).toLocaleString('th-TH');
+         let statusHtml = item.status === 'Completed' ? '<span style="color:green; font-weight:bold;">(คืนแล้ว)</span>' : '<span style="color:orange; font-weight:bold;">(กำลังยืม)</span>';
+         
+         let locDisplay = item.locId || '-';
+         if (item.locId) {
+             let foundLoc = allLocations.find(l => l.id === item.locId);
+             if (foundLoc) locDisplay = foundLoc.name;
+         }
+
+         let photoHtml = '';
+         if (item.photoUrl) {
+             photoHtml = `<br><a href="${item.photoUrl}" target="_blank" style="color:#0095f6; font-size:12px; font-weight:bold;">🖼️ ดูรูปถ่ายหลักฐาน</a>`;
+         }
+
+         let locStr = item.status === 'Completed' ? `<br><span style="font-size:13px;">📍 คืนที่: ${locDisplay}</span>` : '';
+
+         card.innerHTML = `<div class="list-info" style="width:100%;">
+            <strong>${item.userName}</strong> ➔ <strong>${item.eqName}</strong> (x${item.qty}) ${statusHtml}<br>
+            <span style="font-size:12px; color:#8e8e8e;">🕒 ${dateStr}</span>${locStr}${photoHtml}
+         </div>`;
+         listDiv.appendChild(card);
+     });
+  }
 
   // ==========================================
   // ระบบเชื่อมต่อกล้องและการถ่ายรูปหน้าเว็บ (Native Fallback)
