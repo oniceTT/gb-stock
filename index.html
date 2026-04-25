@@ -378,7 +378,7 @@
     else if (actionName === 'updateMyProfile') { payload.userId = args[0]; payload.username = args[1]; payload.name = args[2]; payload.password = args[3]; payload.department = args[4]; } 
     else if (actionName === 'processReturn') { payload.row = args[0]; payload.eqId = args[1]; payload.qty = args[2]; payload.locId = args[3]; payload.photoUrl = args[4]; } 
     else if (actionName === 'uploadImageToDrive') { payload.base64Data = args[0]; payload.filename = args[1]; } 
-    else if (actionName === 'submitBorrow') { payload.userId = args[0]; payload.cart = args[1]; } 
+    else if (actionName === 'submitBorrow') { payload.userId = args[0]; payload.cart = args[1]; if(args[2]) payload.source = args[2]; } 
     else if (actionName === 'approveUser') { payload.row = args[0]; } 
     else if (actionName === 'saveUserData') { payload.data = args[0]; } 
     else if (actionName === 'deleteUserData') { payload.row = args[0]; } 
@@ -824,7 +824,7 @@
         } else {
            alert('❌ ' + (res.message || 'เกิดข้อผิดพลาด'));
         }
-     }).withFailureHandler(showError).submitBorrow(currentUser.id, cart);
+     }).withFailureHandler(showError).submitBorrow(currentUser.id, cart, 'POS');
   }
 
   function playPOSBeep() {
