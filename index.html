@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    
+    <style>
+  body { font-family: 'Kanit', sans-serif; margin: 0; padding: 0; background-color: #fafafa; }
+  .header { background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%); color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .header-title { font-size: 20px; font-weight: 500; }
+  .logout-btn { background: rgba(255,255,255,0.2); border: 1px solid white; color: white; padding: 5px 10px; border-radius: 4px; cursor: pointer; display: none;}
+  .container { max-width: 800px; margin: 0 auto; padding: 20px; }
+  #authSection { text-align: center; margin-top: 50px; background: white; padding: 30px; border-radius: 8px; border: 1px solid #dbdbdb; }
+  input[type="text"], input[type="password"], input[type="number"], select, input[type="file"] { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #dbdbdb; border-radius: 4px; box-sizing: border-box; font-family: 'Kanit', sans-serif; }
+  button { font-family: 'Kanit', sans-serif; }
+  button.btn-primary { background-color: #0095f6; color: white; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px;}
+  button.btn-success { background-color: #28a745; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;}
+  button.btn-danger { background-color: #dc3545; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer;}
+  button.btn-warning { background-color: #ffc107; color: #212529; border: none; padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 500;}
+  button.btn-text { background: none; border: none; color: #0095f6; cursor: pointer; margin-top: 15px;}
+  .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;}
+  .nav-btn { flex: 1; padding: 10px; border: 1px solid #dbdbdb; background: white; border-radius: 8px; cursor: pointer; font-weight: 500; white-space: nowrap; text-align: center;}
+  .nav-btn.active { background: #262626; color: white; border-color: #262626; }
+  .nav-btn.admin-btn { background: #e0f7fa; color: #00838f; border-color: #00acc1; }
+  .nav-btn.admin-btn.active { background: #00838f; color: white; }
+  .controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
+  .filters { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; align-items: center;}
+  .filter-btn { padding: 8px 16px; border: 1px solid #dbdbdb; background-color: white; border-radius: 20px; cursor: pointer; white-space: nowrap; }
+  .filter-btn.active { background-color: #262626; color: white; border-color: #262626; }
+  .equipment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+  .card { background: white; border: 1px solid #dbdbdb; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
+  .card-img { width: 100%; height: 150px; background-color: #efefef; object-fit: cover; }
+  .card-body { padding: 10px; }
+  .card-title { font-size: 14px; font-weight: 500; margin: 0 0 5px 0; }
+  .card-status { font-size: 12px; color: #8e8e8e; margin-bottom: 5px;}
+  .cart-controls { display: flex; align-items: center; justify-content: space-between; background: #efefef; border-radius: 4px; padding: 5px; }
+  .qty-btn { background: white; border: 1px solid #dbdbdb; border-radius: 4px; width: 25px; height: 25px; cursor: pointer;}
+  #cartFloat { position: fixed; bottom: 20px; right: 20px; background: #262626; color: white; padding: 15px 20px; border-radius: 30px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); cursor: pointer; display: none; z-index: 1000;}
+  .list-card { background: white; border: 1px solid #dbdbdb; border-radius: 8px; padding: 15px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;}
+  .list-info { font-size: 14px; }
+  .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; }
+  .modal-content { background: white; padding: 20px; border-radius: 8px; max-width: 400px; width: 90%; max-height: 90vh; overflow-y: auto;}
+  #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
+  .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #0095f6; border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+  @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+</style>
+
+  </head>
+  <body>
+
+    <div id="loadingOverlay">
+      <div class="spinner"></div>
+      <p id="loadingText" style="margin-top: 15px; font-weight: 500; color: #262626;">กำลังประมวลผล...</p>
+    </div>
+
+    <!-- Fallback for in-app browsers (LINE) -->
+    <input type="file" id="qrFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFileScan(event)">
+    <input type="file" id="fallbackCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFallbackCamera(event)">
+
+    <div class="header">
+      <div class="header-title">GB Stocklists</div>
+      <div style="display: flex; align-items: center; gap: 15px;">
+        <span id="welcomeText" style="font-size: 14px;"></span>
+        <button id="logoutBtn" class="logout-btn" onclick="logout()">ออก</button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div id="authSection">
+        <h2 id="authTitle">เข้าสู่ระบบ</h2>
+        <div id="loginForm">
+          <input type="text" id="loginUser" placeholder="Username">
+          <input type="password" id="loginPass" placeholder="Password">
+          <button class="btn-primary" onclick="doLogin()">เข้าสู่ระบบ</button>
+          <button class="btn-text" onclick="toggleRegister()">ยังไม่มีบัญชี? สมัครสมาชิก</button>
+        </div>
+        <div id="registerForm" style="display:none;">
+          <input type="text" id="regUser" placeholder="Username">
+          <input type="password" id="regPass" placeholder="Password">
+          <input type="text" id="regName" placeholder="ชื่อ-นามสกุล">
+          <select id="regDept">
+            <option value="">-- เลือกแผนกของคุณ --</option>
+            <option value="GB">GB</option>
+            <option value="CR">CR</option>
+            <option value="CA">CA</option>
+            <option value="SC">SC</option>
+          </select>
+          <button class="btn-primary" onclick="doRegister()">สมัครสมาชิก</button>
+          <button class="btn-text" onclick="toggleRegister()">กลับไปหน้าเข้าสู่ระบบ</button>
+        </div>
+      </div>
+
+      <div id="mainNav" style="display:none;">
+        <div class="nav-tabs">
+          <button class="nav-btn active" id="btnTabBorrow" onclick="switchTab('borrow')">🛒 เบิกอุปกรณ์</button>
+          <button class="nav-btn" id="btnTabReturn" onclick="switchTab('return')">🔄 คืนอุปกรณ์</button>
+          <button class="nav-btn" id="btnTabProfile" onclick="switchTab('profile')">👤 โปรไฟล์</button>
+          <button class="nav-btn admin-btn" id="btnTabAdmin" style="display:none;" onclick="switchTab('admin')">⚙️ จัดการระบบ</button>
+        </div>
+        <button class="filter-btn" style="width:100%; margin-bottom:15px; background:#e0f7fa; color:#00838f; border-color:#00acc1;" onclick="refreshData()">🔄 โหลดข้อมูลล่าสุด (Refresh)</button>
+      </div>
+
+      <div id="tabBorrow" style="display:none;">
+        <div class="controls">
+          <input type="text" placeholder="ค้นหาอุปกรณ์..." id="searchInput" onkeyup="renderEquipment()">
+          <div class="filters">
+            <button class="filter-btn active" onclick="setFilter('all', this)">ทั้งหมด</button>
+            <button class="filter-btn" onclick="setFilter('available', this)">พร้อมเบิก</button>
+            <button class="btn-warning" onclick="openScanner('borrow')">📷 สแกนเบิกอุปกรณ์</button>
+          </div>
+        </div>
+        <div class="equipment-grid" id="equipmentGrid"></div>
+      </div>
+
+      <div id="tabReturn" style="display:none;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+          <h3 style="margin:0;">อุปกรณ์ที่คุณกำลังใช้งานอยู่</h3>
+          <button class="btn-warning" onclick="openScanner('return')">📷 สแกนคืนอุปกรณ์</button>
+        </div>
+        <p style="font-size: 14px; color: #666; margin-top: 0;">กดยืนยันหรือสแกน QR อุปกรณ์ แล้วนำของไปเก็บที่เดิมได้เลย</p>
+        <div id="myReturnList"></div>
+      </div>
+
+      <div id="tabProfile" style="display:none;">
+        <h3 style="margin-top:0;">จัดการบัญชีส่วนตัว</h3>
+        <p style="font-size: 14px; color: #666;">คุณสามารถเปลี่ยนชื่อ รหัสผ่าน และแผนกได้ที่นี่</p>
+        <div class="list-card" style="display: flex; flex-direction: column; gap: 5px;">
+          <label>Username (แก้ไขไม่ได้)</label><input type="text" id="myProfileUsername" disabled style="background:#efefef; color:#8e8e8e;">
+          <label>รหัสผ่าน</label><input type="text" id="myProfilePassword" placeholder="รหัสผ่านใหม่">
+          <label>ชื่อ-นามสกุล</label><input type="text" id="myProfileName" placeholder="ชื่อ-นามสกุล">
+          <label>แผนก</label>
+          <select id="myProfileDept">
+            <option value="-">-- ไม่ระบุ --</option>
+            <option value="GB">GB</option>
+            <option value="CR">CR</option>
+            <option value="CA">CA</option>
+            <option value="SC">SC</option>
+          </select>
+          <button class="btn-primary" style="margin-top: 15px; border-radius: 30px;" onclick="saveMyProfile()">💾 บันทึกข้อมูลส่วนตัว</button>
+        </div>
+      </div>
+
+      <div id="tabAdmin" style="display:none;">
+        <h3 style="margin-top:0;">จัดการระบบส่วนกลาง</h3>
+        <div class="filters" style="margin-bottom: 15px;" id="adminNavFilters">
+          <button class="filter-btn active" onclick="showAdminSubTab('return')">📦 ของค้างคืน</button>
+          <button class="filter-btn" onclick="showAdminSubTab('users')">👥 จัดการผู้ใช้</button>
+          <button class="filter-btn" onclick="showAdminSubTab('equipments')">🎒 จัดการอุปกรณ์</button>
+          <button class="filter-btn" onclick="showAdminSubTab('locations')">📍 จัดการจุดวาง</button>
+          <button class="filter-btn" onclick="showAdminSubTab('qr')">🔲 สร้าง QR</button>
+        </div>
+
+        <div id="adminTabReturn">
+          <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
+            <input type="text" id="adminSearch" placeholder="ค้นหารหัส หรือ ชื่อผู้เบิก..." onkeyup="renderAdminData()" style="margin: 0;">
+            <button class="btn-warning" style="white-space: nowrap; margin: 0;" onclick="openScanner('admin_return')">📷 สแกนรับคืน</button>
+          </div>
+          <div id="adminList"></div>
+        </div>
+        
+        <div id="adminTabUsers" style="display:none;">
+          <button class="btn-primary" style="width:auto; margin-bottom:15px;" onclick="openUserModal()">+ เพิ่มผู้ใช้ใหม่</button>
+          <div id="adminUserList"></div>
+        </div>
+        
+        <div id="adminTabEq" style="display:none;">
+          <button class="btn-primary" style="width:auto; margin-bottom:15px;" onclick="openEqModal()">+ เพิ่มอุปกรณ์ใหม่</button>
+          <div id="adminEqList"></div>
+        </div>
+
+        <div id="adminTabLoc" style="display:none;">
+          <button class="btn-primary" style="width:auto; margin-bottom:15px;" onclick="openLocModal()">+ เพิ่มจุดวางใหม่</button>
+          <div id="adminLocList"></div>
+        </div>
+
+        <div id="adminTabQR" style="display:none;">
+          <select id="adminLocSelect" onchange="generateQR('loc')"></select><br>
+          <select id="adminEqSelect" onchange="generateQR('eq')" style="margin-top:10px;"></select>
+          <div id="adminQRResult" style="text-align: center; margin-top: 20px;"></div>
+          <hr style="margin: 30px 0; border-top: 1px solid #dbdbdb;">
+          <button class="btn-success" style="width: 100%; padding: 12px; font-size: 16px; border-radius: 8px;" onclick="downloadAllQRs()">📦 ดาวน์โหลด QR ทั้งหมดเป็นไฟล์ .ZIP</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="cartFloat" onclick="checkout()">🛒 ตะกร้า <span id="cartCount">(0)</span> ➔ ยืนยันเบิก</div>
+
+    <!-- Modals -->
+    <div id="returnLocModal" class="modal-bg">
+      <div class="modal-content">
+        <h3 style="margin-top:0;">📍 ระบุจุดวางที่นำไปคืน</h3>
+        <p style="font-size: 14px; color:#666;">นำอุปกรณ์: <strong id="returnEqNamePreview"></strong> ไปคืนที่ไหน?</p>
+        <select id="selectReturnLoc" style="margin-bottom: 15px;"></select>
+        <div style="text-align: center; margin-bottom: 15px;"><span style="color:#8e8e8e; font-size:12px;">-- หรือ --</span></div>
+        <button class="btn-warning" style="width:100%; margin-bottom: 20px;" onclick="openScanner('loc')">📷 สแกน QR ประจำจุดวาง</button>
+        
+        <h3 style="margin-top:10px; margin-bottom: 5px;">📸 ถ่ายรูปหลักฐานการคืน</h3>
+        <label class="btn-primary" style="width:100%; margin-bottom:10px; display:block; text-align:center; padding:10px; cursor:pointer; border-radius:4px; box-sizing:border-box;">
+          ถ่ายรูปด้วยแอปกล้อง
+          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleReturnPhoto(event)">
+        </label>
+        <img id="returnImagePreview" style="width:100%; display:none; border-radius:8px; margin-bottom:15px;">
+        <input type="hidden" id="returnImageBase64">
+        
+        <div style="display:flex; gap:10px;">
+          <button class="btn-success" style="flex:1;" onclick="confirmReturnProcess()">ยืนยันการคืน</button>
+          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('returnLocModal').style.display='none'">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="eqModal" class="modal-bg">
+      <div class="modal-content">
+        <h3 id="eqModalTitle" style="margin-top:0;">เพิ่มอุปกรณ์</h3>
+        <input type="hidden" id="editEqIsNew" value="true">
+        <label>รหัสอุปกรณ์</label><input type="text" id="editEqId" placeholder="เว้นว่างไว้ระบบจะสร้างให้">
+        <label>ชื่ออุปกรณ์</label><input type="text" id="editEqName" placeholder="เช่น กล้อง DSLR">
+        
+        <label>📸 รูปภาพอุปกรณ์ (ถ่ายเอง หรืออัปโหลด)</label>
+        <div style="display:flex; gap:10px; margin-top:5px; margin-bottom:15px;">
+          <label class="btn-primary" style="flex:1; text-align:center; padding:10px; cursor:pointer; border-radius:4px;">
+            ถ่ายรูป
+            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleEqPhoto(event)">
+          </label>
+          <label class="btn-success" style="flex:1; text-align:center; padding:10px; cursor:pointer; border-radius:4px;">
+            เลือกจากเครื่อง
+            <input type="file" accept="image/*" style="display:none;" onchange="handleEqPhoto(event)">
+          </label>
+        </div>
+        <img id="editEqImagePreviewUI" style="width:100%; display:none; border-radius:8px; margin-bottom:15px;">
+        <input type="hidden" id="editEqImage"> 
+        <input type="hidden" id="editEqImageBase64">
+
+        <label>จำนวนทั้งหมด</label><input type="number" id="editEqTotal" placeholder="จำนวน" min="1">
+        <label>จุดวาง</label><select id="editEqLoc"></select>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+          <button class="btn-success" style="flex:1;" onclick="saveEq()">บันทึก</button>
+          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('eqModal').style.display='none'">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="locModal" class="modal-bg">
+      <div class="modal-content">
+        <h3 id="locModalTitle" style="margin-top:0;">เพิ่มจุดวาง</h3>
+        <input type="hidden" id="editLocIsNew" value="true">
+        <label>รหัสจุดวาง</label><input type="text" id="editLocId" placeholder="เว้นว่างไว้ระบบจะสร้างให้">
+        <label>ชื่อจุดวาง</label><input type="text" id="editLocName" placeholder="เช่น ตู้ A ชั้น 1">
+        <div style="display:flex; gap:10px; margin-top:15px;">
+          <button class="btn-success" style="flex:1;" onclick="saveLoc()">บันทึก</button>
+          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('locModal').style.display='none'">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="userModal" class="modal-bg">
+      <div class="modal-content">
+        <h3 id="userModalTitle" style="margin-top:0;">เพิ่ม/แก้ไข ผู้ใช้งาน</h3>
+        <input type="hidden" id="editUserRow">
+        <label>Username</label><input type="text" id="editUsername" placeholder="Username">
+        <label>Password</label><input type="text" id="editPassword" placeholder="Password">
+        <label>ชื่อ-นามสกุล</label><input type="text" id="editName" placeholder="ชื่อ-นามสกุล">
+        <label>แผนก</label>
+        <select id="editDept">
+          <option value="-">-</option>
+          <option value="GB">GB</option>
+          <option value="CR">CR</option>
+          <option value="CA">CA</option>
+          <option value="SC">SC</option>
+        </select>
+        <label>สิทธิ์ (Role)</label>
+        <select id="editRole">
+          <option value="User">User</option>
+          <option value="Admin">Admin</option>
+          <option value="Superadmin">Superadmin</option>
+        </select>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+          <button class="btn-success" style="flex:1;" onclick="saveUser()">บันทึก</button>
+          <button class="btn-danger" style="flex:1;" onclick="closeUserModal()">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+    
+
+    
+    <script>
+
+  // ==========================================
+  // GitHub Pages API Adapter
+  // ==========================================
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcpsuXWSH2w2ZBWtTpME0Nozb92aWNpRnr4w3JyqtBdsJBoFIAGA8LDVri96E10AEL/exec"; // REPLACE THIS URL WITH LATEST DEPLOYMENT
+
+  const google = {
+    script: {
+      run: new Proxy({}, {
+        get: function(target, prop) {
+          if (prop === 'withSuccessHandler') {
+            return function(successCb) {
+              return new Proxy({}, {
+                get: function(t2, p2) {
+                  if (p2 === 'withFailureHandler') {
+                    return function(failureCb) {
+                      return new Proxy({}, {
+                        get: function(t3, actionName) {
+                          return function(...args) { callBackend(actionName, args, successCb, failureCb); }
+                        }
+                      });
+                    }
+                  }
+                  return function(...args) { callBackend(p2, args, successCb, null); }
+                }
+              });
+            }
+          }
+          if (prop === 'withFailureHandler') {
+             return function(failureCb) {
+                return new Proxy({}, {
+                  get: function(t, actionName) { return function(...args) { callBackend(actionName, args, null, failureCb); } }
+                });
+             }
+          }
+          return function(...args) { callBackend(prop, args, null, null); }
+        }
+      })
+    }
+  };
+
+  function callBackend(actionName, args, successCb, failureCb) {
+    let payload = { action: actionName };
+    if (actionName === 'getInitialData' || actionName === 'getActiveTransactions' || actionName === 'getAllUsers') { } 
+    else if (actionName === 'loginUser') { payload.username = args[0]; payload.password = args[1]; } 
+    else if (actionName === 'registerUser') { payload.username = args[0]; payload.password = args[1]; payload.name = args[2]; payload.department = args[3]; } 
+    else if (actionName === 'updateMyProfile') { payload.userId = args[0]; payload.name = args[1]; payload.password = args[2]; payload.department = args[3]; } 
+    else if (actionName === 'processReturn') { payload.row = args[0]; payload.eqId = args[1]; payload.qty = args[2]; payload.locId = args[3]; payload.photoUrl = args[4]; } 
+    else if (actionName === 'uploadImageToDrive') { payload.base64Data = args[0]; payload.filename = args[1]; } 
+    else if (actionName === 'submitBorrow') { payload.userId = args[0]; payload.cart = args[1]; } 
+    else if (actionName === 'approveUser') { payload.row = args[0]; } 
+    else if (actionName === 'saveUserData') { payload.data = args[0]; } 
+    else if (actionName === 'deleteUserData') { payload.row = args[0]; } 
+    else if (actionName === 'resetUserPassword') { payload.row = args[0]; } 
+    else if (actionName === 'saveEquipmentData') { payload.data = args[0]; } 
+    else if (actionName === 'deleteEquipmentData') { payload.id = args[0]; } 
+    else if (actionName === 'saveLocationData') { payload.data = args[0]; } 
+    else if (actionName === 'deleteLocationData') { payload.id = args[0]; }
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+      if(data && data.success === false && data.message) {
+         if(failureCb) failureCb(new Error(data.message));
+         else if(successCb) successCb(data);
+      }
+      else if (successCb) successCb(data);
+    })
+    .catch(err => {
+      if (failureCb) failureCb(err);
+      else console.error("API Error: ", err);
+    });
+  }
+
+  let allEquipment = [], allTransactions = [], allLocations = [], allUsers = [];
+  let currentFilter = 'all', currentUser = null, cart = {};
+  let html5QrCode = null; let currentScanMode = 'borrow'; let pendingReturnData = null;
+
+  function showLoading(text) { document.getElementById('loadingText').innerText = text || 'กำลังประมวลผล...'; document.getElementById('loadingOverlay').style.display = 'flex'; }
+  function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
+  function showError(error) { hideLoading(); alert("ระบบขัดข้อง: " + error.message); }
+
+  window.onload = function() {
+    showLoading('กำลังเริ่มต้นระบบ...');
+    
+    let savedUser = null;
+    try {
+      const storedUserStr = localStorage.getItem('myAppUser');
+      if (storedUserStr) savedUser = JSON.parse(storedUserStr);
+    } catch (e) {
+      console.warn("Storage access blocked by browser settings.", e);
+    }
+
+    if (savedUser) { 
+      currentUser = savedUser; 
+      if(!currentUser.username) { logout(); } else { setupUIAfterLogin(); }
+    } else {
+      document.getElementById('authSection').style.display = 'block';
+      hideLoading();
+    }
+    
+    setInterval(function() { if(currentUser) refreshDataQuietly(); }, 30000);
+  };
+
+  window.addEventListener('popstate', function(event) {
+    if (event.state && event.state.tab) { switchTab(event.state.tab, true); } 
+    else if (currentUser) { switchTab('borrow', true); }
+  });
+
+  function refreshDataQuietly() { google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; renderEquipment(); if (document.getElementById('tabReturn').style.display === 'block') renderMyReturnData(); if (document.getElementById('tabAdmin').style.display === 'block') renderAdminData(); }).getInitialData(); }
+  function safeSetStorage(key, val) { try { localStorage.setItem(key, val); } catch(e){} }
+  function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch(e){} }
+  
+  function toggleRegister() { const l = document.getElementById('loginForm'); const r = document.getElementById('registerForm'); if(l.style.display === 'none') { l.style.display = 'block'; r.style.display = 'none'; document.getElementById('authTitle').innerText = 'เข้าสู่ระบบ'; } else { l.style.display = 'none'; r.style.display = 'block'; document.getElementById('authTitle').innerText = 'สมัครสมาชิก'; } }
+  function doRegister() { const u = document.getElementById('regUser').value, p = document.getElementById('regPass').value, n = document.getElementById('regName').value, d = document.getElementById('regDept').value; if(!u || !p || !n || !d) return alert("กรุณากรอกข้อมูลและเลือกแผนกให้ครบถ้วน"); showLoading('กำลังส่งข้อมูลสมัครสมาชิก...'); google.script.run.withSuccessHandler(res => { hideLoading(); alert(res.message); if(res.success) toggleRegister(); }).withFailureHandler(showError).registerUser(u, p, n, d); }
+  function doLogin() { const u = document.getElementById('loginUser').value, p = document.getElementById('loginPass').value; if(!u || !p) return alert("กรุณากรอกข้อมูล"); showLoading('กำลังเข้าสู่ระบบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } else { alert(res.message); } }).withFailureHandler(showError).loginUser(u, p); }
+
+  function setupUIAfterLogin() {
+    document.getElementById('authSection').style.display = 'none';
+    document.getElementById('logoutBtn').style.display = 'block'; document.getElementById('mainNav').style.display = 'block';
+    let roleText = currentUser.role === 'Superadmin' ? '🌟 Superadmin: ' : (currentUser.role === 'Admin' ? 'แอดมิน: ' : 'คุณ: ');
+    document.getElementById('welcomeText').innerText = roleText + currentUser.name;
+    document.getElementById('btnTabAdmin').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'block' : 'none';
+    document.getElementById('myProfileUsername').value = currentUser.username || '';
+    document.getElementById('myProfilePassword').value = currentUser.password || ''; document.getElementById('myProfileName').value = currentUser.name || ''; document.getElementById('myProfileDept').value = currentUser.department || '-';
+    refreshData();
+    window.history.replaceState({ tab: 'borrow' }, '', '#borrow');
+  }
+
+  function refreshData() { showLoading('กำลังโหลดข้อมูลระบบ...'); google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; hideLoading(); renderEquipment(); if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } else if (document.getElementById('tabAdmin').style.display === 'block') { showAdminSubTab('return'); } else if (document.getElementById('tabProfile').style.display === 'block') { } else { switchTab('borrow'); } }).withFailureHandler(showError).getInitialData(); }
+  function logout() { if(!confirm('ยืนยันการออกจากระบบ?')) return; currentUser = null; cart = {}; safeRemoveStorage('myAppUser'); document.getElementById('authSection').style.display = 'block'; document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('mainNav').style.display = 'none'; document.getElementById('tabBorrow').style.display = 'none'; document.getElementById('tabReturn').style.display = 'none'; document.getElementById('tabProfile').style.display = 'none'; document.getElementById('tabAdmin').style.display = 'none'; document.getElementById('logoutBtn').style.display = 'none'; document.getElementById('welcomeText').innerText = ''; document.getElementById('cartFloat').style.display = 'none'; }
+  
+  function switchTab(tabName, isHistoryBack = false) { 
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tabBorrow').style.display = 'none'; 
+    document.getElementById('tabReturn').style.display = 'none';
+    document.getElementById('tabAdmin').style.display = 'none'; 
+    document.getElementById('tabProfile').style.display = 'none'; 
+    document.getElementById('cartFloat').style.display = 'none';
+    if(tabName === 'borrow') { 
+      document.getElementById('btnTabBorrow').classList.add('active'); 
+      document.getElementById('tabBorrow').style.display = 'block'; 
+      updateCartFloat();
+    } else if(tabName === 'return') { 
+      document.getElementById('btnTabReturn').classList.add('active'); 
+      document.getElementById('tabReturn').style.display = 'block';
+      renderMyReturnData(); 
+    } else if(tabName === 'profile') { 
+      document.getElementById('btnTabProfile').classList.add('active');
+      document.getElementById('tabProfile').style.display = 'block'; 
+    } else if(tabName === 'admin') { 
+      document.getElementById('btnTabAdmin').classList.add('active');
+      document.getElementById('tabAdmin').style.display = 'block'; 
+      showAdminSubTab('return');
+    } 
+    if (!isHistoryBack) window.history.pushState({ tab: tabName }, '', '#' + tabName);
+  }
+
+  function saveMyProfile() { const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!p || !n) return alert('กรุณากรอกรหัสผ่านและชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); alert('✅ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } }).withFailureHandler(showError).updateMyProfile(currentUser.id, n, p, d); }
+  function loadTransactions(isAdminView) { google.script.run.withSuccessHandler(data => { allTransactions = data || []; hideLoading(); if(isAdminView) renderAdminData(); else renderMyReturnData(); }).withFailureHandler(showError).getActiveTransactions(); }
+  function renderMyReturnData() { const listDiv = document.getElementById('myReturnList'); if(!listDiv) return; listDiv.innerHTML = ''; const myItems = allTransactions.filter(item => item.userId === currentUser.id); if(myItems.length === 0) { listDiv.innerHTML = '<div style="text-align:center; padding: 20px; color:#8e8e8e;">🎉 คุณไม่มีอุปกรณ์ที่ค้างคืนอยู่ครับ</div>'; return; } myItems.forEach(item => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong style="color:#e6683c;">🔴 กำลังยืม</strong><br><strong>อุปกรณ์:</strong> ' + item.eqName + ' (x' + item.qty + ')</div><button class="btn-success" onclick="prepareReturn(' + item.row + ', \'' + item.eqId + '\', ' + item.qty + ', \'' + item.eqName + '\')">คืนอุปกรณ์</button>'; listDiv.appendChild(card); }); }
+  function prepareReturn(row, eqId, qty, eqName) { 
+    pendingReturnData = { row: row, eqId: eqId, qty: qty, eqName: eqName }; 
+    document.getElementById('returnEqNamePreview').innerText = eqName; 
+    const sel = document.getElementById('selectReturnLoc'); 
+    sel.innerHTML = '<option value="">-- เลือกจุดวางจากรายการ --</option>'; 
+    allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); 
+    document.getElementById('returnImageBase64').value = ''; 
+    document.getElementById('returnImagePreview').style.display = 'none';
+    document.getElementById('returnLocModal').style.display = 'flex'; 
+  }
+  
+  function confirmReturnProcess() { 
+    const locId = document.getElementById('selectReturnLoc').value; 
+    const base64Data = document.getElementById('returnImageBase64').value;
+    
+    if(!locId) return alert('กรุณาระบุจุดวางที่นำอุปกรณ์ไปคืนครับ'); 
+    if(!base64Data) return alert('กรุณาถ่ายรูปหลักฐานการคืนด้วยครับ');
+    
+    document.getElementById('returnLocModal').style.display = 'none'; 
+    showLoading('กำลังอัปโหลดรูปภาพและบันทึกการรับคืน...'); 
+    
+    google.script.run.withSuccessHandler(res => {
+      if (res.success) {
+        google.script.run.withSuccessHandler(retRes => {
+          alert('✅ ' + retRes.message); 
+          refreshData(); 
+        }).withFailureHandler(showError).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url);
+      } else {
+        hideLoading();
+        alert('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
+      }
+    }).uploadImageToDrive(base64Data, "RET_" + pendingReturnData.eqId + "_" + new Date().getTime());
+  }
+
+  function showAdminSubTab(tab) { document.getElementById('adminTabReturn').style.display = tab === 'return' ? 'block' : 'none'; document.getElementById('adminTabUsers').style.display = tab === 'users' ? 'block' : 'none'; document.getElementById('adminTabEq').style.display = tab === 'equipments' ? 'block' : 'none'; document.getElementById('adminTabLoc').style.display = tab === 'locations' ? 'block' : 'none'; document.getElementById('adminTabQR').style.display = tab === 'qr' ? 'block' : 'none'; const btns = document.querySelectorAll('#adminNavFilters .filter-btn'); btns.forEach(b => b.classList.remove('active')); if(tab === 'return') { btns[0].classList.add('active'); showLoading('กำลังโหลด...'); loadTransactions(true); } if(tab === 'users') { btns[1].classList.add('active'); showLoading('กำลังโหลด...'); loadUsersData(); } if(tab === 'equipments') { btns[2].classList.add('active'); renderAdminEqData(); } if(tab === 'locations') { btns[3].classList.add('active'); renderAdminLocData(); } if(tab === 'qr') { btns[4].classList.add('active'); } }
+  function renderAdminData() { const listDiv = document.getElementById('adminList'); if(!listDiv) return; const searchTxt = document.getElementById('adminSearch').value.toLowerCase(); listDiv.innerHTML = ''; const filtered = allTransactions.filter(item => String(item.transId).toLowerCase().includes(searchTxt) || String(item.userName).toLowerCase().includes(searchTxt) || String(item.eqName).toLowerCase().includes(searchTxt)); if(filtered.length === 0) { listDiv.innerHTML = '<p>ไม่มีรายการค้างคืนในระบบ</p>'; return; } filtered.forEach(item => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>ผู้เบิก:</strong> ' + item.userName + '<br><strong>อุปกรณ์:</strong> ' + item.eqName + ' (x' + item.qty + ')</div><button class="btn-warning" onclick="prepareReturn(' + item.row + ', \'' + item.eqId + '\', ' + item.qty + ', \'' + item.eqName + '\')">บังคับรับคืน</button>'; listDiv.appendChild(card); }); }
+
+  // ==========================================
+  // ระบบเชื่อมต่อกล้องและการถ่ายรูปหน้าเว็บ (Native Fallback)
+  // ==========================================
+  
+  function handleReturnPhoto(event) {
+    if (event.target.files.length == 0) return;
+    showLoading('กำลังโหลดรูปภาพ...');
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      hideLoading();
+      document.getElementById('returnImagePreview').src = e.target.result;
+      document.getElementById('returnImagePreview').style.display = 'block';
+      document.getElementById('returnImageBase64').value = e.target.result;
+      event.target.value = ''; // clear
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function handleEqPhoto(event) {
+    if (event.target.files.length == 0) return;
+    showLoading('กำลังโหลดรูปภาพ...');
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      hideLoading();
+      document.getElementById('editEqImagePreviewUI').src = e.target.result;
+      document.getElementById('editEqImagePreviewUI').style.display = 'block';
+      document.getElementById('editEqImageBase64').value = e.target.result;
+      event.target.value = ''; // clear
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ==========================================
+  // ระบบสแกน QR ด้วยกล้องเครื่อง (Fallback)
+  // ==========================================
+  
+  // ==========================================
+  // ระบบกล้องสแกน QR หน้าเว็บแบบเต็มรูปแบบ (GitHub Version)
+  // ==========================================
+  function openScanner(mode) { 
+    currentScanMode = mode; 
+    document.getElementById('qrScannerModal').style.display = 'flex';
+    
+    if(!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader"); 
+    html5QrCode.start(
+      { facingMode: "environment" }, 
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      (decodedText) => {
+        closeScannerModal();
+        processScannedQR(decodedText);
+      },
+      (errorMessage) => {
+        // parse errors are normal during scanning
+      }
+    ).catch(err => {
+      alert("❌ ไม่สามารถเปิดกล้องได้: " + err);
+      closeScannerModal();
+    });
+  }
+  
+  function closeScannerModal() {
+    document.getElementById('qrScannerModal').style.display = 'none';
+    if (html5QrCode && html5QrCode.isScanning) { 
+        html5QrCode.stop().catch(err => console.error(err)); 
+    }
+  }
+
+  function processScannedQR(scannedId) { if (currentScanMode === 'borrow') { let item = allEquipment.find(e => e.id === scannedId); if(item) { updateCart(item.id, 1); alert('✅ หยิบ "' + item.name + '" ลงตะกร้าแล้ว!'); } else alert('❌ ไม่พบอุปกรณ์รหัสนี้'); } else if (currentScanMode === 'return') { const myItems = allTransactions.filter(item => item.userId === currentUser.id && item.eqId === scannedId); if(myItems.length > 0) { prepareReturn(myItems[0].row, myItems[0].eqId, myItems[0].qty, myItems[0].eqName); } else alert('❌ ไม่พบรายการที่คุณกำลังยืมของชิ้นนี้อยู่'); } else if (currentScanMode === 'admin_return') { const activeItems = allTransactions.filter(item => item.eqId === scannedId); if(activeItems.length > 0) { prepareReturn(activeItems[0].row, activeItems[0].eqId, activeItems[0].qty, activeItems[0].eqName); } else alert('❌ ไม่พบรายการค้างคืนสำหรับอุปกรณ์ชิ้นนี้ในระบบครับ'); } else if (currentScanMode === 'loc') { let loc = allLocations.find(l => l.id === scannedId); if(loc) { document.getElementById('selectReturnLoc').value = loc.id; alert('📍 เลือกจุดวาง: ' + loc.name + ' เรียบร้อยแล้ว'); } else alert('❌ ไม่พบรหัสจุดวางนี้'); } }
+  function updateCart(eqId, change) { let item = allEquipment.find(e => e.id === eqId); if(!item) return; let newQty = (cart[eqId] || 0) + change; if(newQty > item.available) return alert('อุปกรณ์ในสต๊อกไม่พอครับ'); if(newQty < 0) newQty = 0; cart[eqId] = newQty; renderEquipment(); updateCartFloat(); }
+  function updateCartFloat() { let total = 0; for(let k in cart) total += cart[k]; const floatBtn = document.getElementById('cartFloat'); document.getElementById('cartCount').innerText = "(" + total + ")"; floatBtn.style.display = (total > 0 && document.getElementById('tabBorrow').style.display === 'block') ? 'block' : 'none'; }
+  function checkout() { if(!confirm('ยืนยันเบิกอุปกรณ์ที่เลือกไว้?')) return; showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { if(res.success) { cart = {}; updateCartFloat(); alert('✅ ทำรายการสำเร็จ!'); refreshData(); } }).withFailureHandler(showError).submitBorrow(currentUser.id, cart); }
+
+  function renderEquipment() { const grid = document.getElementById('equipmentGrid'); if(!grid) return; grid.innerHTML = ''; const searchTxt = document.getElementById('searchInput').value.toLowerCase(); const filteredData = allEquipment.filter(item => { const matchSearch = String(item.name).toLowerCase().includes(searchTxt); let matchStatus = true; if (currentFilter === 'available') matchStatus = item.available > 0; return matchSearch && matchStatus; }); if (filteredData.length === 0) { grid.innerHTML = '<p>ไม่พบอุปกรณ์</p>'; return; } filteredData.forEach(item => { const card = document.createElement('div'); card.className = 'card'; let imgUrl = item.image ? item.image : 'https://via.placeholder.com/150?text=No+Image'; let fileIdMatch = imgUrl.match(/file\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/); if (fileIdMatch && fileIdMatch[1] && imgUrl.includes('drive.google.com')) { imgUrl = "https://drive.google.com/thumbnail?id=" + fileIdMatch[1] + "&sz=w800"; } const qty = cart[item.id] || 0; let locDisplay = '-'; if (item.location) { let foundLoc = allLocations.find(l => l.id === item.location); locDisplay = foundLoc ? foundLoc.name : item.location; } card.innerHTML = '<img src="' + imgUrl + '" class="card-img"><div class="card-body"><h3 class="card-title">' + item.name + '</h3><div class="card-status">เหลือ: ' + item.available + ' / ' + item.total + '<br><span style="color: #0095f6; font-weight: 500;">📍 ' + locDisplay + '</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', -1)">-</button><span>' + qty + '</span><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', 1)">+</button></div></div>'; grid.appendChild(card); }); }
+  function setFilter(type, btn) { currentFilter = type; document.querySelectorAll('.filters .filter-btn:not(.btn-warning)').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderEquipment(); }
+
+  function loadUsersData() { google.script.run.withSuccessHandler(data => { allUsers = data || []; hideLoading(); renderUsersData(); }).getAllUsers(); }
+  function renderUsersData() { const listDiv = document.getElementById('adminUserList'); if(!listDiv) return; listDiv.innerHTML = ''; const addUserBtn = document.querySelector('#adminTabUsers button.btn-primary'); if (addUserBtn) { addUserBtn.style.display = currentUser.role === 'Superadmin' ? 'inline-block' : 'none'; } allUsers.forEach(user => { const card = document.createElement('div'); card.className = 'list-card'; let statusBadge = user.status === 'Pending' ? '<span style="color:orange; font-weight:bold;">(รออนุมัติ)</span>' : '<span style="color:green;">(Active)</span>'; let actionBtns = ''; if(user.status === 'Pending' && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { actionBtns += `<button class="btn-success" onclick="approveUserRow(${user.row}, '${user.name}')">✅ อนุมัติ</button>`; } actionBtns += `<button class="btn-warning" style="background-color: #17a2b8; color: white;" onclick="resetPassword(${user.row}, '${user.name}')">🔑 รีเซ็ตรหัส</button>`; if(currentUser.role === 'Superadmin') { actionBtns += `<button class="btn-warning" onclick="editUser(${user.row})">แก้ไข</button>`; actionBtns += `<button class="btn-danger" onclick="deleteUser(${user.row}, '${user.name}')">ลบ</button>`; } card.innerHTML = `<div class="list-info"><strong>ชื่อ:</strong> ${user.name} ${statusBadge}<br><strong>User:</strong> ${user.username} <span style="color:#8e8e8e; font-size:12px;">(แผนก: ${user.department})</span><br><span>สิทธิ์: ${user.role}</span></div><div style="display:flex; gap:5px; flex-wrap:wrap;">${actionBtns}</div>`; listDiv.appendChild(card); }); }
+
+  function approveUserRow(row, name) { if(!confirm('ยืนยันอนุมัติให้: ' + name + ' ใช้งานระบบได้?')) return; showLoading('กำลังอนุมัติ...'); google.script.run.withSuccessHandler(res => { alert('✅ ' + res.message); loadUsersData(); }).approveUser(row); }
+  function openUserModal() { document.getElementById('userModalTitle').innerText = 'เพิ่มผู้ใช้'; document.getElementById('editUserRow').value = ''; document.getElementById('editUsername').value = ''; document.getElementById('editPassword').value = ''; document.getElementById('editName').value = ''; document.getElementById('editRole').value = 'User'; document.getElementById('editDept').value = 'GB'; document.getElementById('userModal').style.display = 'flex'; }
+  function editUser(row) { const user = allUsers.find(u => u.row === row); if(!user) return; document.getElementById('userModalTitle').innerText = 'แก้ไขผู้ใช้'; document.getElementById('editUserRow').value = user.row; document.getElementById('editUsername').value = user.username; document.getElementById('editPassword').value = user.password; document.getElementById('editName').value = user.name; document.getElementById('editRole').value = user.role; document.getElementById('editDept').value = user.department || '-'; document.getElementById('userModal').style.display = 'flex'; }
+  function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
+  function saveUser() { const data = { row: document.getElementById('editUserRow').value ? parseInt(document.getElementById('editUserRow').value) : null, username: document.getElementById('editUsername').value, password: document.getElementById('editPassword').value, name: document.getElementById('editName').value, role: document.getElementById('editRole').value, department: document.getElementById('editDept').value }; if(!data.username || !data.password || !data.name) return alert('กรอกข้อมูลให้ครบถ้วน'); showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { alert('✅ ' + res.message); closeUserModal(); loadUsersData(); }).saveUserData(data); }
+  function deleteUser(row, name) { if(!confirm('ลบผู้ใช้: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { alert('🗑️ ' + res.message); loadUsersData(); }).deleteUserData(row); }
+  function resetPassword(row, name) { if(!confirm(`ยืนยันการรีเซ็ตรหัสผ่านของ ${name} เป็น "1234" ใช่หรือไม่?`)) return; showLoading('กำลังรีเซ็ตรหัสผ่าน...'); google.script.run.withSuccessHandler(res => { alert('✅ ' + res.message); loadUsersData(); }).withFailureHandler(showError).resetUserPassword(row); }
+
+  function renderAdminEqData() { const listDiv = document.getElementById('adminEqList'); if(!listDiv) return; listDiv.innerHTML = ''; allEquipment.forEach(eq => { const card = document.createElement('div'); card.className = 'list-card'; let locName = '-'; let foundLoc = allLocations.find(l => l.id === eq.location); if(foundLoc) locName = foundLoc.name; card.innerHTML = '<div class="list-info"><strong>' + eq.name + '</strong> (รหัส: ' + eq.id + ')<br><span>จำนวน: ' + eq.total + ' (พร้อมยืม: ' + eq.available + ')</span><br><span>📍 ' + locName + '</span></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editEq(\'' + eq.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteEq(\'' + eq.id + '\', \'' + eq.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
+  
+  function openEqModal() { document.getElementById('eqModalTitle').innerText = 'เพิ่มอุปกรณ์'; document.getElementById('editEqIsNew').value = 'true'; document.getElementById('editEqId').value = ''; document.getElementById('editEqId').disabled = false; document.getElementById('editEqName').value = ''; document.getElementById('editEqImageFile').value = ''; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImagePreviewUI').style.display = 'none'; document.getElementById('editEqImage').value = ''; document.getElementById('editEqTotal').value = ''; const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); document.getElementById('eqModal').style.display = 'flex'; }
+  function editEq(id) { let eq = allEquipment.find(e => e.id === id); if(!eq) return; document.getElementById('eqModalTitle').innerText = 'แก้ไขอุปกรณ์'; document.getElementById('editEqIsNew').value = 'false'; document.getElementById('editEqId').value = eq.id; document.getElementById('editEqId').disabled = true; document.getElementById('editEqName').value = eq.name; document.getElementById('editEqImageFile').value = ''; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImagePreviewUI').style.display = 'none'; document.getElementById('editEqImage').value = eq.image || ''; document.getElementById('editEqTotal').value = eq.total; const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- ไม่ระบุจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); sel.value = eq.location; document.getElementById('eqModal').style.display = 'flex'; }
+
+  function saveEq() {
+    const fileInput = document.getElementById('editEqImageFile');
+    const file = fileInput.files[0];
+    const base64Cam = document.getElementById('editEqImageBase64').value;
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) { uploadEqImageAndSave(e.target.result); };
+      reader.readAsDataURL(file);
+    } else if (base64Cam) {
+      uploadEqImageAndSave(base64Cam);
+    } else {
+      proceedSaveEq(document.getElementById('editEqImage').value);
+    }
+  }
+
+  function uploadEqImageAndSave(base64Data) {
+    showLoading('กำลังอัปโหลดรูปภาพเข้าคลัง...\n(อาจใช้เวลาสักครู่)');
+    google.script.run.withSuccessHandler(res => {
+      if (res.success) {
+        proceedSaveEq(res.url);
+      } else {
+        hideLoading();
+        alert('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
+      }
+    }).uploadImageToDrive(base64Data, "IMG_EQ_" + new Date().getTime());
+  }
+
+  function proceedSaveEq(imageUrl) { const data = { isNew: document.getElementById('editEqIsNew').value === 'true', id: document.getElementById('editEqId').value, name: document.getElementById('editEqName').value, image: imageUrl, total: document.getElementById('editEqTotal').value, location: document.getElementById('editEqLoc').value }; if(!data.name || !data.total) return alert('กรุณาระบุชื่อและจำนวนอุปกรณ์'); showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { alert('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(); }).withFailureHandler(showError).saveEquipmentData(data); }
+  function deleteEq(id, name) { if(!confirm('ลบอุปกรณ์: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { alert('🗑️ ' + res.message); refreshData(); }).deleteEquipmentData(id); }
+
+  function renderAdminLocData() { const listDiv = document.getElementById('adminLocList'); if(!listDiv) return; listDiv.innerHTML = ''; allLocations.forEach(loc => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>' + loc.name + '</strong><br><span style="color:#8e8e8e; font-size:12px;">รหัส: ' + loc.id + '</span></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editLoc(\'' + loc.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteLoc(\'' + loc.id + '\', \'' + loc.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
+  function openLocModal() { document.getElementById('locModalTitle').innerText = 'เพิ่มจุดวาง'; document.getElementById('editLocIsNew').value = 'true'; document.getElementById('editLocId').value = ''; document.getElementById('editLocId').disabled = false; document.getElementById('editLocName').value = ''; document.getElementById('locModal').style.display = 'flex'; }
+  function editLoc(id) { let loc = allLocations.find(l => l.id === id); if(!loc) return; document.getElementById('locModalTitle').innerText = 'แก้ไขจุดวาง'; document.getElementById('editLocIsNew').value = 'false'; document.getElementById('editLocId').value = loc.id; document.getElementById('editLocId').disabled = true; document.getElementById('editLocName').value = loc.name; document.getElementById('locModal').style.display = 'flex'; }
+  function saveLoc() { const data = { isNew: document.getElementById('editLocIsNew').value === 'true', id: document.getElementById('editLocId').value, name: document.getElementById('editLocName').value }; if(!data.name) return alert('กรุณาระบุชื่อจุดวาง'); showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { alert('✅ ' + res.message); document.getElementById('locModal').style.display='none'; refreshData(); }).withFailureHandler(showError).saveLocationData(data); }
+  function deleteLoc(id, name) { if(!confirm('ลบจุดวาง: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { alert('🗑️ ' + res.message); refreshData(); }).deleteLocationData(id); }
+
+  function populateLocationSelect() { const s = document.getElementById('adminLocSelect'); let o = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(l => o += '<option value="' + l.id + '">' + l.name + '</option>'); if(s) s.innerHTML = o; }
+  function populateEqSelect() { const s = document.getElementById('adminEqSelect'); let o = '<option value="">-- เลือกอุปกรณ์ --</option>'; allEquipment.forEach(e => o += '<option value="' + e.id + '">' + e.name + '</option>'); if(s) s.innerHTML = o; }
+  function generateQR(type) { let selectElement = type === 'loc' ? document.getElementById('adminLocSelect') : document.getElementById('adminEqSelect'); let id = selectElement.value; const resDiv = document.getElementById('adminQRResult'); if(!id) { resDiv.innerHTML = ''; return; } let nameWithPrefix = selectElement.options[selectElement.selectedIndex].text; resDiv.innerHTML = `<div id="printArea" style="border: 2px dashed #0095f6; padding: 25px 20px; border-radius: 12px; display: inline-block; background: white; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 250px;"><h3 style="margin: 0 0 15px 0; color: #262626; font-size: 22px;">${nameWithPrefix}</h3><canvas id="qrDisplayCanvas" style="border: 1px solid #efefef; padding: 10px; border-radius: 8px;"></canvas><p style="margin: 15px 0 0 0; font-size: 16px; color: #8e8e8e;">รหัสอ้างอิง: <strong style="color: #262626;">${id}</strong></p></div><br><button class="btn-primary" style="width: auto; margin-top: 15px; border-radius: 30px;" onclick="printQR()">🖨️ พิมพ์ป้าย QR Code</button>`; new QRious({ element: document.getElementById('qrDisplayCanvas'), value: id, size: 200, level: 'H' }); }
+  function printQR() { var printContents = document.getElementById('printArea').outerHTML; var originalContents = document.body.innerHTML; document.body.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center;">' + printContents + '</div>'; window.print(); document.body.innerHTML = originalContents; location.reload(); }
+
+  async function downloadAllQRs() {
+    if(allEquipment.length === 0 && allLocations.length === 0) return alert('ไม่มีข้อมูลอุปกรณ์หรือจุดวางในระบบครับ');
+    showLoading('กำลังวาดรูปป้ายและสร้างไฟล์ ZIP...\n(อาจใช้เวลาสักครู่)');
+    try { var zip = new JSZip(); var eqFolder = zip.folder("QR_อุปกรณ์"); var locFolder = zip.folder("QR_จุดวาง"); function createTicketBase64(name, id) { const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 500; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 400, 500); ctx.strokeStyle = '#0095f6'; ctx.lineWidth = 6; ctx.setLineDash([15, 10]); ctx.strokeRect(15, 15, 370, 470); ctx.fillStyle = '#262626'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, 200, 75, 340); const qr = new QRious({ value: id, size: 260, level: 'H' }); ctx.drawImage(qr.canvas, 70, 110); ctx.fillStyle = '#8e8e8e'; ctx.font = '22px sans-serif'; ctx.fillText('รหัสอ้างอิง: ' + id, 200, 420); return canvas.toDataURL('image/png').split(',')[1]; } allEquipment.forEach(eq => { var base64Data = createTicketBase64(eq.name, eq.id); var safeName = (eq.name + "_" + eq.id).replace(/[\/\\]/g, '-'); eqFolder.file(safeName + ".png", base64Data, {base64: true}); }); allLocations.forEach(loc => { var base64Data = createTicketBase64(loc.name, loc.id); var safeName = (loc.name + "_" + loc.id).replace(/[\/\\]/g, '-'); locFolder.file(safeName + ".png", base64Data, {base64: true}); }); var content = await zip.generateAsync({type:"blob"}); var link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = "QR_Codes_Tickets.zip"; link.click(); hideLoading(); alert('✅ ดาวน์โหลดไฟล์ .ZIP สำเร็จแล้ว!'); } catch(error) { hideLoading(); alert('❌ เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: ' + error.message); }
+  }
+</script>
+
+  
+    <!-- QR Scanner Modal -->
+    <div id="qrScannerModal" class="modal-bg">
+      <div class="modal-content" style="text-align: center;">
+        <h3>📷 สแกน QR Code</h3>
+        <div id="qr-reader" style="width: 100%; margin-bottom: 15px;"></div>
+        <button class="btn-danger" onclick="closeScannerModal()">ยกเลิก</button>
+      </div>
+    </div>
+  </body>
+</html>
