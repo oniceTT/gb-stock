@@ -615,8 +615,41 @@
   }
 
   function saveMyProfile() { const u = document.getElementById('myProfileUsername').value; const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!u || !p || !n) return alert('กรุณากรอก Username รหัสผ่าน และชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); alert(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, p, d); }
-  function loadTransactions(isAdminView) { google.script.run.withSuccessHandler(data => { allTransactions = data || []; hideLoading(); if(isAdminView) renderAdminData(); else renderMyReturnData(); }).withFailureHandler(showError).getActiveTransactions(); }
-  function renderMyReturnData() { const listDiv = document.getElementById('myReturnList'); if(!listDiv) return; listDiv.innerHTML = ''; const myItems = allTransactions.filter(item => item.userId == currentUser.id); if(myItems.length === 0) { listDiv.innerHTML = '<div style="text-align:center; padding: 20px; color:#8e8e8e;">🎉 คุณไม่มีอุปกรณ์ที่ค้างคืนอยู่ครับ</div>'; return; } myItems.forEach(item => { const card = document.createElement('div'); card.className = 'list-card'; let posBadge = (item.action && String(item.action).indexOf('POS') !== -1) ? ' <span style="background:#ff9800; color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">POS</span>' : ''; card.innerHTML = '<div class="list-info"><strong style="color:#e6683c;">🔴 กำลังยืม</strong><br><strong>อุปกรณ์:</strong> ' + item.eqName + posBadge + ' (x' + item.qty + ')</div><button class="btn-success" onclick="prepareReturn(' + item.row + ', \'' + item.eqId + '\', ' + item.qty + ', \'' + item.eqName + '\')">คืนอุปกรณ์</button>'; listDiv.appendChild(card); }); }
+  function loadTransactions(isAdminView) { 
+    google.script.run.withSuccessHandler(data => { 
+      allTransactions = data || []; 
+      google.script.run.withSuccessHandler(function(res) {
+         if (res && res.success) allRadios = res.radios || [];
+         hideLoading(); 
+         if(isAdminView) renderAdminData(); else renderMyReturnData(); 
+      }).withFailureHandler(showError).getRadios();
+    }).withFailureHandler(showError).getActiveTransactions(); 
+  }
+  function renderMyReturnData() { 
+    const listDiv = document.getElementById('myReturnList'); 
+    if(!listDiv) return; 
+    listDiv.innerHTML = ''; 
+    const myItems = allTransactions.filter(item => item.userId == currentUser.id); 
+    const myRadios = allRadios ? allRadios.filter(r => r.currentUserId == currentUser.id || (r.currentUserName && r.currentUserName === currentUser.name)) : [];
+    
+    if(myItems.length === 0 && myRadios.length === 0) { 
+      listDiv.innerHTML = '<div style="text-align:center; padding: 20px; color:#8e8e8e;">🎉 คุณไม่มีอุปกรณ์หรือวิทยุที่ค้างคืนอยู่ครับ</div>'; 
+      return; 
+    } 
+    myItems.forEach(item => { 
+      const card = document.createElement('div'); 
+      card.className = 'list-card'; 
+      let posBadge = (item.action && String(item.action).indexOf('POS') !== -1) ? ' <span style="background:#ff9800; color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">POS</span>' : ''; 
+      card.innerHTML = '<div class="list-info"><strong style="color:#e6683c;">🔴 กำลังยืม</strong><br><strong>อุปกรณ์:</strong> ' + item.eqName + posBadge + ' (x' + item.qty + ')</div><button class="btn-success" onclick="prepareReturn(' + item.row + ', \'' + item.eqId + '\', ' + item.qty + ', \'' + item.eqName + '\')">คืนอุปกรณ์</button>'; 
+      listDiv.appendChild(card); 
+    }); 
+    myRadios.forEach(radio => { 
+      const card = document.createElement('div'); 
+      card.className = 'list-card'; 
+      card.innerHTML = '<div class="list-info"><strong style="color:#e6683c;">📻 กำลังยืมวิทยุ</strong><br><strong>วิทยุ:</strong> ' + radio.name + '</div><button class="btn-success" onclick="doReturnRadio(\'' + radio.id + '\', \'' + radio.name + '\')">คืนวิทยุ</button>'; 
+      listDiv.appendChild(card); 
+    });
+  }
   function prepareReturn(row, eqId, qty, eqName) { 
     pendingReturnData = { row: row, eqId: eqId, qty: qty, eqName: eqName }; 
     document.getElementById('returnEqNamePreview').innerText = eqName; 
