@@ -399,8 +399,10 @@
       <div class="modal-content">
         <h3 style="margin-top:0;">🤝 เบิกวิทยุ (Admin)</h3>
         <p style="color:#666; font-size:14px;">กำลังเบิก: <strong id="radioBorrowName" style="color:#262626;"></strong></p>
-        <label>ชื่อผู้รับวิทยุ</label>
-        <input type="text" id="radioBorrowRecipient" placeholder="พิมพ์ชื่อผู้รับวิทยุ">
+        <label>เลือกชื่อผู้รับวิทยุ</label>
+        <select id="radioBorrowRecipient" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; font-family:inherit;">
+          <option value="">-- เลือกผู้รับ --</option>
+        </select>
         <div style="display:flex; gap:10px; margin-top:15px;">
           <button class="btn-success" style="flex:1;" onclick="confirmBorrowRadioAdmin()">ยืนยันการเบิก</button>
           <button class="btn-danger" style="flex:1;" onclick="document.getElementById('radioBorrowModal').style.display='none'">ยกเลิก</button>
@@ -560,6 +562,9 @@
     document.getElementById('myProfileUsername').value = currentUser.username || '';
     document.getElementById('myProfilePassword').value = currentUser.password || ''; document.getElementById('myProfileName').value = currentUser.name || ''; document.getElementById('myProfileDept').value = currentUser.department || '-';
     refreshData();
+    if (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') {
+      google.script.run.withSuccessHandler(function(data) { allUsers = data || []; }).getAllUsers();
+    }
     window.history.replaceState({ tab: 'borrow' }, '', '#borrow');
   }
 
@@ -912,7 +917,20 @@
     var radio = allRadios.find(function(r){ return r.id === radioId; });
     pendingBorrowRadioId = radioId;
     document.getElementById('radioBorrowName').innerText = radio ? radio.name : 'วิทยุ';
+    
+    var selectHtml = '<option value="">-- เลือกผู้รับวิทยุ --</option>';
+    if (allUsers && allUsers.length > 0) {
+      allUsers.forEach(function(u) {
+        if (u.status !== 'Pending') {
+          selectHtml += '<option value="' + u.name + '">' + u.name + ' (' + u.department + ')</option>';
+        }
+      });
+    } else {
+      selectHtml += '<option value="ทั่วไป">ทั่วไป (ไม่ได้โหลดรายชื่อ)</option>';
+    }
+    document.getElementById('radioBorrowRecipient').innerHTML = selectHtml;
     document.getElementById('radioBorrowRecipient').value = '';
+    
     document.getElementById('radioBorrowModal').style.display = 'flex';
   }
 
@@ -971,13 +989,19 @@
 
   function confirmRadioReturn() {
     if (!pendingRadioReturnId || !pendingRadioReturnLocId) return;
+    
+    // Save variables before closing modal clears them
+    var radioIdToReturn = pendingRadioReturnId;
+    var locIdToReturn = pendingRadioReturnLocId;
+    
     closeRadioReturnModal();
     showLoading('กำลังบันทึกการคืนวิทยุ...');
+    
     google.script.run.withSuccessHandler(function(res) {
       hideLoading();
       alert(res.success ? '✅ ' + res.message : '❌ ' + res.message);
       if (res.success) loadRadios();
-    }).withFailureHandler(showError).returnRadio(pendingRadioReturnId, pendingRadioReturnLocId);
+    }).withFailureHandler(showError).returnRadio(radioIdToReturn, locIdToReturn);
   }
 
   function doUpdateRadioBattery(radioId, status) {
