@@ -122,7 +122,9 @@
           <div class="filters">
             <button class="filter-btn active" onclick="setFilter('all', this)">ทั้งหมด</button>
             <button class="filter-btn" onclick="setFilter('available', this)">พร้อมเบิก</button>
-            <button class="btn-warning" onclick="openScanner('borrow')" style="padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 500; display:inline-block; margin:0;">📷 สแกนเบิกอุปกรณ์</button>
+            <button class="btn-warning" onclick="openScanner('borrow')" style="padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 500; display:inline-block; margin:0;">
+              📷 สแกนเบิกอุปกรณ์
+            </button>
           </div>
         </div>
         <div class="equipment-grid" id="equipmentGrid"></div>
@@ -131,7 +133,9 @@
       <div id="tabReturn" style="display:none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
           <h3 style="margin:0;">อุปกรณ์ที่คุณกำลังใช้งานอยู่</h3>
-          <button class="btn-warning" onclick="openScanner('return')" style="width: 100%; margin-bottom: 20px; display:block; text-align:center; padding:10px; cursor:pointer; border-radius:20px; box-sizing:border-box;">📷 สแกนคืนอุปกรณ์</button>
+          <button class="btn-warning" style="width: 100%; margin-bottom: 20px; display:block; text-align:center; padding:10px; cursor:pointer; border-radius:20px; box-sizing:border-box;" onclick="openScanner('return')">
+            📷 สแกนคืนอุปกรณ์
+          </button>
         </div>
         <p style="font-size: 14px; color: #666; margin-top: 0;">กดยืนยันหรือสแกน QR อุปกรณ์ แล้วนำของไปเก็บที่เดิมได้เลย</p>
         <div id="myReturnList"></div>
@@ -215,7 +219,184 @@
         <div id="adminTabReturn">
           <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
             <input type="text" id="adminSearch" placeholder="ค้นหารหัส หรือ ชื่อผู้เบิก..." onkeyup="renderAdminData()" style="margin: 0;">
-            <button class="btn-warning" style="width:100%; margin-bottom: 20px; display:block; text-align:center; padding:10px; cursor:pointer; border-radius:20px; box-sizing:border-box;" onclick="openScanner('radio_return_loc')">📷 สแกนจุดคืนวิทยุ</button>
+            <button class="btn-warning" style="white-space: nowrap; margin: 0; padding:10px; cursor:pointer; border-radius:20px; box-sizing:border-box;" onclick="openScanner('admin_return')">
+              📷 สแกนรับคืน
+            </button>
+          </div>
+          <div id="adminList"></div>
+        </div>
+        
+        <div id="adminTabUsers" style="display:none;">
+          <button class="btn-primary" style="width:auto; margin-bottom:15px;" onclick="openUserModal()">+ เพิ่มผู้ใช้ใหม่</button>
+          <div id="adminUserList"></div>
+        </div>
+        
+        <div id="adminTabEq" style="display:none;">
+          <button class="btn-primary" style="width:auto; margin-bottom:15px;" onclick="openEqModal()">+ เพิ่มอุปกรณ์ใหม่</button>
+          <div id="adminEqList"></div>
+        </div>
+
+        <div id="adminTabLoc" style="display:none;">
+          <button class="btn-primary" style="width:auto; margin-bottom:15px;" onclick="openLocModal()">+ เพิ่มจุดวางใหม่</button>
+          <div id="adminLocList"></div>
+        </div>
+
+        <div id="adminTabQR" style="display:none;">
+          <select id="adminLocSelect" onchange="generateQR('loc')"></select><br>
+          <select id="adminEqSelect" onchange="generateQR('eq')" style="margin-top:10px;"></select>
+          <div id="adminQRResult" style="text-align: center; margin-top: 20px;"></div>
+          <hr style="margin: 30px 0; border-top: 1px solid #dbdbdb;">
+          <button class="btn-success" style="width: 100%; padding: 12px; font-size: 16px; border-radius: 8px;" onclick="downloadAllQRs()">📦 ดาวน์โหลด QR ทั้งหมดเป็นไฟล์ .ZIP</button>
+        </div>
+        
+        <div id="adminTabHistory" style="display:none;">
+          <h4 style="margin-top:0; color:#8e8e8e;">ประวัติการทำรายการล่าสุด (10 รายการ/หน้า)</h4>
+          <div id="adminHistoryList"></div>
+          <div style="display:flex; justify-content:center; gap:15px; margin-top:15px; align-items:center;">
+             <button class="btn-primary" style="width:auto; padding:8px 20px; margin-top:0;" onclick="loadHistoryPage(-1)">◀ ก่อนหน้า</button>
+             <span id="historyPageLabel" style="font-weight:500;">หน้า 1 / 1</span>
+             <button class="btn-primary" style="width:auto; padding:8px 20px; margin-top:0;" onclick="loadHistoryPage(1)">ถัดไป ▶</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="cartFloat" onclick="checkout()">🛒 ตะกร้า <span id="cartCount">(0)</span> ➔ ยืนยันเบิก</div>
+
+    <!-- Modals -->
+    <div id="returnLocModal" class="modal-bg">
+      <div class="modal-content">
+        <h3 style="margin-top:0;">📍 ระบุจุดวางที่นำไปคืน</h3>
+        <p style="font-size: 14px; color:#666;">นำอุปกรณ์: <strong id="returnEqNamePreview"></strong> ไปคืนที่ไหน?</p>
+        <select id="selectReturnLoc" style="margin-bottom: 15px;"></select>
+        <div style="text-align: center; margin-bottom: 15px;"><span style="color:#8e8e8e; font-size:12px;">-- หรือ --</span></div>
+        <button class="btn-warning" style="width:100%; margin-bottom: 20px; display:block; text-align:center; padding:10px; cursor:pointer; border-radius:20px; box-sizing:border-box;" onclick="openScanner('loc')">
+          📷 สแกน QR ประจำจุดวาง
+        </button>
+        
+        <h3 style="margin-top:10px; margin-bottom: 5px;">📸 ถ่ายรูปหลักฐานการคืน</h3>
+        <label class="upload-zone">
+          <span style="font-size: 28px; display: block; margin-bottom: 8px;">📷</span>
+          แตะเพื่อถ่ายรูปด้วยแอปกล้อง
+          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleReturnPhoto(event)">
+        </label>
+        <img id="returnImagePreview" style="width:100%; display:none; border-radius:8px; margin-bottom:15px;">
+        <input type="hidden" id="returnImageBase64">
+        
+        <div style="display:flex; gap:10px;">
+          <button class="btn-success" style="flex:1;" onclick="confirmReturnProcess()">ยืนยันการคืน</button>
+          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('returnLocModal').style.display='none'">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="eqModal" class="modal-bg">
+      <div class="modal-content">
+        <h3 id="eqModalTitle" style="margin-top:0;">เพิ่มอุปกรณ์</h3>
+        <input type="hidden" id="editEqIsNew" value="true">
+        <label>รหัสอุปกรณ์</label><input type="text" id="editEqId" placeholder="เว้นว่างไว้ระบบจะสร้างให้">
+        <label>ชื่ออุปกรณ์</label><input type="text" id="editEqName" placeholder="เช่น กล้อง DSLR">
+        
+        <label>📸 รูปภาพอุปกรณ์ (ถ่ายเอง หรืออัปโหลด)</label>
+        <div style="display:flex; gap:10px; margin-top:5px; margin-bottom:15px;">
+          <label class="btn-primary" style="flex:1; margin-top: 0; padding: 12px; font-weight: 500;">
+            📷 ถ่ายรูป
+            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleEqPhoto(event)">
+          </label>
+          <label class="btn-success" style="flex:1; margin-top: 0; padding: 12px; font-weight: 500; background-color: #17a2b8;">
+            🖼️ เลือกจากเครื่อง
+            <input type="file" accept="image/*" style="display:none;" onchange="handleEqPhoto(event)">
+          </label>
+        </div>
+        <img id="editEqImagePreviewUI" style="width:100%; display:none; border-radius:8px; margin-bottom:15px;">
+        <input type="hidden" id="editEqImage"> 
+        <input type="hidden" id="editEqImageBase64">
+
+        <label>จำนวนทั้งหมด</label><input type="number" id="editEqTotal" placeholder="จำนวน" min="1">
+        <label>จุดวาง</label><select id="editEqLoc"></select>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+          <button class="btn-success" style="flex:1;" onclick="saveEq()">บันทึก</button>
+          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('eqModal').style.display='none'">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="locModal" class="modal-bg">
+      <div class="modal-content">
+        <h3 id="locModalTitle" style="margin-top:0;">เพิ่มจุดวาง</h3>
+        <input type="hidden" id="editLocIsNew" value="true">
+        <label>รหัสจุดวาง</label><input type="text" id="editLocId" placeholder="เว้นว่างไว้ระบบจะสร้างให้">
+        <label>ชื่อจุดวาง</label><input type="text" id="editLocName" placeholder="เช่น ตู้ A ชั้น 1">
+        <div style="display:flex; gap:10px; margin-top:15px;">
+          <button class="btn-success" style="flex:1;" onclick="saveLoc()">บันทึก</button>
+          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('locModal').style.display='none'">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+    
+    <div id="userModal" class="modal-bg">
+      <div class="modal-content">
+        <h3 id="userModalTitle" style="margin-top:0;">เพิ่ม/แก้ไข ผู้ใช้งาน</h3>
+        <input type="hidden" id="editUserRow">
+        <label>Username</label><input type="text" id="editUsername" placeholder="Username">
+        <label>Password</label><input type="text" id="editPassword" placeholder="Password">
+        <label>ชื่อ-นามสกุล</label><input type="text" id="editName" placeholder="ชื่อ-นามสกุล">
+        <label>แผนก</label>
+        <select id="editDept">
+          <option value="-">-</option>
+          <option value="GB">GB</option>
+          <option value="CR">CR</option>
+          <option value="CA">CA</option>
+          <option value="SC">SC</option>
+        </select>
+        <label>สิทธิ์ (Role)</label>
+        <select id="editRole">
+          <option value="User">User</option>
+          <option value="Admin">Admin</option>
+          <option value="Superadmin">Superadmin</option>
+        </select>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+          <button class="btn-success" style="flex:1;" onclick="saveUser()">บันทึก</button>
+          <button class="btn-danger" style="flex:1;" onclick="closeUserModal()">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+    
+
+    
+    
+    <!-- Radio QR Modal -->
+    <div id="radioQRModal" class="modal-bg">
+      <div class="modal-content" style="text-align:center;">
+        <h3 style="margin-top:0;" id="radioQRTitle">📻 QR วิทยุ</h3>
+        <div id="radioQRPrintArea" style="border: 2px dashed #0095f6; padding: 25px 20px; border-radius: 12px; display: inline-block; background: white; margin: 10px 0; min-width: 220px;">
+          <canvas id="radioQRCanvas" style="border: 1px solid #efefef; padding: 10px; border-radius: 8px;"></canvas>
+          <p id="radioQRIdLabel" style="margin: 10px 0 0 0; font-size: 13px; color: #8e8e8e;"></p>
+        </div>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+          <button class="btn-primary" style="flex:1;" onclick="printRadioQR()">🖨️ พิมพ์ QR</button>
+          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('radioQRModal').style.display='none'">ปิด</button>
+        </div>
+      </div>
+    </div>
+    <!-- Radio Return Modal -->
+    <div id="radioReturnModal" class="modal-bg">
+      <div class="modal-content">
+        <h3 style="margin-top:0;">📦 คืนวิทยุ</h3>
+        <p style="color:#666; font-size:14px;">กำลังคืน: <strong id="radioReturnName" style="color:#262626;"></strong></p>
+        <div id="radioReturnScanSection">
+          <div style="background:#fff8e1; border:1px solid #ffc107; border-radius:10px; padding:14px; margin:15px 0; text-align:center;">
+            <div style="font-size:28px; margin-bottom:6px;">📍</div>
+            <div style="font-weight:600;">สแกน QR Code ที่จุดคืนวิทยุก่อน</div>
+            <div style="font-size:12px; color:#888; margin-top:4px;">ต้องอยู่ที่จุดคืนจริงๆ เท่านั้น</div>
+          </div>
+          <div id="radioReturnLocDisplay" style="display:none; background:#e8f5e9; border:1px solid #4caf50; border-radius:10px; padding:12px; margin-bottom:15px; text-align:center;">
+             <span style="font-size:12px; color:#4caf50;">จุดคืนที่สแกน:</span><br>
+             <strong id="radioReturnLocNameDisplay"></strong>
+          </div>
+          <button class="btn-warning" style="width:100%; margin-bottom: 20px; display:block; text-align:center; padding:10px; cursor:pointer; border-radius:20px; box-sizing:border-box;" onclick="openScanner('radio_return_loc')">
+            📷 สแกนจุดคืนวิทยุ
+          </button>
         </div>
         <div id="radioReturnAdminBypass" style="display:none; background:#e3f2fd; border:1px solid #90caf9; border-radius:10px; padding:14px; margin-bottom:15px; text-align:center;">
           <div style="font-size:28px; margin-bottom:6px;">⚡</div>
