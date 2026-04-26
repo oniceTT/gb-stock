@@ -866,25 +866,28 @@
       console.warn("Optimistic UI failed:", err);
     }
 
-    showLoading('กำลังอัปโหลดรูปภาพและบันทึกการรับคืน...'); 
-    
-    google.script.run.withSuccessHandler(res => {
-      if (res.success) {
-        google.script.run.withSuccessHandler(retRes => {
+    // Delay 50ms so the browser can repaint the DOM and make the item disappear instantly BEFORE showing the loader
+    setTimeout(() => {
+      showLoading('กำลังอัปโหลดรูปภาพและบันทึกการรับคืน...'); 
+      
+      google.script.run.withSuccessHandler(res => {
+        if (res.success) {
+          google.script.run.withSuccessHandler(retRes => {
+            hideLoading();
+            showToast('✅ ' + retRes.message);
+            setTimeout(() => refreshData(true), 2500); 
+          }).withFailureHandler(err => { hideLoading(); showToast('อัปเดตข้อมูลล้มเหลว: '+err.message); setTimeout(() => refreshData(true), 2500); }).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url, eqStatus);
+        } else {
           hideLoading();
-          showToast('✅ ' + retRes.message);
-          setTimeout(() => refreshData(true), 2500); 
-        }).withFailureHandler(err => { hideLoading(); showToast('อัปเดตข้อมูลล้มเหลว: '+err.message); setTimeout(() => refreshData(true), 2500); }).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url, eqStatus);
-      } else {
+          showToast('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
+          setTimeout(() => refreshData(true), 2500);
+        }
+      }).withFailureHandler(function(err) {
         hideLoading();
-        showToast('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
+        showToast('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
         setTimeout(() => refreshData(true), 2500);
-      }
-    }).withFailureHandler(function(err) {
-      hideLoading();
-      showToast('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
-      setTimeout(() => refreshData(true), 2500);
-    }).uploadImageToDrive(base64Data, "RET_" + pendingReturnData.eqId + "_" + new Date().getTime());
+      }).uploadImageToDrive(base64Data, "RET_" + pendingReturnData.eqId + "_" + new Date().getTime());
+    }, 50);
   }
 
   function showAdminSubTab(tab) { document.getElementById('adminTabReturn').style.display = tab === 'return' ? 'block' : 'none'; document.getElementById('adminTabUsers').style.display = tab === 'users' ? 'block' : 'none'; document.getElementById('adminTabEq').style.display = tab === 'equipments' ? 'block' : 'none'; document.getElementById('adminTabLoc').style.display = tab === 'locations' ? 'block' : 'none'; document.getElementById('adminTabQR').style.display = tab === 'qr' ? 'block' : 'none'; document.getElementById('adminTabHistory').style.display = tab === 'history' ? 'block' : 'none'; const btns = document.querySelectorAll('#adminNavFilters .filter-btn'); btns.forEach(b => b.classList.remove('active')); if(tab === 'return') { btns[0].classList.add('active'); showLoading('กำลังโหลด...'); loadTransactions(true); } if(tab === 'history') { btns[1].classList.add('active'); currentHistoryPage = 1; fetchHistoryData(); } if(tab === 'users') { btns[2].classList.add('active'); showLoading('กำลังโหลด...'); loadUsersData(); } if(tab === 'equipments') { btns[3].classList.add('active'); renderAdminEqData(); } if(tab === 'locations') { btns[4].classList.add('active'); renderAdminLocData(); } if(tab === 'qr') { btns[5].classList.add('active'); } }
@@ -1109,18 +1112,21 @@
     }
     cart = {}; updateCartFloat(); renderEquipment(); renderMyReturnData();
 
-    showLoading('กำลังบันทึก...');
-    
-    google.script.run.withSuccessHandler(res => { 
-      hideLoading();
-      if(!res.success) {
-          showToast('❌ ' + res.message);
-          setTimeout(() => refreshData(true), 500); // Revert if failed
-      } else {
-          showToast('✅ ' + res.message);
-      }
-      setTimeout(() => refreshData(true), 2500); 
-    }).withFailureHandler(err => { hideLoading(); showToast('บันทึกล้มเหลว: '+err.message); setTimeout(() => refreshData(true), 500); }).submitBorrow(currentUser.id, cartCopy); 
+    // Delay 50ms to allow DOM repaint
+    setTimeout(() => {
+      showLoading('กำลังบันทึก...');
+      
+      google.script.run.withSuccessHandler(res => { 
+        hideLoading();
+        if(!res.success) {
+            showToast('❌ ' + res.message);
+            setTimeout(() => refreshData(true), 500); // Revert if failed
+        } else {
+            showToast('✅ ' + res.message);
+        }
+        setTimeout(() => refreshData(true), 2500); 
+      }).withFailureHandler(err => { hideLoading(); showToast('บันทึกล้มเหลว: '+err.message); setTimeout(() => refreshData(true), 500); }).submitBorrow(currentUser.id, cartCopy); 
+    }, 50);
   }
 
   function renderEquipment() { const grid = document.getElementById('equipmentGrid'); if(!grid) return; grid.innerHTML = ''; const searchTxt = document.getElementById('searchInput').value.toLowerCase(); const filteredData = allEquipment.filter(item => { const matchSearch = String(item.name).toLowerCase().includes(searchTxt); let matchStatus = true; if (currentFilter === 'available') matchStatus = item.available > 0; let hasStockElsewhere = false; if (item.total <= 0) { hasStockElsewhere = allEquipment.some(other => String(other.name).trim() === String(item.name).trim() && other.total > 0); } let shouldShowZero = item.total > 0 || !hasStockElsewhere; return matchSearch && matchStatus && shouldShowZero; }); if (filteredData.length === 0) { grid.innerHTML = '<p>ไม่พบอุปกรณ์</p>'; return; } filteredData.forEach(item => { const card = document.createElement('div'); card.className = 'card'; let imgUrl = item.image ? item.image : 'https://via.placeholder.com/150?text=No+Image'; let fileIdMatch = imgUrl.match(/file\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/); if (fileIdMatch && fileIdMatch[1] && imgUrl.includes('drive.google.com')) { imgUrl = "https://drive.google.com/thumbnail?id=" + fileIdMatch[1] + "&sz=w800"; } const qty = cart[item.id] || 0; let locDisplay = '-'; if (item.location) { let foundLoc = allLocations.find(l => l.id === item.location); locDisplay = foundLoc ? foundLoc.name : item.location; } card.innerHTML = '<img src="' + imgUrl + '" class="card-img"><div class="card-body"><h3 class="card-title">' + item.name + '</h3><div class="card-status">เหลือ: ' + item.available + ' / ' + item.total + '<br><span style="color: #0095f6; font-weight: 500;">📍 ' + locDisplay + '</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', -1)">-</button><span>' + qty + '</span><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', 1)">+</button></div></div>'; grid.appendChild(card); }); }
@@ -1579,18 +1585,20 @@
      }
      posCart = {}; renderPOSCart(); renderEquipment(); renderMyReturnData();
 
-     showLoading('กำลังบันทึก...');
-     
-     google.script.run.withSuccessHandler(res => {
-         hideLoading();
-         if(!res.success) {
-             showToast('❌ ' + res.message);
-             setTimeout(() => refreshData(true), 500); // Revert
-         } else {
-             showToast('✅ ' + res.message);
-         }
-         setTimeout(() => refreshData(true), 2500);
-     }).withFailureHandler(err => { hideLoading(); showToast('การบันทึกล้มเหลว: ' + err.message); setTimeout(() => refreshData(true), 500); }).submitBorrow(currentUser.id, toSubmit, 'POS');
+     setTimeout(() => {
+       showLoading('กำลังบันทึก...');
+       
+       google.script.run.withSuccessHandler(res => {
+           hideLoading();
+           if(!res.success) {
+               showToast('❌ ' + res.message);
+               setTimeout(() => refreshData(true), 500); // Revert
+           } else {
+               showToast('✅ ' + res.message);
+           }
+           setTimeout(() => refreshData(true), 2500);
+       }).withFailureHandler(err => { hideLoading(); showToast('การบันทึกล้มเหลว: ' + err.message); setTimeout(() => refreshData(true), 500); }).submitBorrow(currentUser.id, toSubmit, 'POS');
+     }, 50);
   }
 
   let posAudioCtx = null;
