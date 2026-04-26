@@ -434,9 +434,9 @@
         <h3 style="margin-top:0;">🤝 เบิกวิทยุ (Admin)</h3>
         <p style="color:#666; font-size:14px;">กำลังเบิก: <strong id="radioBorrowName" style="color:#262626;"></strong></p>
         <label>ระบุชื่อผู้รับวิทยุ</label>
-        <div style="position:relative;" id="recipientDropdownWrap">
+        <div id="recipientDropdownWrap">
           <input type="text" id="radioBorrowRecipient" autocomplete="off" placeholder="🔍 พิมพ์ค้นหาชื่อผู้รับวิทยุ..." style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #ddd; font-family:inherit; box-sizing:border-box;" oninput="filterRecipientList()" onfocus="showRecipientList()">
-          <div id="recipientDropdown" style="display:none; position:absolute; top:100%; left:0; right:0; max-height:200px; overflow-y:auto; background:white; border:1px solid #ddd; border-top:none; border-radius:0 0 8px 8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:999;"></div>
+          <div id="recipientDropdown" style="display:none; max-height:180px; overflow-y:auto; background:#fafafa; border:1px solid #e0e0e0; border-radius:8px; margin-top:6px;"></div>
         </div>
         <div style="display:flex; gap:10px; margin-top:15px;">
           <button class="btn-success" style="flex:1;" onclick="confirmBorrowRadioAdmin()">ยืนยันการเบิก</button>
