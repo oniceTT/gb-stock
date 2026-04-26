@@ -250,8 +250,7 @@
           <strong style="color:#1565c0;">⚙️ Admin: จัดการวิทยุ</strong>
           <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
             <button class="btn-primary" style="width:auto;" onclick="openAddRadioModal()">+ เพิ่มวิทยุ</button>
-            <button class="btn-success" style="width:auto; background:#17a2b8;" onclick="openRadioQR('ALL', 'วิทยุทั้งหมด', 'PRINT')">🖨️ พิมพ์ทั้งหมด</button>
-            <button class="btn-success" style="width:auto; background:#ff9800;" onclick="openRadioQR('ALL', 'วิทยุทั้งหมด', 'DOWNLOAD')">📥 โหลดทั้งหมด (ZIP)</button>
+            <button class="btn-success" style="width:auto; background:#17a2b8;" onclick="openRadioQR('ALL', 'วิทยุทั้งหมด')">🖨️ พิมพ์/โหลดทั้งหมด</button>
           </div>
         </div>
         <div id="radioGrid" class="equipment-grid"></div>
@@ -1597,23 +1596,15 @@
     }
   });
 
-  let currentRadioModalAction = 'PRINT';
-
-  function openRadioQR(id, name, action) {
-    currentRadioModalAction = action || 'PRINT';
-    document.getElementById('radioQRTitle').innerText = id === 'ALL' ? (currentRadioModalAction === 'DOWNLOAD' ? '📥 โหลดป้ายทั้งหมด (23 เครื่อง)' : '🖨️ พิมพ์ป้ายทั้งหมด (23 เครื่อง)') : name;
+  function openRadioQR(id, name) {
+    document.getElementById('radioQRTitle').innerText = id === 'ALL' ? '🖨️ พิมพ์/โหลดป้ายทั้งหมด (23 เครื่อง)' : name;
     document.getElementById('radioQRIdLabel').innerHTML = id === 'ALL' ? 'รหัสวิทยุทั้งหมด' : 'รหัสอ้างอิง: <strong style="color: #1d1d1f;">' + id + '</strong>';
     
     if (id === 'ALL') {
-       if (currentRadioModalAction === 'DOWNLOAD') {
-          document.getElementById('btnRadioPrintAction').style.display = 'none';
-          document.getElementById('btnRadioDownloadAction').style.display = 'inline-block';
-       } else {
-          document.getElementById('btnRadioPrintAction').style.display = 'inline-block';
-          document.getElementById('btnRadioDownloadAction').style.display = 'none';
-       }
+       document.getElementById('btnRadioPrintAction').style.display = 'block';
+       document.getElementById('btnRadioDownloadAction').style.display = 'block';
     } else {
-       document.getElementById('btnRadioPrintAction').style.display = 'inline-block';
+       document.getElementById('btnRadioPrintAction').style.display = 'block';
        document.getElementById('btnRadioDownloadAction').style.display = 'none';
     }
 
