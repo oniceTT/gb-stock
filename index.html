@@ -274,6 +274,15 @@
           📷 สแกน QR ประจำจุดวาง
         </button>
         
+        <div style="margin-bottom: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px;">
+          <label style="font-size:14px; font-weight:600; display:block; text-align:center;">สภาพของอุปกรณ์</label>
+          <div style="display:flex; gap:10px; margin-top:8px;">
+            <button class="btn-outline" style="flex:1; padding:8px; background:#4caf50; color:white; border:none;" id="btnEqStatusReady" onclick="setEqReturnStatus('สมบูรณ์')">✅ พร้อมใช้งาน</button>
+            <button class="btn-outline" style="flex:1; padding:8px; border:1px solid #f44336; color:#f44336; background:white;" id="btnEqStatusBroken" onclick="setEqReturnStatus('ชำรุด')">❌ ชำรุด/หาย</button>
+          </div>
+          <input type="hidden" id="eqReturnStatus" value="สมบูรณ์">
+        </div>
+        
         <h3 style="margin-top:10px; margin-bottom: 5px;">📸 ถ่ายรูปหลักฐานการคืน</h3>
         <label class="upload-zone">
           <span style="font-size: 28px; display: block; margin-bottom: 8px;">📷</span>
@@ -402,6 +411,16 @@
           <div style="font-size:28px; margin-bottom:6px;">⚡</div>
           <div style="font-weight:600; color:#1565c0;">Admin: คืนโดยไม่ต้องสแกน QR</div>
           <div style="font-size:12px; color:#888; margin-top:4px;">สิทธิ์แอดมินสามารถข้ามการสแกนได้</div>
+        </div>
+        
+        <div style="margin-bottom: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px;">
+          <label style="font-size:14px; font-weight:600; display:block; text-align:center;">สถานะแบตเตอรี่ (หลังใช้งาน)</label>
+          <div style="display:flex; gap:10px; margin-top:8px;">
+            <button class="btn-outline" style="flex:1; padding:8px; background:#4caf50; color:white; border:none;" id="btnRadBatReady" onclick="setRadReturnBat('ready')">🟢 พร้อม</button>
+            <button class="btn-outline" style="flex:1; padding:8px; border:1px solid #2196f3; color:#2196f3; background:white;" id="btnRadBatCharging" onclick="setRadReturnBat('charging')">🔵 ชาร์จ</button>
+            <button class="btn-outline" style="flex:1; padding:8px; border:1px solid #f44336; color:#f44336; background:white;" id="btnRadBatLow" onclick="setRadReturnBat('low')">🔴 หมด</button>
+          </div>
+          <input type="hidden" id="radReturnBat" value="ready">
         </div>
         <div style="display:flex; gap:10px;">
           <button class="btn-success" style="flex:1; opacity:0.5; cursor:not-allowed;" id="confirmRadioReturnBtn" disabled onclick="confirmRadioReturn()">ยืนยันการคืน</button>
@@ -582,7 +601,7 @@
     window.history.replaceState({ tab: 'borrow' }, '', '#borrow');
   }
 
-  function refreshData() { showLoading('กำลังโหลดข้อมูลระบบ...'); google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; hideLoading(); renderEquipment(); if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } else if (document.getElementById('tabAdmin').style.display === 'block') { showAdminSubTab('return'); } else if (document.getElementById('tabProfile').style.display === 'block') { } else { switchTab('tabBorrow'); } }).withFailureHandler(showError).getInitialData(); }
+  function refreshData() { showLoading('กำลังโหลดข้อมูลระบบ...'); google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; google.script.run.withSuccessHandler(res => { if (res && res.success) allRadios = res.radios || []; hideLoading(); renderEquipment(); if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } else if (document.getElementById('tabAdmin').style.display === 'block') { showAdminSubTab('return'); } else if (document.getElementById('tabProfile').style.display === 'block') { } else { switchTab('tabBorrow'); } }).withFailureHandler(showError).getRadios(); }).withFailureHandler(showError).getInitialData(); }
   function logout() { if(!confirm('ยืนยันการออกจากระบบ?')) return; currentUser = null; cart = {}; safeRemoveStorage('myAppUser'); document.getElementById('authSection').style.display = 'block'; document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('mainNav').style.display = 'none'; document.getElementById('tabBorrow').style.display = 'none'; document.getElementById('tabReturn').style.display = 'none'; document.getElementById('tabProfile').style.display = 'none'; document.getElementById('tabAdmin').style.display = 'none'; document.getElementById('logoutBtn').style.display = 'none'; document.getElementById('welcomeText').innerText = ''; document.getElementById('cartFloat').style.display = 'none'; }
   
   function switchTab(tabName, navElement, isHistoryBack = false) { 
@@ -661,9 +680,25 @@
     document.getElementById('returnLocModal').style.display = 'flex'; 
   }
   
+  function setEqReturnStatus(status) {
+    document.getElementById('eqReturnStatus').value = status;
+    document.getElementById('btnEqStatusReady').className = (status === 'สมบูรณ์') ? 'btn-outline active' : 'btn-outline';
+    document.getElementById('btnEqStatusBroken').className = (status === 'ชำรุด') ? 'btn-outline active' : 'btn-outline';
+    
+    // Adjust colors
+    document.getElementById('btnEqStatusReady').style.background = (status === 'สมบูรณ์') ? '#4caf50' : 'white';
+    document.getElementById('btnEqStatusReady').style.color = (status === 'สมบูรณ์') ? 'white' : '#4caf50';
+    document.getElementById('btnEqStatusReady').style.border = (status === 'สมบูรณ์') ? 'none' : '1px solid #4caf50';
+    
+    document.getElementById('btnEqStatusBroken').style.background = (status === 'ชำรุด') ? '#f44336' : 'white';
+    document.getElementById('btnEqStatusBroken').style.color = (status === 'ชำรุด') ? 'white' : '#f44336';
+    document.getElementById('btnEqStatusBroken').style.border = (status === 'ชำรุด') ? 'none' : '1px solid #f44336';
+  }
+
   function confirmReturnProcess() { 
     const locId = document.getElementById('selectReturnLoc').value; 
     const base64Data = document.getElementById('returnImageBase64').value;
+    const eqStatus = document.getElementById('eqReturnStatus').value;
     
     if(!locId) return alert('กรุณาระบุจุดวางที่นำอุปกรณ์ไปคืนครับ'); 
     if(!base64Data) return alert('กรุณาถ่ายรูปหลักฐานการคืนด้วยครับ');
@@ -676,7 +711,7 @@
         google.script.run.withSuccessHandler(retRes => {
           alert('✅ ' + retRes.message); 
           refreshData(); 
-        }).withFailureHandler(showError).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url);
+        }).withFailureHandler(showError).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url, eqStatus);
       } else {
         hideLoading();
         alert('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
@@ -685,7 +720,7 @@
   }
 
   function showAdminSubTab(tab) { document.getElementById('adminTabReturn').style.display = tab === 'return' ? 'block' : 'none'; document.getElementById('adminTabUsers').style.display = tab === 'users' ? 'block' : 'none'; document.getElementById('adminTabEq').style.display = tab === 'equipments' ? 'block' : 'none'; document.getElementById('adminTabLoc').style.display = tab === 'locations' ? 'block' : 'none'; document.getElementById('adminTabQR').style.display = tab === 'qr' ? 'block' : 'none'; document.getElementById('adminTabHistory').style.display = tab === 'history' ? 'block' : 'none'; const btns = document.querySelectorAll('#adminNavFilters .filter-btn'); btns.forEach(b => b.classList.remove('active')); if(tab === 'return') { btns[0].classList.add('active'); showLoading('กำลังโหลด...'); loadTransactions(true); } if(tab === 'history') { btns[1].classList.add('active'); currentHistoryPage = 1; fetchHistoryData(); } if(tab === 'users') { btns[2].classList.add('active'); showLoading('กำลังโหลด...'); loadUsersData(); } if(tab === 'equipments') { btns[3].classList.add('active'); renderAdminEqData(); } if(tab === 'locations') { btns[4].classList.add('active'); renderAdminLocData(); } if(tab === 'qr') { btns[5].classList.add('active'); } }
-  function renderAdminData() { const listDiv = document.getElementById('adminList'); if(!listDiv) return; const searchTxt = document.getElementById('adminSearch').value.toLowerCase(); listDiv.innerHTML = ''; const filtered = allTransactions.filter(item => String(item.transId).toLowerCase().includes(searchTxt) || String(item.userName).toLowerCase().includes(searchTxt) || String(item.eqName).toLowerCase().includes(searchTxt)); if(filtered.length === 0) { listDiv.innerHTML = '<p>ไม่มีรายการค้างคืนในระบบ</p>'; return; } filtered.forEach(item => { const card = document.createElement('div'); card.className = 'list-card'; let posBadge = (item.action && String(item.action).indexOf('POS') !== -1) ? ' <span style="background:#ff9800; color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">POS</span>' : ''; card.innerHTML = '<div class="list-info"><strong>ผู้เบิก:</strong> ' + item.userName + '<br><strong>อุปกรณ์:</strong> ' + item.eqName + posBadge + ' (x' + item.qty + ')</div><button class="btn-warning" onclick="prepareReturn(' + item.row + ', \'' + item.eqId + '\', ' + item.qty + ', \'' + item.eqName + '\')">บังคับรับคืน</button>'; listDiv.appendChild(card); }); }
+  function renderAdminData() { const listDiv = document.getElementById('adminList'); if(!listDiv) return; const searchTxt = document.getElementById('adminSearch').value.toLowerCase(); listDiv.innerHTML = ''; const filtered = allTransactions.filter(item => String(item.transId).toLowerCase().includes(searchTxt) || String(item.userName).toLowerCase().includes(searchTxt) || String(item.eqName).toLowerCase().includes(searchTxt)); const filteredRadios = allRadios ? allRadios.filter(r => r.currentUserId && (String(r.id).toLowerCase().includes(searchTxt) || String(r.name).toLowerCase().includes(searchTxt) || String(r.currentUserName).toLowerCase().includes(searchTxt))) : []; if(filtered.length === 0 && filteredRadios.length === 0) { listDiv.innerHTML = '<p>ไม่มีรายการค้างคืนในระบบ</p>'; return; } filtered.forEach(item => { const card = document.createElement('div'); card.className = 'list-card'; let posBadge = (item.action && String(item.action).indexOf('POS') !== -1) ? ' <span style="background:#ff9800; color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">POS</span>' : ''; card.innerHTML = '<div class="list-info"><strong>ผู้เบิก:</strong> ' + item.userName + '<br><strong>อุปกรณ์:</strong> ' + item.eqName + posBadge + ' (x' + item.qty + ')</div><button class="btn-warning" onclick="prepareReturn(' + item.row + ', \'' + item.eqId + '\', ' + item.qty + ', \'' + item.eqName + '\')">บังคับรับคืน</button>'; listDiv.appendChild(card); }); filteredRadios.forEach(radio => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>ผู้เบิก:</strong> ' + radio.currentUserName + '<br><strong>วิทยุ:</strong> ' + radio.name + '</div><button class="btn-warning" onclick="doReturnRadio(\'' + radio.id + '\', \'' + radio.name + '\')">บังคับรับคืนวิทยุ</button>'; listDiv.appendChild(card); }); }
 
   let currentHistoryPage = 1;
   let totalHistoryPages = 1;
@@ -1032,12 +1067,33 @@
     pendingRadioReturnId = null; pendingRadioReturnLocId = null;
   }
 
+  function setRadReturnBat(status) {
+    document.getElementById('radReturnBat').value = status;
+    document.getElementById('btnRadBatReady').className = (status === 'ready') ? 'btn-outline active' : 'btn-outline';
+    document.getElementById('btnRadBatCharging').className = (status === 'charging') ? 'btn-outline active' : 'btn-outline';
+    document.getElementById('btnRadBatLow').className = (status === 'low') ? 'btn-outline active' : 'btn-outline';
+    
+    // Adjust colors
+    document.getElementById('btnRadBatReady').style.background = (status === 'ready') ? '#4caf50' : 'white';
+    document.getElementById('btnRadBatReady').style.color = (status === 'ready') ? 'white' : '#4caf50';
+    document.getElementById('btnRadBatReady').style.border = (status === 'ready') ? 'none' : '1px solid #4caf50';
+    
+    document.getElementById('btnRadBatCharging').style.background = (status === 'charging') ? '#2196f3' : 'white';
+    document.getElementById('btnRadBatCharging').style.color = (status === 'charging') ? 'white' : '#2196f3';
+    document.getElementById('btnRadBatCharging').style.border = (status === 'charging') ? 'none' : '1px solid #2196f3';
+    
+    document.getElementById('btnRadBatLow').style.background = (status === 'low') ? '#f44336' : 'white';
+    document.getElementById('btnRadBatLow').style.color = (status === 'low') ? 'white' : '#f44336';
+    document.getElementById('btnRadBatLow').style.border = (status === 'low') ? 'none' : '1px solid #f44336';
+  }
+
   function confirmRadioReturn() {
     if (!pendingRadioReturnId || !pendingRadioReturnLocId) return;
     
     // Save variables before closing modal clears them
     var radioIdToReturn = pendingRadioReturnId;
     var locIdToReturn = pendingRadioReturnLocId;
+    var batteryStatus = document.getElementById('radReturnBat').value;
     
     closeRadioReturnModal();
     showLoading('กำลังบันทึกการคืนวิทยุ...');
@@ -1045,8 +1101,11 @@
     google.script.run.withSuccessHandler(function(res) {
       hideLoading();
       alert(res.success ? '✅ ' + res.message : '❌ ' + res.message);
-      if (res.success) loadRadios();
-    }).withFailureHandler(showError).returnRadio(radioIdToReturn, locIdToReturn);
+      if (res.success) {
+        loadRadios();
+        refreshData();
+      }
+    }).withFailureHandler(showError).returnRadio(radioIdToReturn, locIdToReturn, batteryStatus);
   }
 
   function doUpdateRadioBattery(radioId, status) {
