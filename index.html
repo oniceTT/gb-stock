@@ -1053,10 +1053,10 @@
     
     var html = '';
     filtered.forEach(function(u) {
-      html += '<div class="recipient-item" onmousedown="selectRecipient(\'' + u.name.replace(/'/g, "\\'") + '\')" style="padding:10px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; transition:background 0.15s;"'
+      html += '<div class="recipient-item" onmousedown="selectRecipient(\'' + u.name.replace(/'/g, "\\'") + '\')" onclick="selectRecipient(\'' + u.name.replace(/'/g, "\\'") + '\')" style="padding:10px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; transition:background 0.15s;"'
         + ' onmouseover="this.style.background=\'#f0f7ff\'" onmouseout="this.style.background=\'white\'">'
-        + '<div style="font-weight:500; font-size:14px; color:#262626;">' + u.name + '</div>'
-        + '<div style="font-size:11px; color:#999;">แผนก: ' + u.department + '</div>'
+        + '<div style="font-weight:500; font-size:14px; color:#262626; pointer-events:none;">' + u.name + '</div>'
+        + '<div style="font-size:11px; color:#999; pointer-events:none;">แผนก: ' + u.department + '</div>'
         + '</div>';
     });
     dropdown.innerHTML = html;
