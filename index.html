@@ -53,7 +53,7 @@
   .radio-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
   .radio-card.is-borrowed { border: 1px solid #ffcc00; background: #fffdf0; }
   .radio-card.is-mine { border: 1px solid #34c759; background: #f0fdf4; }
-  .rc-battery { flex:1; padding:6px 8px; border:none; border-radius:8px; background:#f5f5f7; cursor:pointer; font-size:12px; text-align:center; font-weight: 500; color: #86868b;}
+  .rc-battery { flex:1; padding:6px 2px; border:none; border-radius:6px; background:#f5f5f7; cursor:pointer; font-size:11px; text-align:center; font-weight: 500; color: #86868b; white-space: nowrap;}
   .rc-battery.active-ready { background:#e8f5e9; color:#34c759; }
   .rc-battery.active-charging { background:#e3f2fd; color:#007aff; }
   .rc-battery.active-low { background:#ffebee; color:#ff3b30; }
@@ -62,6 +62,7 @@
   .nav-item { border: none !important; background: #e5e5ea !important; color: #1d1d1f !important; border-radius: 12px !important; font-weight: 600 !important; transition: all 0.2s; box-shadow: none !important; }
   .nav-item.active { background: #1d1d1f !important; color: white !important; }
   .btn-outline { font-family: inherit; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
+  .nav-scroll::-webkit-scrollbar { display: none; }
 
     /* Toast Notification */
     #toastContainer {
@@ -152,13 +153,13 @@
       </div>
 
       <div id="mainNav" style="display:none;">
-        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-          <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">🛒<br>เบิกอุปกรณ์</button>
-          <button class="nav-item" onclick="switchTab('tabReturn', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📦<br>คืนอุปกรณ์</button>
-          <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📻<br>วิทยุ</button>
-          <button class="nav-item" onclick="switchTab('tabPOS', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">💻<br>โหมด POS</button>
-          <button class="nav-item" onclick="switchTab('tabProfile', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">👤<br>โปรไฟล์</button>
-          <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">⚙️<br>จัดการระบบ</button>
+        <div class="nav-scroll" style="display: flex; gap: 8px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; -webkit-overflow-scrolling: touch;">
+          <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="flex: 0 0 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">🛒<br>เบิกอุปกรณ์</button>
+          <button class="nav-item" onclick="switchTab('tabReturn', this)" style="flex: 0 0 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📦<br>คืนอุปกรณ์</button>
+          <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; flex: 0 0 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📻<br>วิทยุ</button>
+          <button class="nav-item" onclick="switchTab('tabPOS', this)" style="flex: 0 0 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">💻<br>โหมด POS</button>
+          <button class="nav-item" onclick="switchTab('tabProfile', this)" style="flex: 0 0 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">👤<br>โปรไฟล์</button>
+          <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="flex: 0 0 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">⚙️<br>จัดการระบบ</button>
         </div>
         <button class="filter-btn" style="width:100%; margin-bottom:15px; background:#e0f7fa; color:#00838f; border-color:#00acc1;" onclick="refreshData()">🔄 โหลดข้อมูลล่าสุด (Refresh)</button>
       </div>
@@ -225,7 +226,7 @@
             <button class="btn-primary" style="width:auto;" onclick="openAddRadioModal()">+ เพิ่มวิทยุ</button>
           </div>
         </div>
-        <div id="radioGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap:12px;"></div>
+        <div id="radioGrid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:12px;"></div>
       </div>
 
       <div id="tabPOS" class="tab-content" style="display:none;">
@@ -331,17 +332,34 @@
         </div>
         
         <h3 style="margin-top:10px; margin-bottom: 5px;">📸 ถ่ายรูปหลักฐานการคืน</h3>
-        <label class="upload-zone">
-          <span style="font-size: 28px; display: block; margin-bottom: 8px;">📷</span>
-          แตะเพื่อถ่ายรูปด้วยแอปกล้อง
-          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleReturnPhoto(event)">
-        </label>
-        <img id="returnImagePreview" style="width:100%; display:none; border-radius:8px; margin-bottom:15px;">
+        <div id="returnCameraSection">
+          <button class="btn-primary" style="width:100%; padding:12px; margin-bottom:10px; border-radius:12px; background:#007aff;" onclick="startReturnCamera()">📷 เปิดกล้องถ่ายรูป</button>
+          <div style="text-align: center; margin-bottom: 10px;"><span style="color:#8e8e8e; font-size:12px;">-- หรืออัปโหลดรูปภาพ --</span></div>
+          <label class="btn-outline" style="display:block; text-align:center; padding:10px; border:1px solid #d2d2d7; border-radius:12px; cursor:pointer; margin-bottom:15px;">
+            🖼️ เลือกรูปจากเครื่อง
+            <input type="file" accept="image/*" style="display:none;" onchange="handleReturnPhoto(event)">
+          </label>
+        </div>
+
+        <div id="returnCameraContainer" style="display:none; text-align:center; margin-bottom:15px; border-radius:12px; overflow:hidden; border:1px solid #e5e5ea;">
+          <video id="returnVideo" autoplay playsinline style="width:100%; max-height:300px; object-fit:cover; background:#000; display:block;"></video>
+          <div style="padding:10px; background:#f5f5f7; display:flex; gap:10px;">
+            <button class="btn-success" style="flex:2; border-radius:20px; padding:12px; font-size:16px;" onclick="captureReturnPhoto()">📸 ถ่ายรูป</button>
+            <button class="btn-danger" style="flex:1; border-radius:20px; padding:12px;" onclick="stopReturnCamera()">ปิดกล้อง</button>
+          </div>
+        </div>
+        <canvas id="returnCanvas" style="display:none;"></canvas>
+
+        <div id="retakePhotoSection" style="display:none; text-align:center; margin-bottom:15px;">
+           <img id="returnImagePreview" style="width:100%; border-radius:8px; margin-bottom:10px;">
+           <button class="btn-outline" style="padding:8px 16px; border-radius:20px; font-weight:600; border:1px solid #007aff; color:#007aff; background:transparent;" onclick="retakeReturnPhoto()">🔄 ถ่ายใหม่ / เปลี่ยนรูป</button>
+        </div>
+        
         <input type="hidden" id="returnImageBase64">
         
         <div style="display:flex; gap:10px;">
           <button class="btn-success" style="flex:1;" onclick="confirmReturnProcess()">ยืนยันการคืน</button>
-          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('returnLocModal').style.display='none'">ยกเลิก</button>
+          <button class="btn-danger" style="flex:1;" onclick="closeReturnLocModal()">ยกเลิก</button>
         </div>
       </div>
     </div>
@@ -815,7 +833,10 @@
     sel.innerHTML = '<option value="">-- เลือกจุดวางจากรายการ --</option>'; 
     allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); 
     document.getElementById('returnImageBase64').value = ''; 
-    document.getElementById('returnImagePreview').style.display = 'none';
+    document.getElementById('returnImagePreview').src = '';
+    document.getElementById('retakePhotoSection').style.display = 'none';
+    document.getElementById('returnCameraSection').style.display = 'block';
+    document.getElementById('returnCameraContainer').style.display = 'none';
     document.getElementById('returnLocModal').style.display = 'flex'; 
   }
   
@@ -952,6 +973,66 @@
      });
   }
 
+  let returnVideoStream = null;
+
+  function startReturnCamera() {
+    document.getElementById('returnCameraSection').style.display = 'none';
+    document.getElementById('returnCameraContainer').style.display = 'block';
+    document.getElementById('retakePhotoSection').style.display = 'none';
+    
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(function(stream) {
+        returnVideoStream = stream;
+        const video = document.getElementById('returnVideo');
+        video.srcObject = stream;
+        video.play();
+      })
+      .catch(function(err) {
+        showToast('❌ ไม่สามารถเปิดกล้องได้: ' + err.message);
+        stopReturnCamera();
+      });
+  }
+
+  function stopReturnCamera() {
+    if (returnVideoStream) {
+      returnVideoStream.getTracks().forEach(track => track.stop());
+      returnVideoStream = null;
+    }
+    document.getElementById('returnCameraContainer').style.display = 'none';
+    if (!document.getElementById('returnImageBase64').value) {
+      document.getElementById('returnCameraSection').style.display = 'block';
+    }
+  }
+
+  function captureReturnPhoto() {
+    const video = document.getElementById('returnVideo');
+    const canvas = document.getElementById('returnCanvas');
+    if (!video.videoWidth) return;
+    
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    const base64 = canvas.toDataURL('image/jpeg', 0.8);
+    document.getElementById('returnImageBase64').value = base64;
+    document.getElementById('returnImagePreview').src = base64;
+    document.getElementById('retakePhotoSection').style.display = 'block';
+    
+    stopReturnCamera();
+  }
+
+  function retakeReturnPhoto() {
+    document.getElementById('returnImageBase64').value = '';
+    document.getElementById('retakePhotoSection').style.display = 'none';
+    startReturnCamera();
+  }
+
+  function closeReturnLocModal() {
+    document.getElementById('returnLocModal').style.display='none';
+    stopReturnCamera();
+  }
+
   function handleReturnPhoto(event) {
     if (event.target.files.length == 0) return;
     showLoading('กำลังโหลดรูปภาพ...');
@@ -960,8 +1041,9 @@
     reader.onload = function(e) {
       hideLoading();
       document.getElementById('returnImagePreview').src = e.target.result;
-      document.getElementById('returnImagePreview').style.display = 'block';
       document.getElementById('returnImageBase64').value = e.target.result;
+      document.getElementById('returnCameraSection').style.display = 'none';
+      document.getElementById('retakePhotoSection').style.display = 'block';
       event.target.value = ''; // clear
     };
     reader.readAsDataURL(file);
