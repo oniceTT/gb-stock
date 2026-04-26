@@ -250,6 +250,7 @@
           <strong style="color:#1565c0;">⚙️ Admin: จัดการวิทยุ</strong>
           <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
             <button class="btn-primary" style="width:auto;" onclick="openAddRadioModal()">+ เพิ่มวิทยุ</button>
+            <button class="btn-success" style="width:auto; background:#17a2b8;" onclick="openRadioQR('ALL', 'วิทยุทั้งหมด')">🖨️ พิมพ์ QR/Barcode ทั้งหมด</button>
           </div>
         </div>
         <div id="radioGrid" class="equipment-grid"></div>
@@ -1291,15 +1292,13 @@
       } else {
         batteryHtml = '<div style="font-size:12px;color:#86868b;margin-top:8px;">' + bsEmoji + ' ' + bsLabel + '</div>';
       }
-      var deleteBtn = isAdmin ? '<button onclick="doDeleteRadio(\'' + radio.id + '\',\'' + radio.name + '\')" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:#d2d2d7;font-size:16px;" title="ลบ">✕</button>' : '';
-      var printBtn = isAdmin ? '<button onclick="openRadioQR(\'' + radio.id + '\',\'' + radio.name + '\')" style="position:absolute;top:10px;right:36px;background:none;border:none;cursor:pointer;color:#007aff;font-size:16px;" title="พิมพ์ QR">🖨️</button>' : '';
+      var adminActions = isAdmin ? '<div style="display:flex;gap:5px;margin-top:10px;padding-top:10px;border-top:1px solid #f5f5f7;"><button class="btn-outline" style="flex:1;padding:6px;font-size:12px;border:1px solid #007aff;color:#007aff;border-radius:8px;background:transparent;" onclick="openRadioQR(\'' + radio.id + '\',\'' + radio.name + '\')">🖨️ พิมพ์ป้าย</button><button class="btn-outline" style="flex:1;padding:6px;font-size:12px;border:1px solid #ff3b30;color:#ff3b30;border-radius:8px;background:transparent;" onclick="doDeleteRadio(\'' + radio.id + '\',\'' + radio.name + '\')">🗑️ ลบ</button></div>' : '';
       var card = document.createElement('div');
       card.className = 'radio-card' + (isBorrowed ? ' is-borrowed' : '') + (isMine ? ' is-mine' : '');
-      card.innerHTML = deleteBtn + printBtn
-        + '<div style="display:flex;justify-content:space-between;align-items:center;">'
+      card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">'
         + '<div style="font-weight:600;font-size:15px;color:#1d1d1f;">' + radio.name + '</div>'
         + '<div style="font-size:22px;">' + bsEmoji + '</div></div>'
-        + statusHtml + actionHtml + batteryHtml;
+        + statusHtml + actionHtml + batteryHtml + adminActions;
       grid.appendChild(card);
     });
   }
@@ -1459,16 +1458,31 @@
     var batteryStatus = document.getElementById('radReturnBat').value;
     
     closeRadioReturnModal();
+    
+    var radio = allRadios.find(r => r.id === radioIdToReturn);
+    if (radio) {
+      radio.currentUserId = null;
+      radio.currentUserName = null;
+      radio.batteryStatus = batteryStatus;
+    }
+    renderRadioTab();
+    renderMyReturnData();
+    
     showLoading('กำลังบันทึกการคืนวิทยุ...');
     
     google.script.run.withSuccessHandler(function(res) {
       hideLoading();
       showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
       if (res.success) {
+        setTimeout(() => loadRadios(), 1500);
+        setTimeout(() => refreshData(true), 1500);
+      } else {
         loadRadios();
-        refreshData();
       }
-    }).withFailureHandler(showError).returnRadio(radioIdToReturn, locIdToReturn, batteryStatus);
+    }).withFailureHandler(function(err){
+      showError(err);
+      loadRadios();
+    }).returnRadio(radioIdToReturn, locIdToReturn, batteryStatus);
   }
 
   function doUpdateRadioBattery(radioId, status) {
@@ -1556,14 +1570,38 @@
   }
 
   function openRadioQR(id, name) {
-    document.getElementById('radioQRTitle').innerText = name;
-    document.getElementById('radioQRIdLabel').innerHTML = 'รหัสอ้างอิง: <strong style="color: #1d1d1f;">' + id + '</strong>';
+    document.getElementById('radioQRTitle').innerText = id === 'ALL' ? '🖨️ พิมพ์ป้ายทั้งหมด (23 เครื่อง)' : name;
+    document.getElementById('radioQRIdLabel').innerHTML = id === 'ALL' ? 'พิมพ์รหัสวิทยุทั้งหมด' : 'รหัสอ้างอิง: <strong style="color: #1d1d1f;">' + id + '</strong>';
     currentRadioPrintId = id;
     setRadioPrintFormat(currentRadioPrintFormat);
     document.getElementById('radioQRModal').style.display = 'flex';
   }
 
   function printRadioQR() {
+    if (currentRadioPrintId === 'ALL') {
+      var printHtml = '<div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center; text-align:center; font-family:sans-serif;">';
+      allRadios.forEach(function(radio) {
+        printHtml += '<div style="border: 2px dashed #ccc; padding: 15px; border-radius: 8px; page-break-inside: avoid; width: 220px; box-sizing:border-box;">';
+        printHtml += '<h3 style="margin:0 0 10px 0;">' + radio.name + '</h3>';
+        if (currentRadioPrintFormat === 'QR') {
+          var canvas = document.createElement('canvas');
+          new QRious({ element: canvas, value: radio.id, size: 150, level: 'H' });
+          printHtml += '<img src="' + canvas.toDataURL() + '" style="margin-bottom:10px;">';
+        } else {
+           var canvas = document.createElement('canvas');
+           try { JsBarcode(canvas, radio.id, { format: "CODE128", width: 2, height: 50, displayValue: false, margin: 0 }); } catch(e){}
+           printHtml += '<img src="' + canvas.toDataURL() + '" style="margin-bottom:10px; max-width: 100%;">';
+        }
+        printHtml += '<p style="margin:0; font-size:12px; color:#666;">รหัสอ้างอิง: <strong>' + radio.id + '</strong></p>';
+        printHtml += '</div>';
+      });
+      printHtml += '</div>';
+      var w = window.open('', '_blank');
+      w.document.write('<html><head><title>Print All Radio Codes</title></head><body style="margin:20px;">' + printHtml + '</body></html>');
+      w.document.close();
+      setTimeout(function() { w.focus(); w.print(); w.close(); }, 500);
+      return;
+    }
     var title = document.getElementById('radioQRTitle').innerText;
     var printContents = document.getElementById('radioQRPrintArea').outerHTML;
     var printHtml = '<div style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; flex-direction:column;">'
