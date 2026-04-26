@@ -4,7 +4,34 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript">
+  function showToast(message, type = 'info') {
+    if (message.includes('✅')) type = 'success';
+    else if (message.includes('❌') || message.includes('ไม่สำเร็จ') || message.includes('ล้มเหลว') || message.includes('กรุณา') || message.includes('ขัดข้อง')) type = 'error';
+    else if (message.includes('🗑️')) type = 'warning';
+
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg toast-' + type;
+    
+    // Add OK button and flex layout
+    toast.innerHTML = `<span style="flex-grow: 1;">${message}</span><button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.25); border: none; color: white; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 15px; flex-shrink: 0;">ตกลง</button>`;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => { toast.classList.add('show'); }, 10);
+    
+    setTimeout(() => {
+      if(toast.parentElement) {
+        toast.classList.remove('show');
+        setTimeout(() => { if(toast.parentElement) toast.remove(); }, 400);
+      }
+    }, 5000);
+  }
+
+</script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     
@@ -62,7 +89,49 @@
   .nav-item { border: none !important; background: #e5e5ea !important; color: #1d1d1f !important; border-radius: 12px !important; font-weight: 600 !important; transition: all 0.2s; box-shadow: none !important; }
   .nav-item.active { background: #1d1d1f !important; color: white !important; }
   .btn-outline { font-family: inherit; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-</style>
+
+    /* Toast Notification */
+    #toastContainer {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 99999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      pointer-events: none;
+      width: 90%;
+      max-width: 400px;
+    }
+    .toast-msg {
+      background-color: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #fff;
+      text-align: left;
+      border-radius: 14px;
+      padding: 14px 18px;
+      font-size: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      pointer-events: auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    .toast-success { background-color: rgba(52, 199, 89, 0.9); }
+    .toast-error { background-color: rgba(255, 59, 48, 0.9); }
+    .toast-warning { background-color: rgba(255, 149, 0, 0.9); }
+    .toast-info { background-color: rgba(0, 122, 255, 0.9); }
+
+  </style>
 
   </head>
   <body>
@@ -553,7 +622,7 @@
 
   function showLoading(text) { document.getElementById('loadingText').innerText = text || 'กำลังประมวลผล...'; document.getElementById('loadingOverlay').style.display = 'flex'; }
   function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
-  function showError(error) { hideLoading(); alert("ระบบขัดข้อง: " + error.message); }
+  function showError(error) { hideLoading(); showToast("ระบบขัดข้อง: " + error.message); }
 
   window.onload = function() {
     showLoading('กำลังเริ่มต้นระบบ...');
@@ -587,8 +656,8 @@
   function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch(e){} }
   
   function toggleRegister() { const l = document.getElementById('loginForm'); const r = document.getElementById('registerForm'); if(l.style.display === 'none') { l.style.display = 'block'; r.style.display = 'none'; document.getElementById('authTitle').innerText = 'เข้าสู่ระบบ'; } else { l.style.display = 'none'; r.style.display = 'block'; document.getElementById('authTitle').innerText = 'สมัครสมาชิก'; } }
-  function doRegister() { const u = document.getElementById('regUser').value, p = document.getElementById('regPass').value, n = document.getElementById('regName').value, d = document.getElementById('regDept').value; if(!u || !p || !n || !d) return alert("กรุณากรอกข้อมูลและเลือกแผนกให้ครบถ้วน"); showLoading('กำลังส่งข้อมูลสมัครสมาชิก...'); google.script.run.withSuccessHandler(res => { hideLoading(); alert(res.message); if(res.success) toggleRegister(); }).withFailureHandler(showError).registerUser(u, p, n, d); }
-  function doLogin() { const u = document.getElementById('loginUser').value, p = document.getElementById('loginPass').value; if(!u || !p) return alert("กรุณากรอกข้อมูล"); showLoading('กำลังเข้าสู่ระบบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } else { alert(res.message); } }).withFailureHandler(showError).loginUser(u, p); }
+  function doRegister() { const u = document.getElementById('regUser').value, p = document.getElementById('regPass').value, n = document.getElementById('regName').value, d = document.getElementById('regDept').value; if(!u || !p || !n || !d) return showToast("กรุณากรอกข้อมูลและเลือกแผนกให้ครบถ้วน"); showLoading('กำลังส่งข้อมูลสมัครสมาชิก...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast(res.message); if(res.success) toggleRegister(); }).withFailureHandler(showError).registerUser(u, p, n, d); }
+  function doLogin() { const u = document.getElementById('loginUser').value, p = document.getElementById('loginPass').value; if(!u || !p) return showToast("กรุณากรอกข้อมูล"); showLoading('กำลังเข้าสู่ระบบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } else { showToast(res.message); } }).withFailureHandler(showError).loginUser(u, p); }
 
   function setupUIAfterLogin() {
     document.getElementById('authSection').style.display = 'none';
@@ -684,7 +753,7 @@
     }
   }
 
-  function saveMyProfile() { const u = document.getElementById('myProfileUsername').value; const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!u || !p || !n) return alert('กรุณากรอก Username รหัสผ่าน และชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); alert(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, p, d); }
+  function saveMyProfile() { const u = document.getElementById('myProfileUsername').value; const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!u || !p || !n) return showToast('กรุณากรอก Username รหัสผ่าน และชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, p, d); }
   async function loadTransactions(isAdminView) { 
     try {
       const [txData, radData] = await Promise.all([
@@ -759,8 +828,8 @@
     const base64Data = document.getElementById('returnImageBase64').value;
     const eqStatus = document.getElementById('eqReturnStatus').value;
     
-    if(!locId) return alert('กรุณาระบุจุดวางที่นำอุปกรณ์ไปคืนครับ'); 
-    if(!base64Data) return alert('กรุณาถ่ายรูปหลักฐานการคืนด้วยครับ');
+    if(!locId) return showToast('กรุณาระบุจุดวางที่นำอุปกรณ์ไปคืนครับ'); 
+    if(!base64Data) return showToast('กรุณาถ่ายรูปหลักฐานการคืนด้วยครับ');
     
     document.getElementById('returnLocModal').style.display = 'none'; 
     showLoading('กำลังอัปโหลดรูปภาพและบันทึกการรับคืน...'); 
@@ -769,7 +838,7 @@
       if (res.success) {
         google.script.run.withSuccessHandler(retRes => {
           hideLoading();
-          alert('✅ ' + retRes.message);
+          showToast('✅ ' + retRes.message);
           // Optimistic UI Update
           let eq = allEquipment.find(e => e.id === pendingReturnData.eqId);
           if(eq) eq.available = parseInt(eq.available) + parseInt(pendingReturnData.qty);
@@ -777,15 +846,15 @@
           renderMyReturnData();
           renderEquipment();
           refreshData(true); 
-        }).withFailureHandler(err => { hideLoading(); alert('อัปเดตข้อมูลล้มเหลว: '+err.message); refreshData(true); }).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url, eqStatus);
+        }).withFailureHandler(err => { hideLoading(); showToast('อัปเดตข้อมูลล้มเหลว: '+err.message); refreshData(true); }).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url, eqStatus);
       } else {
         hideLoading();
-        alert('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
+        showToast('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
         refreshData(true);
       }
     }).withFailureHandler(function(err) {
       hideLoading();
-      alert('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
+      showToast('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
       refreshData(true);
     }).uploadImageToDrive(base64Data, "RET_" + pendingReturnData.eqId + "_" + new Date().getTime());
   }
@@ -895,7 +964,7 @@
         video.srcObject = stream;
       })
       .catch(function(err) {
-        alert("เบราว์เซอร์ไม่รองรับกล้อง หรือไม่ได้รับอนุญาต: " + err.message);
+        showToast("เบราว์เซอร์ไม่รองรับกล้อง หรือไม่ได้รับอนุญาต: " + err.message);
         closeCameraModal();
       });
   }
@@ -973,7 +1042,7 @@
         // parse errors are normal during scanning
       }
     ).catch(err => {
-      alert("❌ ไม่สามารถเปิดกล้องได้: " + err);
+      showToast("❌ ไม่สามารถเปิดกล้องได้: " + err);
       closeScannerModal();
     });
   }
@@ -985,7 +1054,7 @@
     }
   }
 
-  function processScannedQR(scannedId) { if (currentScanMode === 'borrow') { let item = allEquipment.find(e => e.id === scannedId); if(item) { updateCart(item.id, 1); alert('✅ หยิบ "' + item.name + '" ลงตะกร้าแล้ว!'); } else alert('❌ ไม่พบอุปกรณ์รหัสนี้'); } else if (currentScanMode === 'return') { const myItems = allTransactions.filter(item => item.userId === currentUser.id && item.eqId === scannedId); if(myItems.length > 0) { prepareReturn(myItems[0].row, myItems[0].eqId, myItems[0].qty, myItems[0].eqName); } else alert('❌ ไม่พบรายการที่คุณกำลังยืมของชิ้นนี้อยู่'); } else if (currentScanMode === 'admin_return') { const activeItems = allTransactions.filter(item => item.eqId === scannedId); if(activeItems.length > 0) { prepareReturn(activeItems[0].row, activeItems[0].eqId, activeItems[0].qty, activeItems[0].eqName); } else alert('❌ ไม่พบรายการค้างคืนสำหรับอุปกรณ์ชิ้นนี้ในระบบครับ');   } else if (currentScanMode === 'radio_return_loc') {
+  function processScannedQR(scannedId) { if (currentScanMode === 'borrow') { let item = allEquipment.find(e => e.id === scannedId); if(item) { updateCart(item.id, 1); showToast('✅ หยิบ "' + item.name + '" ลงตะกร้าแล้ว!'); } else showToast('❌ ไม่พบอุปกรณ์รหัสนี้'); } else if (currentScanMode === 'return') { const myItems = allTransactions.filter(item => item.userId === currentUser.id && item.eqId === scannedId); if(myItems.length > 0) { prepareReturn(myItems[0].row, myItems[0].eqId, myItems[0].qty, myItems[0].eqName); } else showToast('❌ ไม่พบรายการที่คุณกำลังยืมของชิ้นนี้อยู่'); } else if (currentScanMode === 'admin_return') { const activeItems = allTransactions.filter(item => item.eqId === scannedId); if(activeItems.length > 0) { prepareReturn(activeItems[0].row, activeItems[0].eqId, activeItems[0].qty, activeItems[0].eqName); } else showToast('❌ ไม่พบรายการค้างคืนสำหรับอุปกรณ์ชิ้นนี้ในระบบครับ');   } else if (currentScanMode === 'radio_return_loc') {
     let loc = allLocations.find(l => l.id === scannedId);
     if(loc) {
       pendingRadioReturnLocId = loc.id;
@@ -993,10 +1062,10 @@
       document.getElementById('radioReturnLocDisplay').style.display = 'block';
       var btn = document.getElementById('confirmRadioReturnBtn');
       btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
-      alert('📍 เลือกจุดคืนวิทยุ: ' + loc.name + ' เรียบร้อยแล้ว\nกรุณากดยืนยันการคืน');
-    } else alert('❌ ไม่พบรหัสจุดวางนี้ในระบบ');
-  } else if (currentScanMode === 'loc') { let loc = allLocations.find(l => l.id === scannedId); if(loc) { document.getElementById('selectReturnLoc').value = loc.id; alert('📍 เลือกจุดวาง: ' + loc.name + ' เรียบร้อยแล้ว'); } else alert('❌ ไม่พบรหัสจุดวางนี้'); } }
-  function updateCart(eqId, change) { let item = allEquipment.find(e => e.id === eqId); if(!item) return; let newQty = (cart[eqId] || 0) + change; if(newQty > item.available) return alert('อุปกรณ์ในสต๊อกไม่พอครับ'); if(newQty < 0) newQty = 0; cart[eqId] = newQty; renderEquipment(); updateCartFloat(); }
+      showToast('📍 เลือกจุดคืนวิทยุ: ' + loc.name + ' เรียบร้อยแล้ว\nกรุณากดยืนยันการคืน');
+    } else showToast('❌ ไม่พบรหัสจุดวางนี้ในระบบ');
+  } else if (currentScanMode === 'loc') { let loc = allLocations.find(l => l.id === scannedId); if(loc) { document.getElementById('selectReturnLoc').value = loc.id; showToast('📍 เลือกจุดวาง: ' + loc.name + ' เรียบร้อยแล้ว'); } else showToast('❌ ไม่พบรหัสจุดวางนี้'); } }
+  function updateCart(eqId, change) { let item = allEquipment.find(e => e.id === eqId); if(!item) return; let newQty = (cart[eqId] || 0) + change; if(newQty > item.available) return showToast('อุปกรณ์ในสต๊อกไม่พอครับ'); if(newQty < 0) newQty = 0; cart[eqId] = newQty; renderEquipment(); updateCartFloat(); }
   function updateCartFloat() { let total = 0; for(let k in cart) total += cart[k]; const floatBtn = document.getElementById('cartFloat'); document.getElementById('cartCount').innerText = "(" + total + ")"; floatBtn.style.display = (total > 0 && document.getElementById('tabBorrow').style.display === 'block') ? 'block' : 'none'; }
   function checkout() { 
     if(!confirm('ยืนยันเบิกอุปกรณ์ที่เลือกไว้?')) return; 
@@ -1005,14 +1074,14 @@
     google.script.run.withSuccessHandler(res => { 
       hideLoading();
       if(!res.success) {
-          alert('❌ ' + res.message);
+          showToast('❌ ' + res.message);
       } else {
-          alert('✅ ' + res.message);
+          showToast('✅ ' + res.message);
           for (let eqId in cart) { let eq = allEquipment.find(e => e.id === eqId); if (eq) eq.available = parseInt(eq.available) - cart[eqId]; }
           cart = {}; updateCartFloat(); renderEquipment(); 
       }
       refreshData(true); 
-    }).withFailureHandler(err => { hideLoading(); alert('บันทึกล้มเหลว: '+err.message); refreshData(true); }).submitBorrow(currentUser.id, cartCopy); 
+    }).withFailureHandler(err => { hideLoading(); showToast('บันทึกล้มเหลว: '+err.message); refreshData(true); }).submitBorrow(currentUser.id, cartCopy); 
   }
 
   function renderEquipment() { const grid = document.getElementById('equipmentGrid'); if(!grid) return; grid.innerHTML = ''; const searchTxt = document.getElementById('searchInput').value.toLowerCase(); const filteredData = allEquipment.filter(item => { const matchSearch = String(item.name).toLowerCase().includes(searchTxt); let matchStatus = true; if (currentFilter === 'available') matchStatus = item.available > 0; return matchSearch && matchStatus && item.total > 0; }); if (filteredData.length === 0) { grid.innerHTML = '<p>ไม่พบอุปกรณ์</p>'; return; } filteredData.forEach(item => { const card = document.createElement('div'); card.className = 'card'; let imgUrl = item.image ? item.image : 'https://via.placeholder.com/150?text=No+Image'; let fileIdMatch = imgUrl.match(/file\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/); if (fileIdMatch && fileIdMatch[1] && imgUrl.includes('drive.google.com')) { imgUrl = "https://drive.google.com/thumbnail?id=" + fileIdMatch[1] + "&sz=w800"; } const qty = cart[item.id] || 0; let locDisplay = '-'; if (item.location) { let foundLoc = allLocations.find(l => l.id === item.location); locDisplay = foundLoc ? foundLoc.name : item.location; } card.innerHTML = '<img src="' + imgUrl + '" class="card-img"><div class="card-body"><h3 class="card-title">' + item.name + '</h3><div class="card-status">เหลือ: ' + item.available + ' / ' + item.total + '<br><span style="color: #0095f6; font-weight: 500;">📍 ' + locDisplay + '</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', -1)">-</button><span>' + qty + '</span><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', 1)">+</button></div></div>'; grid.appendChild(card); }); }
@@ -1021,13 +1090,13 @@
   function loadUsersData() { google.script.run.withSuccessHandler(data => { allUsers = data || []; hideLoading(); renderUsersData(); }).getAllUsers(); }
   function renderUsersData() { const listDiv = document.getElementById('adminUserList'); if(!listDiv) return; listDiv.innerHTML = ''; const addUserBtn = document.querySelector('#adminTabUsers button.btn-primary'); if (addUserBtn) { addUserBtn.style.display = currentUser.role === 'Superadmin' ? 'inline-block' : 'none'; } allUsers.forEach(user => { const card = document.createElement('div'); card.className = 'list-card'; let statusBadge = user.status === 'Pending' ? '<span style="color:orange; font-weight:bold;">(รออนุมัติ)</span>' : '<span style="color:green;">(Active)</span>'; let actionBtns = ''; if(user.status === 'Pending' && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { actionBtns += `<button class="btn-success" onclick="approveUserRow(${user.row}, '${user.name}')">✅ อนุมัติ</button>`; } actionBtns += `<button class="btn-warning" style="background-color: #17a2b8; color: white;" onclick="resetPassword(${user.row}, '${user.name}')">🔑 รีเซ็ตรหัส</button>`; if(currentUser.role === 'Superadmin') { actionBtns += `<button class="btn-warning" onclick="editUser(${user.row})">แก้ไข</button>`; actionBtns += `<button class="btn-danger" onclick="deleteUser(${user.row}, '${user.name}')">ลบ</button>`; } card.innerHTML = `<div class="list-info"><strong>ชื่อ:</strong> ${user.name} ${statusBadge}<br><strong>User:</strong> ${user.username} <span style="color:#8e8e8e; font-size:12px;">(แผนก: ${user.department})</span><br><span>สิทธิ์: ${user.role}</span></div><div style="display:flex; gap:5px; flex-wrap:wrap;">${actionBtns}</div>`; listDiv.appendChild(card); }); }
 
-  function approveUserRow(row, name) { if(!confirm('ยืนยันอนุมัติให้: ' + name + ' ใช้งานระบบได้?')) return; showLoading('กำลังอนุมัติ...'); google.script.run.withSuccessHandler(res => { alert('✅ ' + res.message); loadUsersData(); }).approveUser(row); }
+  function approveUserRow(row, name) { if(!confirm('ยืนยันอนุมัติให้: ' + name + ' ใช้งานระบบได้?')) return; showLoading('กำลังอนุมัติ...'); google.script.run.withSuccessHandler(res => { showToast('✅ ' + res.message); loadUsersData(); }).approveUser(row); }
   function openUserModal() { document.getElementById('userModalTitle').innerText = 'เพิ่มผู้ใช้'; document.getElementById('editUserRow').value = ''; document.getElementById('editUsername').value = ''; document.getElementById('editPassword').value = ''; document.getElementById('editName').value = ''; document.getElementById('editRole').value = 'User'; document.getElementById('editDept').value = 'GB'; document.getElementById('userModal').style.display = 'flex'; }
   function editUser(row) { const user = allUsers.find(u => u.row === row); if(!user) return; document.getElementById('userModalTitle').innerText = 'แก้ไขผู้ใช้'; document.getElementById('editUserRow').value = user.row; document.getElementById('editUsername').value = user.username; document.getElementById('editPassword').value = user.password; document.getElementById('editName').value = user.name; document.getElementById('editRole').value = user.role; document.getElementById('editDept').value = user.department || '-'; document.getElementById('userModal').style.display = 'flex'; }
   function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
-  function saveUser() { const data = { row: document.getElementById('editUserRow').value ? parseInt(document.getElementById('editUserRow').value) : null, username: document.getElementById('editUsername').value, password: document.getElementById('editPassword').value, name: document.getElementById('editName').value, role: document.getElementById('editRole').value, department: document.getElementById('editDept').value }; if(!data.username || !data.password || !data.name) return alert('กรอกข้อมูลให้ครบถ้วน'); showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { alert('✅ ' + res.message); closeUserModal(); loadUsersData(); }).saveUserData(data); }
-  function deleteUser(row, name) { if(!confirm('ลบผู้ใช้: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { alert('🗑️ ' + res.message); loadUsersData(); }).deleteUserData(row); }
-  function resetPassword(row, name) { if(!confirm(`ยืนยันการรีเซ็ตรหัสผ่านของ ${name} เป็น "1234" ใช่หรือไม่?`)) return; showLoading('กำลังรีเซ็ตรหัสผ่าน...'); google.script.run.withSuccessHandler(res => { alert('✅ ' + res.message); loadUsersData(); }).withFailureHandler(showError).resetUserPassword(row); }
+  function saveUser() { const data = { row: document.getElementById('editUserRow').value ? parseInt(document.getElementById('editUserRow').value) : null, username: document.getElementById('editUsername').value, password: document.getElementById('editPassword').value, name: document.getElementById('editName').value, role: document.getElementById('editRole').value, department: document.getElementById('editDept').value }; if(!data.username || !data.password || !data.name) return showToast('กรอกข้อมูลให้ครบถ้วน'); showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { showToast('✅ ' + res.message); closeUserModal(); loadUsersData(); }).saveUserData(data); }
+  function deleteUser(row, name) { if(!confirm('ลบผู้ใช้: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { showToast('🗑️ ' + res.message); loadUsersData(); }).deleteUserData(row); }
+  function resetPassword(row, name) { if(!confirm(`ยืนยันการรีเซ็ตรหัสผ่านของ ${name} เป็น "1234" ใช่หรือไม่?`)) return; showLoading('กำลังรีเซ็ตรหัสผ่าน...'); google.script.run.withSuccessHandler(res => { showToast('✅ ' + res.message); loadUsersData(); }).withFailureHandler(showError).resetUserPassword(row); }
 
   function renderAdminEqData() { const listDiv = document.getElementById('adminEqList'); if(!listDiv) return; listDiv.innerHTML = ''; allEquipment.forEach(eq => { const card = document.createElement('div'); card.className = 'list-card'; let locName = '-'; let foundLoc = allLocations.find(l => l.id === eq.location); if(foundLoc) locName = foundLoc.name; card.innerHTML = '<div class="list-info"><strong>' + eq.name + '</strong> (รหัส: ' + eq.id + ')<br><span>จำนวน: ' + eq.total + ' (พร้อมยืม: ' + eq.available + ')</span><br><span>📍 ' + locName + '</span></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editEq(\'' + eq.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteEq(\'' + eq.id + '\', \'' + eq.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
   
@@ -1051,32 +1120,33 @@
         proceedSaveEq(res.url);
       } else {
         hideLoading();
-        alert('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
+        showToast('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
       }
     }).withFailureHandler(function(err) {
       hideLoading();
-      alert('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
+      showToast('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
     }).uploadImageToDrive(base64Data, "IMG_EQ_" + new Date().getTime());
   }
 
-  function proceedSaveEq(imageUrl) { const data = { isNew: document.getElementById('editEqIsNew').value === 'true', id: document.getElementById('editEqId').value, name: document.getElementById('editEqName').value, image: imageUrl, total: document.getElementById('editEqTotal').value, location: document.getElementById('editEqLoc').value }; if(!data.name || !data.total) return alert('กรุณาระบุชื่อและจำนวนอุปกรณ์'); showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { alert('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(); }).withFailureHandler(showError).saveEquipmentData(data); }
-  function deleteEq(id, name) { if(!confirm('ลบอุปกรณ์: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { alert('🗑️ ' + res.message); refreshData(); }).deleteEquipmentData(id); }
+  function proceedSaveEq(imageUrl) { const data = { isNew: document.getElementById('editEqIsNew').value === 'true', id: document.getElementById('editEqId').value, name: document.getElementById('editEqName').value, image: imageUrl, total: document.getElementById('editEqTotal').value, location: document.getElementById('editEqLoc').value }; if(!data.name || !data.total) return showToast('กรุณาระบุชื่อและจำนวนอุปกรณ์'); showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { showToast('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(); }).withFailureHandler(showError).saveEquipmentData(data); }
+  function deleteEq(id, name) { if(!confirm('ลบอุปกรณ์: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { showToast('🗑️ ' + res.message); refreshData(); }).deleteEquipmentData(id); }
 
   function renderAdminLocData() { const listDiv = document.getElementById('adminLocList'); if(!listDiv) return; listDiv.innerHTML = ''; allLocations.forEach(loc => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>' + loc.name + '</strong><br><span style="color:#8e8e8e; font-size:12px;">รหัส: ' + loc.id + '</span></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editLoc(\'' + loc.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteLoc(\'' + loc.id + '\', \'' + loc.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
   function openLocModal() { document.getElementById('locModalTitle').innerText = 'เพิ่มจุดวาง'; document.getElementById('editLocIsNew').value = 'true'; document.getElementById('editLocId').value = ''; document.getElementById('editLocId').disabled = false; document.getElementById('editLocName').value = ''; document.getElementById('locModal').style.display = 'flex'; }
   function editLoc(id) { let loc = allLocations.find(l => l.id === id); if(!loc) return; document.getElementById('locModalTitle').innerText = 'แก้ไขจุดวาง'; document.getElementById('editLocIsNew').value = 'false'; document.getElementById('editLocId').value = loc.id; document.getElementById('editLocId').disabled = true; document.getElementById('editLocName').value = loc.name; document.getElementById('locModal').style.display = 'flex'; }
-  function saveLoc() { const data = { isNew: document.getElementById('editLocIsNew').value === 'true', id: document.getElementById('editLocId').value, name: document.getElementById('editLocName').value }; if(!data.name) return alert('กรุณาระบุชื่อจุดวาง'); showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { alert('✅ ' + res.message); document.getElementById('locModal').style.display='none'; refreshData(); }).withFailureHandler(showError).saveLocationData(data); }
-  function deleteLoc(id, name) { if(!confirm('ลบจุดวาง: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { alert('🗑️ ' + res.message); refreshData(); }).deleteLocationData(id); }
+  function saveLoc() { const data = { isNew: document.getElementById('editLocIsNew').value === 'true', id: document.getElementById('editLocId').value, name: document.getElementById('editLocName').value }; if(!data.name) return showToast('กรุณาระบุชื่อจุดวาง'); showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { showToast('✅ ' + res.message); document.getElementById('locModal').style.display='none'; refreshData(); }).withFailureHandler(showError).saveLocationData(data); }
+  function deleteLoc(id, name) { if(!confirm('ลบจุดวาง: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { showToast('🗑️ ' + res.message); refreshData(); }).deleteLocationData(id); }
 
   function populateLocationSelect() { const s = document.getElementById('adminLocSelect'); let o = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(l => o += '<option value="' + l.id + '">' + l.name + '</option>'); if(s) s.innerHTML = o; }
   function populateEqSelect() { const s = document.getElementById('adminEqSelect'); let o = '<option value="">-- เลือกอุปกรณ์ --</option>'; allEquipment.forEach(e => o += '<option value="' + e.id + '">' + e.name + '</option>'); if(s) s.innerHTML = o; }
   function generateQR(type) { let selectElement = type === 'loc' ? document.getElementById('adminLocSelect') : document.getElementById('adminEqSelect'); let id = selectElement.value; const resDiv = document.getElementById('adminQRResult'); if(!id) { resDiv.innerHTML = ''; return; } let nameWithPrefix = selectElement.options[selectElement.selectedIndex].text; resDiv.innerHTML = `<div id="printArea" style="border: 2px dashed #0095f6; padding: 25px 20px; border-radius: 12px; display: inline-block; background: white; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 250px;"><h3 style="margin: 0 0 15px 0; color: #262626; font-size: 22px;">${nameWithPrefix}</h3><canvas id="qrDisplayCanvas" style="border: 1px solid #efefef; padding: 10px; border-radius: 8px;"></canvas><p style="margin: 15px 0 0 0; font-size: 16px; color: #8e8e8e;">รหัสอ้างอิง: <strong style="color: #262626;">${id}</strong></p></div><br><button class="btn-primary" style="width: auto; margin-top: 15px; border-radius: 30px;" onclick="printQR()">🖨️ พิมพ์ป้าย QR Code</button>`; new QRious({ element: document.getElementById('qrDisplayCanvas'), value: id, size: 200, level: 'H' }); }
-  function printQR() { var printContents = document.getElementById('printArea').outerHTML; var w = window.open('', '_blank', 'width=400,height=600'); w.document.write('<html><head><title>Print QR</title></head><body style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; font-family:sans-serif;">' + printContents + '</body></html>'); w.document.close(); w.focus(); w.print(); w.close(); }
+  function printQR() { var printContents = document.getElementById('printArea').outerHTML; var w = window.open('', '_blank', 'width=400,height=600'); w.document.write('<html><head><title>Print QR</title></head><body style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; font-family:sans-serif;">' + printContents + '  <div id="toastContainer"></div>
+  </body></html>'); w.document.close(); w.focus(); w.print(); w.close(); }
 
   async function downloadAllQRs() {
-    if(allEquipment.length === 0 && allLocations.length === 0) return alert('ไม่มีข้อมูลอุปกรณ์หรือจุดวางในระบบครับ');
+    if(allEquipment.length === 0 && allLocations.length === 0) return showToast('ไม่มีข้อมูลอุปกรณ์หรือจุดวางในระบบครับ');
     showLoading('กำลังวาดรูปป้ายและสร้างไฟล์ ZIP...\n(อาจใช้เวลาสักครู่)');
-    try { var zip = new JSZip(); var eqFolder = zip.folder("QR_อุปกรณ์"); var locFolder = zip.folder("QR_จุดวาง"); function createTicketBase64(name, id) { const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 500; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 400, 500); ctx.strokeStyle = '#0095f6'; ctx.lineWidth = 6; ctx.setLineDash([15, 10]); ctx.strokeRect(15, 15, 370, 470); ctx.fillStyle = '#262626'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, 200, 75, 340); const qr = new QRious({ value: id, size: 260, level: 'H' }); ctx.drawImage(qr.canvas, 70, 110); ctx.fillStyle = '#8e8e8e'; ctx.font = '22px sans-serif'; ctx.fillText('รหัสอ้างอิง: ' + id, 200, 420); return canvas.toDataURL('image/png').split(',')[1]; } allEquipment.forEach(eq => { var base64Data = createTicketBase64(eq.name, eq.id); var safeName = (eq.name + "_" + eq.id).replace(/[\/\\]/g, '-'); eqFolder.file(safeName + ".png", base64Data, {base64: true}); }); allLocations.forEach(loc => { var base64Data = createTicketBase64(loc.name, loc.id); var safeName = (loc.name + "_" + loc.id).replace(/[\/\\]/g, '-'); locFolder.file(safeName + ".png", base64Data, {base64: true}); }); if(typeof allRadios !== 'undefined') { var radioFolder = zip.folder("QR_วิทยุ"); allRadios.forEach(radio => { var base64Data = createTicketBase64(radio.name, radio.id); var safeName = (radio.name + "_" + radio.id).replace(/[\/\\]/g, '-'); radioFolder.file(safeName + ".png", base64Data, {base64: true}); }); } var content = await zip.generateAsync({type:"blob"}); var link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = "QR_Codes_Tickets.zip"; link.click(); hideLoading(); alert('✅ ดาวน์โหลดไฟล์ .ZIP สำเร็จแล้ว!'); } catch(error) { hideLoading(); alert('❌ เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: ' + error.message); }
+    try { var zip = new JSZip(); var eqFolder = zip.folder("QR_อุปกรณ์"); var locFolder = zip.folder("QR_จุดวาง"); function createTicketBase64(name, id) { const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 500; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 400, 500); ctx.strokeStyle = '#0095f6'; ctx.lineWidth = 6; ctx.setLineDash([15, 10]); ctx.strokeRect(15, 15, 370, 470); ctx.fillStyle = '#262626'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, 200, 75, 340); const qr = new QRious({ value: id, size: 260, level: 'H' }); ctx.drawImage(qr.canvas, 70, 110); ctx.fillStyle = '#8e8e8e'; ctx.font = '22px sans-serif'; ctx.fillText('รหัสอ้างอิง: ' + id, 200, 420); return canvas.toDataURL('image/png').split(',')[1]; } allEquipment.forEach(eq => { var base64Data = createTicketBase64(eq.name, eq.id); var safeName = (eq.name + "_" + eq.id).replace(/[\/\\]/g, '-'); eqFolder.file(safeName + ".png", base64Data, {base64: true}); }); allLocations.forEach(loc => { var base64Data = createTicketBase64(loc.name, loc.id); var safeName = (loc.name + "_" + loc.id).replace(/[\/\\]/g, '-'); locFolder.file(safeName + ".png", base64Data, {base64: true}); }); if(typeof allRadios !== 'undefined') { var radioFolder = zip.folder("QR_วิทยุ"); allRadios.forEach(radio => { var base64Data = createTicketBase64(radio.name, radio.id); var safeName = (radio.name + "_" + radio.id).replace(/[\/\\]/g, '-'); radioFolder.file(safeName + ".png", base64Data, {base64: true}); }); } var content = await zip.generateAsync({type:"blob"}); var link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = "QR_Codes_Tickets.zip"; link.click(); hideLoading(); showToast('✅ ดาวน์โหลดไฟล์ .ZIP สำเร็จแล้ว!'); } catch(error) { hideLoading(); showToast('❌ เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: ' + error.message); }
   }
 
   // ==========================================
@@ -1090,7 +1160,7 @@
     google.script.run.withSuccessHandler(function(res) {
       hideLoading();
       if (res.success) { allRadios = res.radios || []; renderRadioTab(); }
-      else alert('โหลดไม่สำเร็จ: ' + (res.message || ''));
+      else showToast('โหลดไม่สำเร็จ: ' + (res.message || ''));
     }).withFailureHandler(showError).getRadios();
   }
 
@@ -1220,7 +1290,7 @@
 
   function confirmBorrowRadioAdmin() {
     var recipientName = document.getElementById('radioBorrowRecipient').value.trim();
-    if (!recipientName) return alert('กรุณาระบุชื่อผู้รับวิทยุ');
+    if (!recipientName) return showToast('กรุณาระบุชื่อผู้รับวิทยุ');
     if (!pendingBorrowRadioId) return;
     
     var realUserId = 'admin_assigned';
@@ -1233,7 +1303,7 @@
     showLoading('กำลังบันทึก...');
     google.script.run.withSuccessHandler(function(res) {
       hideLoading();
-      alert(res.success ? '✅ ' + res.message : '❌ ' + res.message);
+      showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
       if (res.success) loadRadios();
     }).withFailureHandler(showError).borrowRadio(pendingBorrowRadioId, realUserId, recipientName);
   }
@@ -1268,7 +1338,7 @@
     showLoading('กำลังบันทึก...');
     google.script.run.withSuccessHandler(function(res) {
       hideLoading();
-      alert(res.success ? '✅ ' + res.message : '❌ ' + res.message);
+      showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
       if (res.success) loadRadios();
     }).withFailureHandler(showError).returnRadio(radioId, 'admin_force');
   }
@@ -1311,7 +1381,7 @@
     
     google.script.run.withSuccessHandler(function(res) {
       hideLoading();
-      alert(res.success ? '✅ ' + res.message : '❌ ' + res.message);
+      showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
       if (res.success) {
         loadRadios();
         refreshData();
@@ -1325,7 +1395,7 @@
     renderRadioTab();
     google.script.run.withSuccessHandler(function(){}).withFailureHandler(function(err){
       if (radio) radio.batteryStatus = 'ready'; renderRadioTab();
-      alert('บันทึกไม่สำเร็จ: ' + err.message);
+      showToast('บันทึกไม่สำเร็จ: ' + err.message);
     }).updateRadioBattery(radioId, status);
   }
 
@@ -1333,7 +1403,7 @@
     if (!confirm('สร้างวิทยุ 23 เครื่อง (วิทยุ #01 - #23) ลงในระบบ?')) return;
     showLoading('กำลังสร้างข้อมูลวิทยุ...');
     google.script.run.withSuccessHandler(function(res) {
-      hideLoading(); alert(res.success ? '✅ ' + res.message : '❌ ' + res.message);
+      hideLoading(); showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
       if (res.success) loadRadios();
     }).withFailureHandler(showError).initRadios(23);
   }
@@ -1345,11 +1415,11 @@
 
   function doSaveRadio() {
     var name = document.getElementById('radioNameInput').value;
-    if (!name) return alert('กรุณาระบุชื่อวิทยุ');
+    if (!name) return showToast('กรุณาระบุชื่อวิทยุ');
     showLoading('กำลังบันทึก...');
     google.script.run.withSuccessHandler(function(res) {
       hideLoading();
-      alert(res.success ? '✅ ' + res.message : '❌ ' + res.message);
+      showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
       if (res.success) { document.getElementById('radioModal').style.display='none'; loadRadios(); }
     }).withFailureHandler(showError).saveRadio({ isNew: true, name: name });
   }
@@ -1358,7 +1428,7 @@
     if (!confirm('ลบวิทยุ: ' + name + ' ?')) return;
     showLoading('กำลังลบ...');
     google.script.run.withSuccessHandler(function(res) {
-      hideLoading(); alert(res.success ? '🗑️ ' + res.message : '❌ ' + res.message);
+      hideLoading(); showToast(res.success ? '🗑️ ' + res.message : '❌ ' + res.message);
       if (res.success) loadRadios();
     }).withFailureHandler(showError).deleteRadio(id);
   }
@@ -1404,7 +1474,7 @@
          if (posLastScannedId === decodedText && (now - posLastScannedTime) < 2000) return;
          posLastScannedId = decodedText; posLastScannedTime = now;
          handlePOSScan(decodedText);
-     }).catch(err => alert("ไม่สามารถเปิดกล้องได้: " + err));
+     }).catch(err => showToast("ไม่สามารถเปิดกล้องได้: " + err));
      document.getElementById('btnStartPOS').style.display = 'none';
      document.getElementById('btnStopPOS').style.display = 'inline-block';
   }
@@ -1429,10 +1499,10 @@
              playPOSBeep();
              renderPOSCart();
          } else {
-             alert('ของหมดสต๊อก');
+             showToast('ของหมดสต๊อก');
          }
      } else {
-         alert('ไม่พบรหัสอุปกรณ์');
+         showToast('ไม่พบรหัสอุปกรณ์');
      }
   }
 
@@ -1458,7 +1528,7 @@
      let toSubmit = {};
      let hasItem = false;
      for (let id in posCart) { if (posCart[id] > 0) { toSubmit[id] = posCart[id]; hasItem = true; } }
-     if (!hasItem) return alert('ตะกร้าว่างเปล่า');
+     if (!hasItem) return showToast('ตะกร้าว่างเปล่า');
      if (!confirm('ยืนยันทำรายการ?')) return;
      
      showLoading('กำลังบันทึก...');
@@ -1466,14 +1536,14 @@
      google.script.run.withSuccessHandler(res => {
          hideLoading();
          if(!res.success) {
-             alert('❌ ' + res.message);
+             showToast('❌ ' + res.message);
          } else {
-             alert('✅ ' + res.message);
+             showToast('✅ ' + res.message);
              for (let id in toSubmit) { let eq = allEquipment.find(e => e.id === id); if (eq) eq.available = parseInt(eq.available) - toSubmit[id]; }
              posCart = {}; renderPOSCart(); renderEquipment();
          }
          refreshData(true);
-     }).withFailureHandler(err => { hideLoading(); alert('การบันทึกล้มเหลว: ' + err.message); refreshData(true); }).submitBorrow(currentUser.id, toSubmit, 'POS');
+     }).withFailureHandler(err => { hideLoading(); showToast('การบันทึกล้มเหลว: ' + err.message); refreshData(true); }).submitBorrow(currentUser.id, toSubmit, 'POS');
   }
 
   let posAudioCtx = null;
