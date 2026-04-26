@@ -764,7 +764,7 @@
       if (radData && radData.success) allRadios = radData.radios || [];
       hideLoading();
       if(isAdminView) renderAdminData(); else renderMyReturnData(); 
-    } catch(err) { showError(err); }
+    } catch(err) { hideLoading(); showError(err); }
   }
   function renderMyReturnData() { 
     const listDiv = document.getElementById('myReturnList'); 
