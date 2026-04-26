@@ -649,10 +649,13 @@
     if(!listDiv) return; 
     listDiv.innerHTML = ''; 
     const myItems = allTransactions.filter(item => String(item.userId).trim() === String(currentUser.id).trim()); 
-    const myRadios = allRadios ? allRadios.filter(r => 
-      (r.currentUserId && String(r.currentUserId).trim() === String(currentUser.id).trim()) || 
-      (r.currentUserName && String(r.currentUserName).trim() === String(currentUser.name).trim())
-    ) : [];
+    const myRadios = allRadios ? allRadios.filter(r => {
+      const matchId = r.currentUserId && String(r.currentUserId).trim() === String(currentUser.id).trim();
+      const rName = r.currentUserName ? String(r.currentUserName).trim().toLowerCase() : '';
+      const cName = currentUser.name ? String(currentUser.name).trim().toLowerCase() : '';
+      const matchName = (rName && cName) && (rName === cName || rName.includes(cName) || cName.includes(rName));
+      return matchId || matchName;
+    }) : [];
     
     if(myItems.length === 0 && myRadios.length === 0) { 
       listDiv.innerHTML = '<div style="text-align:center; padding: 20px; color:#8e8e8e;">🎉 คุณไม่มีอุปกรณ์หรือวิทยุที่ค้างคืนอยู่ครับ</div>'; 
@@ -1021,13 +1024,20 @@
     var recipientName = document.getElementById('radioBorrowRecipient').value.trim();
     if (!recipientName) return alert('กรุณาระบุชื่อผู้รับวิทยุ');
     if (!pendingBorrowRadioId) return;
+    
+    var realUserId = 'admin_assigned';
+    if (allUsers && allUsers.length > 0) {
+       var matchedUser = allUsers.find(u => u.name === recipientName);
+       if (matchedUser) realUserId = matchedUser.id;
+    }
+    
     document.getElementById('radioBorrowModal').style.display = 'none';
     showLoading('กำลังบันทึก...');
     google.script.run.withSuccessHandler(function(res) {
       hideLoading();
       alert(res.success ? '✅ ' + res.message : '❌ ' + res.message);
       if (res.success) loadRadios();
-    }).withFailureHandler(showError).borrowRadio(pendingBorrowRadioId, 'admin_assigned', recipientName);
+    }).withFailureHandler(showError).borrowRadio(pendingBorrowRadioId, realUserId, recipientName);
   }
 
   let pendingRadioReturnId = null;
