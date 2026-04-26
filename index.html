@@ -59,7 +59,7 @@
   .rc-battery.active-low { background:#ffebee; color:#ff3b30; }
   .upload-zone { display:block; border:2px dashed #d2d2d7; border-radius:16px; padding:24px; text-align:center; cursor:pointer; background:#f5f5f7; margin-bottom:15px; font-size:15px; color:#86868b; transition: all 0.2s; }
   .upload-zone:hover { border-color:#007aff; background:#f0f8ff; color:#007aff; }
-  .nav-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 10px; }
+  .nav-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
   .nav-item { border: none !important; background: #e5e5ea !important; color: #1d1d1f !important; border-radius: 12px !important; font-weight: 600 !important; transition: all 0.2s; box-shadow: none !important; padding: 10px 5px; font-size: 13px; text-align: center; cursor: pointer; }
   .nav-item.active { background: #1d1d1f !important; color: white !important; }
   .btn-outline { font-family: inherit; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
@@ -358,12 +358,7 @@
         
         <h3 style="margin-top:10px; margin-bottom: 5px;">📸 ถ่ายรูปหลักฐานการคืน</h3>
         <div id="returnCameraSection">
-          <button class="btn-primary" style="width:100%; padding:12px; margin-bottom:10px; border-radius:12px; background:#007aff;" onclick="startReturnCamera()">📷 เปิดกล้องถ่ายรูป</button>
-          <div style="text-align: center; margin-bottom: 10px;"><span style="color:#8e8e8e; font-size:12px;">-- หรืออัปโหลดรูปภาพ --</span></div>
-          <label class="btn-outline" style="display:block; text-align:center; padding:10px; border:1px solid #d2d2d7; border-radius:12px; cursor:pointer; margin-bottom:15px;">
-            🖼️ เลือกรูปจากเครื่อง
-            <input type="file" accept="image/*" style="display:none;" onchange="handleReturnPhoto(event)">
-          </label>
+          <button class="btn-primary" style="width:100%; padding:14px; margin-bottom:15px; border-radius:12px; background:#007aff; font-size:16px;" onclick="startReturnCamera()">📷 เปิดกล้องถ่ายรูป</button>
         </div>
 
         <div id="returnCameraContainer" style="display:none; text-align:center; margin-bottom:15px; border-radius:12px; overflow:hidden; border:1px solid #e5e5ea;">
@@ -377,7 +372,7 @@
 
         <div id="retakePhotoSection" style="display:none; text-align:center; margin-bottom:15px;">
            <img id="returnImagePreview" style="width:100%; border-radius:8px; margin-bottom:10px;">
-           <button class="btn-outline" style="padding:8px 16px; border-radius:20px; font-weight:600; border:1px solid #007aff; color:#007aff; background:transparent;" onclick="retakeReturnPhoto()">🔄 ถ่ายใหม่ / เปลี่ยนรูป</button>
+           <button class="btn-outline" style="padding:8px 16px; border-radius:20px; font-weight:600; border:1px solid #007aff; color:#007aff; background:transparent;" onclick="retakeReturnPhoto()">🔄 ถ่ายใหม่</button>
         </div>
         
         <input type="hidden" id="returnImageBase64">
