@@ -4,34 +4,7 @@
     
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript">
-  function showToast(message, type = 'info') {
-    if (message.includes('✅')) type = 'success';
-    else if (message.includes('❌') || message.includes('ไม่สำเร็จ') || message.includes('ล้มเหลว') || message.includes('กรุณา') || message.includes('ขัดข้อง')) type = 'error';
-    else if (message.includes('🗑️')) type = 'warning';
-
-    const container = document.getElementById('toastContainer');
-    if (!container) return;
-    
-    const toast = document.createElement('div');
-    toast.className = 'toast-msg toast-' + type;
-    
-    // Add OK button and flex layout
-    toast.innerHTML = `<span style="flex-grow: 1;">${message}</span><button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.25); border: none; color: white; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 15px; flex-shrink: 0;">ตกลง</button>`;
-    
-    container.appendChild(toast);
-    
-    setTimeout(() => { toast.classList.add('show'); }, 10);
-    
-    setTimeout(() => {
-      if(toast.parentElement) {
-        toast.classList.remove('show');
-        setTimeout(() => { if(toast.parentElement) toast.remove(); }, 400);
-      }
-    }, 5000);
-  }
-
-</script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
     
@@ -131,7 +104,7 @@
     .toast-warning { background-color: rgba(255, 149, 0, 0.9); }
     .toast-info { background-color: rgba(0, 122, 255, 0.9); }
 
-  </style>
+</style>
 
   </head>
   <body>
@@ -358,10 +331,11 @@
         </div>
         
         <h3 style="margin-top:10px; margin-bottom: 5px;">📸 ถ่ายรูปหลักฐานการคืน</h3>
-        <button class="upload-zone" style="width: 100%; border: 2px dashed #007aff; background: #f0f8ff; color: #007aff;" onclick="openInAppCamera('returnImagePreview', 'returnImageBase64')">
+        <label class="upload-zone">
           <span style="font-size: 28px; display: block; margin-bottom: 8px;">📷</span>
-          แตะเพื่อเปิดกล้องหน้าเว็บ (บังคับ)
-        </button>
+          แตะเพื่อถ่ายรูปด้วยแอปกล้อง
+          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleReturnPhoto(event)">
+        </label>
         <img id="returnImagePreview" style="width:100%; display:none; border-radius:8px; margin-bottom:15px;">
         <input type="hidden" id="returnImageBase64">
         
@@ -381,9 +355,10 @@
         
         <label>📸 รูปภาพอุปกรณ์ (ถ่ายเอง หรืออัปโหลด)</label>
         <div style="display:flex; gap:10px; margin-top:5px; margin-bottom:15px;">
-          <button class="btn-primary" style="flex:1; margin-top: 0; padding: 12px; font-weight: 500;" onclick="openInAppCamera('editEqImagePreviewUI', 'editEqImageBase64')">
-            📷 ถ่ายรูปหน้าเว็บ
-          </button>
+          <label class="btn-primary" style="flex:1; margin-top: 0; padding: 12px; font-weight: 500;">
+            📷 ถ่ายรูป
+            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleEqPhoto(event)">
+          </label>
           <label class="btn-success" style="flex:1; margin-top: 0; padding: 12px; font-weight: 500; background-color: #17a2b8;">
             🖼️ เลือกจากเครื่อง
             <input type="file" accept="image/*" style="display:none;" onchange="handleEqPhoto(event)">
@@ -529,6 +504,7 @@
       </div>
     </div>
 
+    <div id="toastContainer"></div>
     <script>
 
   // ==========================================
@@ -614,6 +590,32 @@
       if (failureCb) failureCb(err);
       else console.error("API Error: ", err);
     });
+  }
+
+  function showToast(message, type = 'info') {
+    if (message.includes('✅')) type = 'success';
+    else if (message.includes('❌') || message.includes('ไม่สำเร็จ') || message.includes('ล้มเหลว') || message.includes('กรุณา') || message.includes('ขัดข้อง')) type = 'error';
+    else if (message.includes('🗑️')) type = 'warning';
+
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg toast-' + type;
+    
+    // Add OK button and flex layout
+    toast.innerHTML = `<span style="flex-grow: 1;">${message}</span><button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.25); border: none; color: white; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 15px; flex-shrink: 0;">ตกลง</button>`;
+    
+    container.appendChild(toast);
+    
+    setTimeout(() => { toast.classList.add('show'); }, 10);
+    
+    setTimeout(() => {
+      if(toast.parentElement) {
+        toast.classList.remove('show');
+        setTimeout(() => { if(toast.parentElement) toast.remove(); }, 400);
+      }
+    }, 5000);
   }
 
   let allEquipment = [], allTransactions = [], allLocations = [], allUsers = [];
@@ -798,7 +800,6 @@
     });
   }
   function prepareReturn(row, eqId, qty, eqName) { 
-    if (row === -1) return showToast('⏳ ระบบกำลังซิงค์ข้อมูลกับเซิร์ฟเวอร์ กรุณารอสักครู่แล้วลองใหม่ครับ');
     pendingReturnData = { row: row, eqId: eqId, qty: qty, eqName: eqName }; 
     document.getElementById('returnEqNamePreview').innerText = eqName; 
     const sel = document.getElementById('selectReturnLoc'); 
@@ -833,25 +834,21 @@
     if(!base64Data) return showToast('กรุณาถ่ายรูปหลักฐานการคืนด้วยครับ');
     
     document.getElementById('returnLocModal').style.display = 'none'; 
-    
-    // === Optimistic UI Update (ทำทันทีเพื่อให้หายไปเลย ไม่ต้องรอโหลด) ===
+
+    // === Optimistic UI Update ===
     try {
       let eq = allEquipment.find(e => e.id === pendingReturnData.eqId);
-      if(eq) {
-        if(eq.location === locId || !eq.location || eq.location === "") {
+      if (eq) {
+        if (String(eq.location) === String(locId)) {
           eq.available = parseInt(eq.available) + parseInt(pendingReturnData.qty);
-          if(!eq.location) eq.location = locId;
         } else {
-          eq.total = parseInt(eq.total) - parseInt(pendingReturnData.qty);
-          let existing = allEquipment.find(e => String(e.name).trim() === String(eq.name).trim() && e.location === locId && e.id !== eq.id);
-          if(existing) {
-            existing.total = parseInt(existing.total) + parseInt(pendingReturnData.qty);
-            existing.available = parseInt(existing.available) + parseInt(pendingReturnData.qty);
+          let targetLocEq = allEquipment.find(e => e.id === pendingReturnData.eqId && String(e.location) === String(locId));
+          if (targetLocEq) {
+            targetLocEq.available = parseInt(targetLocEq.available) + parseInt(pendingReturnData.qty);
           } else {
             allEquipment.push({
-              id: 'sync_' + Date.now(),
-              name: eq.name,
-              image: eq.image,
+              id: pendingReturnData.eqId,
+              name: pendingReturnData.eqName,
               total: parseInt(pendingReturnData.qty),
               available: parseInt(pendingReturnData.qty),
               location: locId
@@ -933,7 +930,7 @@
 
          let photoHtml = '';
          if (item.photoUrl) {
-             photoHtml = `<br><a href="${item.photoUrl}" target="_blank" style="color:#0095f6; font-size:12px; font-weight:bold;">🖼️ ดูรูปถ่ายหลักฐาน</a>`;
+             photoHtml = `<br><a href="${item.photoUrl}" target="_blank" style="color:#007aff; font-size:12px; font-weight:bold;">🖼️ ดูรูปถ่ายหลักฐาน</a>`;
          }
 
          let locStr = item.status === 'Completed' ? `<br><span style="font-size:13px;">📍 คืนที่: ${locDisplay}</span>` : '';
@@ -946,113 +943,36 @@
      });
   }
 
-  // ==========================================
-  // ระบบเชื่อมต่อกล้องและการถ่ายรูปหน้าเว็บ (Native Fallback)
-  // ==========================================
-  
-  function compressImageAndSet(file, previewId, base64Id) {
-    showLoading('กำลังเตรียมรูปภาพ...');
+  function handleReturnPhoto(event) {
+    if (event.target.files.length == 0) return;
+    showLoading('กำลังโหลดรูปภาพ...');
+    const file = event.target.files[0];
     const reader = new FileReader();
     reader.onload = function(e) {
-      const img = new Image();
-      img.onload = function() {
-        const canvas = document.createElement('canvas');
-        let width = img.width; let height = img.height;
-        const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
-        if (width > height) {
-          if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-        } else {
-          if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-        }
-        canvas.width = width; canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.6); // 60% quality jpeg
-        hideLoading();
-        document.getElementById(previewId).src = dataUrl;
-        document.getElementById(previewId).style.display = 'block';
-        document.getElementById(base64Id).value = dataUrl;
-      };
-      img.src = e.target.result;
+      hideLoading();
+      document.getElementById('returnImagePreview').src = e.target.result;
+      document.getElementById('returnImagePreview').style.display = 'block';
+      document.getElementById('returnImageBase64').value = e.target.result;
+      event.target.value = ''; // clear
     };
     reader.readAsDataURL(file);
   }
 
-  let currentCameraStream = null;
-  let currentCameraTargetPreview = null;
-  let currentCameraTargetBase64 = null;
-
-  function openInAppCamera(previewId, base64Id) {
-    currentCameraTargetPreview = previewId;
-    currentCameraTargetBase64 = base64Id;
-    document.getElementById('cameraModal').style.display = 'flex';
-    
-    const constraints = { video: { facingMode: 'environment' } };
-    navigator.mediaDevices.getUserMedia(constraints)
-      .then(function(stream) {
-        currentCameraStream = stream;
-        const video = document.getElementById('cameraVideo');
-        video.srcObject = stream;
-      })
-      .catch(function(err) {
-        showToast("เบราว์เซอร์ไม่รองรับกล้อง หรือไม่ได้รับอนุญาต: " + err.message);
-        closeCameraModal();
-      });
-  }
-
-  function closeCameraModal() {
-    document.getElementById('cameraModal').style.display = 'none';
-    if (currentCameraStream) {
-      currentCameraStream.getTracks().forEach(track => track.stop());
-      currentCameraStream = null;
-    }
-    const video = document.getElementById('cameraVideo');
-    if (video) video.srcObject = null;
-  }
-
-  function captureCameraPhoto() {
-    const video = document.getElementById('cameraVideo');
-    if (!video || !video.videoWidth) return;
-    
-    const canvas = document.createElement('canvas');
-    let width = video.videoWidth;
-    let height = video.videoHeight;
-    const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
-    
-    if (width > height) {
-      if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-    } else {
-      if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-    }
-    
-    canvas.width = width; canvas.height = height;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.6); // Compress to 60% quality directly
-    
-    document.getElementById(currentCameraTargetPreview).src = dataUrl;
-    document.getElementById(currentCameraTargetPreview).style.display = 'block';
-    document.getElementById(currentCameraTargetBase64).value = dataUrl;
-    
-    closeCameraModal();
-  }
-
-  // Fallback for upload file
-  function handleReturnPhoto(event) {
-    if (event.target.files.length == 0) return;
-    compressImageAndSet(event.target.files[0], 'returnImagePreview', 'returnImageBase64');
-    event.target.value = '';
-  }
-
   function handleEqPhoto(event) {
     if (event.target.files.length == 0) return;
-    compressImageAndSet(event.target.files[0], 'editEqImagePreviewUI', 'editEqImageBase64');
-    event.target.value = '';
+    showLoading('กำลังโหลดรูปภาพ...');
+    const file = event.target.files[0];
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      hideLoading();
+      document.getElementById('editEqImagePreviewUI').src = e.target.result;
+      document.getElementById('editEqImagePreviewUI').style.display = 'block';
+      document.getElementById('editEqImageBase64').value = e.target.result;
+      event.target.value = ''; // clear
+    };
+    reader.readAsDataURL(file);
   }
 
-  // ==========================================
-  // ระบบสแกน QR ด้วยกล้องเครื่อง (Fallback)
-  // ==========================================
   
   // ==========================================
   // ระบบกล้องสแกน QR หน้าเว็บแบบเต็มรูปแบบ (GitHub Version)
@@ -1073,7 +993,7 @@
         // parse errors are normal during scanning
       }
     ).catch(err => {
-      showToast("❌ ไม่สามารถเปิดกล้องได้: " + err);
+      alert("❌ ไม่สามารถเปิดกล้องได้: " + err);
       closeScannerModal();
     });
   }
@@ -1098,6 +1018,7 @@
   } else if (currentScanMode === 'loc') { let loc = allLocations.find(l => l.id === scannedId); if(loc) { document.getElementById('selectReturnLoc').value = loc.id; showToast('📍 เลือกจุดวาง: ' + loc.name + ' เรียบร้อยแล้ว'); } else showToast('❌ ไม่พบรหัสจุดวางนี้'); } }
   function updateCart(eqId, change) { let item = allEquipment.find(e => e.id === eqId); if(!item) return; let newQty = (cart[eqId] || 0) + change; if(newQty > item.available) return showToast('อุปกรณ์ในสต๊อกไม่พอครับ'); if(newQty < 0) newQty = 0; cart[eqId] = newQty; renderEquipment(); updateCartFloat(); }
   function updateCartFloat() { let total = 0; for(let k in cart) total += cart[k]; const floatBtn = document.getElementById('cartFloat'); document.getElementById('cartCount').innerText = "(" + total + ")"; floatBtn.style.display = (total > 0 && document.getElementById('tabBorrow').style.display === 'block') ? 'block' : 'none'; }
+  
   function checkout() { 
     if(!confirm('ยืนยันเบิกอุปกรณ์ที่เลือกไว้?')) return; 
     
@@ -1129,7 +1050,7 @@
     }, 50);
   }
 
-  function renderEquipment() { const grid = document.getElementById('equipmentGrid'); if(!grid) return; grid.innerHTML = ''; const searchTxt = document.getElementById('searchInput').value.toLowerCase(); const filteredData = allEquipment.filter(item => { const matchSearch = String(item.name).toLowerCase().includes(searchTxt); let matchStatus = true; if (currentFilter === 'available') matchStatus = item.available > 0; let hasStockElsewhere = false; if (item.total <= 0) { hasStockElsewhere = allEquipment.some(other => String(other.name).trim() === String(item.name).trim() && other.total > 0); } let shouldShowZero = item.total > 0 || !hasStockElsewhere; return matchSearch && matchStatus && shouldShowZero; }); if (filteredData.length === 0) { grid.innerHTML = '<p>ไม่พบอุปกรณ์</p>'; return; } filteredData.forEach(item => { const card = document.createElement('div'); card.className = 'card'; let imgUrl = item.image ? item.image : 'https://via.placeholder.com/150?text=No+Image'; let fileIdMatch = imgUrl.match(/file\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/); if (fileIdMatch && fileIdMatch[1] && imgUrl.includes('drive.google.com')) { imgUrl = "https://drive.google.com/thumbnail?id=" + fileIdMatch[1] + "&sz=w800"; } const qty = cart[item.id] || 0; let locDisplay = '-'; if (item.location) { let foundLoc = allLocations.find(l => l.id === item.location); locDisplay = foundLoc ? foundLoc.name : item.location; } card.innerHTML = '<img src="' + imgUrl + '" class="card-img"><div class="card-body"><h3 class="card-title">' + item.name + '</h3><div class="card-status">เหลือ: ' + item.available + ' / ' + item.total + '<br><span style="color: #0095f6; font-weight: 500;">📍 ' + locDisplay + '</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', -1)">-</button><span>' + qty + '</span><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', 1)">+</button></div></div>'; grid.appendChild(card); }); }
+  function renderEquipment() { const grid = document.getElementById('equipmentGrid'); if(!grid) return; grid.innerHTML = ''; const searchTxt = document.getElementById('searchInput').value.toLowerCase(); const filteredData = allEquipment.filter(item => { const matchSearch = String(item.name).toLowerCase().includes(searchTxt); let matchStatus = true; if (currentFilter === 'available') matchStatus = item.available > 0; let hasStockElsewhere = false; if (item.total <= 0) { hasStockElsewhere = allEquipment.some(other => String(other.name).trim() === String(item.name).trim() && other.total > 0); } let shouldShowZero = item.total > 0 || !hasStockElsewhere; return matchSearch && matchStatus && shouldShowZero; }); if (filteredData.length === 0) { grid.innerHTML = '<p>ไม่พบอุปกรณ์</p>'; return; } filteredData.forEach(item => { const card = document.createElement('div'); card.className = 'card'; let imgUrl = item.image ? item.image : 'https://via.placeholder.com/150?text=No+Image'; let fileIdMatch = imgUrl.match(/file\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/); if (fileIdMatch && fileIdMatch[1] && imgUrl.includes('drive.google.com')) { imgUrl = "https://drive.google.com/thumbnail?id=" + fileIdMatch[1] + "&sz=w800"; } const qty = cart[item.id] || 0; let locDisplay = '-'; if (item.location) { let foundLoc = allLocations.find(l => l.id === item.location); locDisplay = foundLoc ? foundLoc.name : item.location; } card.innerHTML = '<img src="' + imgUrl + '" class="card-img"><div class="card-body"><h3 class="card-title">' + item.name + '</h3><div class="card-status">เหลือ: ' + item.available + ' / ' + item.total + '<br><span style="color: #007aff; font-weight: 500;">📍 ' + locDisplay + '</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', -1)">-</button><span>' + qty + '</span><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', 1)">+</button></div></div>'; grid.appendChild(card); }); }
   function setFilter(type, btn) { currentFilter = type; document.querySelectorAll('.filters .filter-btn:not(.btn-warning)').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderEquipment(); }
 
   function loadUsersData() { google.script.run.withSuccessHandler(data => { allUsers = data || []; hideLoading(); renderUsersData(); }).getAllUsers(); }
@@ -1167,16 +1088,13 @@
         hideLoading();
         showToast('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
       }
-    }).withFailureHandler(function(err) {
-      hideLoading();
-      showToast('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
     }).uploadImageToDrive(base64Data, "IMG_EQ_" + new Date().getTime());
   }
 
   function proceedSaveEq(imageUrl) { const data = { isNew: document.getElementById('editEqIsNew').value === 'true', id: document.getElementById('editEqId').value, name: document.getElementById('editEqName').value, image: imageUrl, total: document.getElementById('editEqTotal').value, location: document.getElementById('editEqLoc').value }; if(!data.name || !data.total) return showToast('กรุณาระบุชื่อและจำนวนอุปกรณ์'); showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { showToast('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(); }).withFailureHandler(showError).saveEquipmentData(data); }
   function deleteEq(id, name) { if(!confirm('ลบอุปกรณ์: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { showToast('🗑️ ' + res.message); refreshData(); }).deleteEquipmentData(id); }
 
-  function renderAdminLocData() { const listDiv = document.getElementById('adminLocList'); if(!listDiv) return; listDiv.innerHTML = ''; allLocations.forEach(loc => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>' + loc.name + '</strong><br><span style="color:#8e8e8e; font-size:12px;">รหัส: ' + loc.id + '</span></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editLoc(\'' + loc.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteLoc(\'' + loc.id + '\', \'' + loc.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
+  function renderAdminLocData() { const listDiv = document.getElementById('adminLocList'); if(!listDiv) return; listDiv.innerHTML = ''; allLocations.forEach(loc => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>' + loc.name + '</strong><br><span style="color:#86868b; font-size:12px;">รหัส: ' + loc.id + '</span></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editLoc(\'' + loc.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteLoc(\'' + loc.id + '\', \'' + loc.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
   function openLocModal() { document.getElementById('locModalTitle').innerText = 'เพิ่มจุดวาง'; document.getElementById('editLocIsNew').value = 'true'; document.getElementById('editLocId').value = ''; document.getElementById('editLocId').disabled = false; document.getElementById('editLocName').value = ''; document.getElementById('locModal').style.display = 'flex'; }
   function editLoc(id) { let loc = allLocations.find(l => l.id === id); if(!loc) return; document.getElementById('locModalTitle').innerText = 'แก้ไขจุดวาง'; document.getElementById('editLocIsNew').value = 'false'; document.getElementById('editLocId').value = loc.id; document.getElementById('editLocId').disabled = true; document.getElementById('editLocName').value = loc.name; document.getElementById('locModal').style.display = 'flex'; }
   function saveLoc() { const data = { isNew: document.getElementById('editLocIsNew').value === 'true', id: document.getElementById('editLocId').value, name: document.getElementById('editLocName').value }; if(!data.name) return showToast('กรุณาระบุชื่อจุดวาง'); showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { showToast('✅ ' + res.message); document.getElementById('locModal').style.display='none'; refreshData(); }).withFailureHandler(showError).saveLocationData(data); }
@@ -1184,13 +1102,22 @@
 
   function populateLocationSelect() { const s = document.getElementById('adminLocSelect'); let o = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(l => o += '<option value="' + l.id + '">' + l.name + '</option>'); if(s) s.innerHTML = o; }
   function populateEqSelect() { const s = document.getElementById('adminEqSelect'); let o = '<option value="">-- เลือกอุปกรณ์ --</option>'; allEquipment.forEach(e => o += '<option value="' + e.id + '">' + e.name + '</option>'); if(s) s.innerHTML = o; }
-  function generateQR(type) { let selectElement = type === 'loc' ? document.getElementById('adminLocSelect') : document.getElementById('adminEqSelect'); let id = selectElement.value; const resDiv = document.getElementById('adminQRResult'); if(!id) { resDiv.innerHTML = ''; return; } let nameWithPrefix = selectElement.options[selectElement.selectedIndex].text; resDiv.innerHTML = `<div id="printArea" style="border: 2px dashed #0095f6; padding: 25px 20px; border-radius: 12px; display: inline-block; background: white; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 250px;"><h3 style="margin: 0 0 15px 0; color: #262626; font-size: 22px;">${nameWithPrefix}</h3><canvas id="qrDisplayCanvas" style="border: 1px solid #efefef; padding: 10px; border-radius: 8px;"></canvas><p style="margin: 15px 0 0 0; font-size: 16px; color: #8e8e8e;">รหัสอ้างอิง: <strong style="color: #262626;">${id}</strong></p></div><br><button class="btn-primary" style="width: auto; margin-top: 15px; border-radius: 30px;" onclick="printQR()">🖨️ พิมพ์ป้าย QR Code</button>`; new QRious({ element: document.getElementById('qrDisplayCanvas'), value: id, size: 200, level: 'H' }); }
-  function printQR() { var printContents = document.getElementById('printArea').outerHTML; var w = window.open('', '_blank', 'width=400,height=600'); w.document.write('<html><head><title>Print QR</title></head><body style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; font-family:sans-serif;">' + printContents + '</body></html>'); w.document.close(); w.focus(); w.print(); w.close(); }
+  function generateQR(type) { let selectElement = type === 'loc' ? document.getElementById('adminLocSelect') : document.getElementById('adminEqSelect'); let id = selectElement.value; const resDiv = document.getElementById('adminQRResult'); if(!id) { resDiv.innerHTML = ''; return; } let nameWithPrefix = selectElement.options[selectElement.selectedIndex].text; resDiv.innerHTML = `<div id="printArea" style="border: 2px dashed #007aff; padding: 25px 20px; border-radius: 12px; display: inline-block; background: white; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 250px;"><h3 style="margin: 0 0 15px 0; color: #1d1d1f; font-size: 22px;">${nameWithPrefix}</h3><canvas id="qrDisplayCanvas" style="border: 1px solid #f5f5f7; padding: 10px; border-radius: 8px;"></canvas><p style="margin: 15px 0 0 0; font-size: 16px; color: #86868b;">รหัสอ้างอิง: <strong style="color: #1d1d1f;">${id}</strong></p></div><br><button class="btn-primary" style="width: auto; margin-top: 15px; border-radius: 30px;" onclick="printQR()">🖨️ พิมพ์ป้าย QR Code</button>`; new QRious({ element: document.getElementById('qrDisplayCanvas'), value: id, size: 200, level: 'H' }); }
+  function printQR() { var printContents = document.getElementById('printArea').outerHTML; var w = window.open('', '_blank', 'width=400,height=600'); w.document.write('<html><head><title>Print QR</title></head><body style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; font-family:sans-serif;">' + printContents + '
+    <!-- QR Scanner Modal -->
+    <div id="qrScannerModal" class="modal-bg">
+      <div class="modal-content" style="text-align: center;">
+        <h3>📷 สแกน QR Code</h3>
+        <div id="qr-reader" style="width: 100%; margin-bottom: 15px;"></div>
+        <button class="btn-danger" onclick="closeScannerModal()">ยกเลิก</button>
+      </div>
+    </div>
+  </body></html>'); w.document.close(); w.focus(); w.print(); w.close(); }
 
   async function downloadAllQRs() {
     if(allEquipment.length === 0 && allLocations.length === 0) return showToast('ไม่มีข้อมูลอุปกรณ์หรือจุดวางในระบบครับ');
     showLoading('กำลังวาดรูปป้ายและสร้างไฟล์ ZIP...\n(อาจใช้เวลาสักครู่)');
-    try { var zip = new JSZip(); var eqFolder = zip.folder("QR_อุปกรณ์"); var locFolder = zip.folder("QR_จุดวาง"); function createTicketBase64(name, id) { const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 500; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 400, 500); ctx.strokeStyle = '#0095f6'; ctx.lineWidth = 6; ctx.setLineDash([15, 10]); ctx.strokeRect(15, 15, 370, 470); ctx.fillStyle = '#262626'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, 200, 75, 340); const qr = new QRious({ value: id, size: 260, level: 'H' }); ctx.drawImage(qr.canvas, 70, 110); ctx.fillStyle = '#8e8e8e'; ctx.font = '22px sans-serif'; ctx.fillText('รหัสอ้างอิง: ' + id, 200, 420); return canvas.toDataURL('image/png').split(',')[1]; } allEquipment.forEach(eq => { var base64Data = createTicketBase64(eq.name, eq.id); var safeName = (eq.name + "_" + eq.id).replace(/[\/\\]/g, '-'); eqFolder.file(safeName + ".png", base64Data, {base64: true}); }); allLocations.forEach(loc => { var base64Data = createTicketBase64(loc.name, loc.id); var safeName = (loc.name + "_" + loc.id).replace(/[\/\\]/g, '-'); locFolder.file(safeName + ".png", base64Data, {base64: true}); }); if(typeof allRadios !== 'undefined') { var radioFolder = zip.folder("QR_วิทยุ"); allRadios.forEach(radio => { var base64Data = createTicketBase64(radio.name, radio.id); var safeName = (radio.name + "_" + radio.id).replace(/[\/\\]/g, '-'); radioFolder.file(safeName + ".png", base64Data, {base64: true}); }); } var content = await zip.generateAsync({type:"blob"}); var link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = "QR_Codes_Tickets.zip"; link.click(); hideLoading(); showToast('✅ ดาวน์โหลดไฟล์ .ZIP สำเร็จแล้ว!'); } catch(error) { hideLoading(); showToast('❌ เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: ' + error.message); }
+    try { var zip = new JSZip(); var eqFolder = zip.folder("QR_อุปกรณ์"); var locFolder = zip.folder("QR_จุดวาง"); function createTicketBase64(name, id) { const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 500; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 400, 500); ctx.strokeStyle = '#007aff'; ctx.lineWidth = 6; ctx.setLineDash([15, 10]); ctx.strokeRect(15, 15, 370, 470); ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, 200, 75, 340); const qr = new QRious({ value: id, size: 260, level: 'H' }); ctx.drawImage(qr.canvas, 70, 110); ctx.fillStyle = '#86868b'; ctx.font = '22px sans-serif'; ctx.fillText('รหัสอ้างอิง: ' + id, 200, 420); return canvas.toDataURL('image/png').split(',')[1]; } allEquipment.forEach(eq => { var base64Data = createTicketBase64(eq.name, eq.id); var safeName = (eq.name + "_" + eq.id).replace(/[\/\\]/g, '-'); eqFolder.file(safeName + ".png", base64Data, {base64: true}); }); allLocations.forEach(loc => { var base64Data = createTicketBase64(loc.name, loc.id); var safeName = (loc.name + "_" + loc.id).replace(/[\/\\]/g, '-'); locFolder.file(safeName + ".png", base64Data, {base64: true}); }); if(typeof allRadios !== 'undefined') { var radioFolder = zip.folder("QR_วิทยุ"); allRadios.forEach(radio => { var base64Data = createTicketBase64(radio.name, radio.id); var safeName = (radio.name + "_" + radio.id).replace(/[\/\\]/g, '-'); radioFolder.file(safeName + ".png", base64Data, {base64: true}); }); } var content = await zip.generateAsync({type:"blob"}); var link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = "QR_Codes_Tickets.zip"; link.click(); hideLoading(); showToast('✅ ดาวน์โหลดไฟล์ .ZIP สำเร็จแล้ว!'); } catch(error) { hideLoading(); showToast('❌ เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: ' + error.message); }
   }
 
   // ==========================================
@@ -1225,7 +1152,7 @@
     if (radioFilter === 'available') filtered = allRadios.filter(function(r){ return !r.currentUserId; });
     if (radioFilter === 'borrowed') filtered = allRadios.filter(function(r){ return !!r.currentUserId; });
     grid.innerHTML = '';
-    if (filtered.length === 0) { grid.innerHTML = '<p style="color:#8e8e8e;text-align:center;padding:30px;grid-column:1/-1;">ไม่พบวิทยุ</p>'; return; }
+    if (filtered.length === 0) { grid.innerHTML = '<p style="color:#86868b;text-align:center;padding:30px;grid-column:1/-1;">ไม่พบวิทยุ</p>'; return; }
     filtered.forEach(function(radio) {
       var isBorrowed = !!radio.currentUserId;
       var isMine = radio.currentUserId == String(currentUser.id);
@@ -1233,33 +1160,33 @@
       var bsEmoji = bs==='ready'?'🟢':bs==='charging'?'🔵':'🔴';
       var bsLabel = bs==='ready'?'พร้อมใช้':bs==='charging'?'กำลังชาร์จ':'ใกล้หมด/หมด';
       var statusHtml = isBorrowed
-        ? '<div style="font-size:13px;margin:6px 0;"><span style="color:#e65100;">👤 ' + radio.currentUserName + '</span></div>'
-        : '<div style="font-size:13px;margin:6px 0;color:#28a745;">✅ ว่าง</div>';
+        ? '<div style="font-size:13px;margin:6px 0;"><span style="color:#ff9500;">👤 ' + radio.currentUserName + '</span></div>'
+        : '<div style="font-size:13px;margin:6px 0;color:#34c759;">✅ ว่าง</div>';
       var actionHtml = '';
       if (!isBorrowed) {
-        actionHtml = '<button class="btn-success" style="width:100%;margin-top:6px;border-radius:8px;" onclick="doBorrowRadio(\'' + radio.id + '\')">🤝 ยืมวิทยุ</button>';
+        actionHtml = '<button class="btn-success" style="width:100%;margin-top:6px;border-radius:12px;" onclick="doBorrowRadio(\'' + radio.id + '\')">🤝 ยืมวิทยุ</button>';
       } else if (isMine || isAdmin) {
-        actionHtml = '<button class="btn-danger" style="width:100%;margin-top:6px;border-radius:8px;" onclick="doReturnRadio(\'' + radio.id + '\', \'' + radio.name + '\')">📦 คืนวิทยุ</button>';
+        actionHtml = '<button class="btn-danger" style="width:100%;margin-top:6px;border-radius:12px;" onclick="doReturnRadio(\'' + radio.id + '\', \'' + radio.name + '\')">📦 คืนวิทยุ</button>';
       } else {
-        actionHtml = '<div style="font-size:11px;color:#999;margin-top:6px;text-align:center;">รอให้ผู้ยืมคืน</div>';
+        actionHtml = '<div style="font-size:11px;color:#86868b;margin-top:6px;text-align:center;">รอให้ผู้ยืมคืน</div>';
       }
       var batteryHtml = '';
       if (isAdmin) {
-        batteryHtml = '<div style="display:flex;gap:4px;margin-top:10px;border-top:1px solid #f0f0f0;padding-top:10px;">'
+        batteryHtml = '<div style="display:flex;gap:4px;margin-top:10px;border-top:1px solid #f5f5f7;padding-top:10px;">'
           + '<button class="rc-battery ' + (bs==='ready'?'active-ready':'') + '" onclick="doUpdateRadioBattery(\'' + radio.id + '\',\'ready\')">🟢 พร้อม</button>'
           + '<button class="rc-battery ' + (bs==='charging'?'active-charging':'') + '" onclick="doUpdateRadioBattery(\'' + radio.id + '\',\'charging\')">🔵 ชาร์จ</button>'
           + '<button class="rc-battery ' + (bs==='low'?'active-low':'') + '" onclick="doUpdateRadioBattery(\'' + radio.id + '\',\'low\')">🔴 หมด</button>'
           + '</div>';
       } else {
-        batteryHtml = '<div style="font-size:12px;color:#666;margin-top:8px;">' + bsEmoji + ' ' + bsLabel + '</div>';
+        batteryHtml = '<div style="font-size:12px;color:#86868b;margin-top:8px;">' + bsEmoji + ' ' + bsLabel + '</div>';
       }
-      var deleteBtn = isAdmin ? '<button onclick="doDeleteRadio(\'' + radio.id + '\',\'' + radio.name + '\')" style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;color:#ccc;font-size:16px;" title="ลบ">✕</button>' : '';
-      var printBtn = isAdmin ? '<button onclick="openRadioQR(\'' + radio.id + '\',\'' + radio.name + '\')" style="position:absolute;top:8px;right:32px;background:none;border:none;cursor:pointer;color:#0095f6;font-size:16px;" title="พิมพ์ QR">🖨️</button>' : '';
+      var deleteBtn = isAdmin ? '<button onclick="doDeleteRadio(\'' + radio.id + '\',\'' + radio.name + '\')" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:#d2d2d7;font-size:16px;" title="ลบ">✕</button>' : '';
+      var printBtn = isAdmin ? '<button onclick="openRadioQR(\'' + radio.id + '\',\'' + radio.name + '\')" style="position:absolute;top:10px;right:36px;background:none;border:none;cursor:pointer;color:#007aff;font-size:16px;" title="พิมพ์ QR">🖨️</button>' : '';
       var card = document.createElement('div');
       card.className = 'radio-card' + (isBorrowed ? ' is-borrowed' : '') + (isMine ? ' is-mine' : '');
       card.innerHTML = deleteBtn + printBtn
         + '<div style="display:flex;justify-content:space-between;align-items:center;">'
-        + '<div style="font-weight:600;font-size:14px;">' + radio.name + '</div>'
+        + '<div style="font-weight:600;font-size:15px;color:#1d1d1f;">' + radio.name + '</div>'
         + '<div style="font-size:22px;">' + bsEmoji + '</div></div>'
         + statusHtml + actionHtml + batteryHtml;
       grid.appendChild(card);
@@ -1302,17 +1229,17 @@
     });
     
     if (filtered.length === 0) {
-      dropdown.innerHTML = '<div style="padding:10px 12px; color:#999; font-size:13px; text-align:center;">ไม่พบรายชื่อ</div>';
+      dropdown.innerHTML = '<div style="padding:10px 12px; color:#86868b; font-size:13px; text-align:center;">ไม่พบรายชื่อ</div>';
       dropdown.style.display = 'block';
       return;
     }
     
     var html = '';
     filtered.forEach(function(u) {
-      html += '<div class="recipient-item" onmousedown="selectRecipient(\'' + u.name.replace(/'/g, "\\'") + '\')" onclick="selectRecipient(\'' + u.name.replace(/'/g, "\\'") + '\')" style="padding:10px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; transition:background 0.15s;"'
+      html += '<div class="recipient-item" onmousedown="selectRecipient(\'' + u.name.replace(/'/g, "\\'") + '\')" onclick="selectRecipient(\'' + u.name.replace(/'/g, "\\'") + '\')" style="padding:10px 12px; cursor:pointer; border-bottom:1px solid #f5f5f7; transition:background 0.15s;"'
         + ' onmouseover="this.style.background=\'#f0f7ff\'" onmouseout="this.style.background=\'white\'">'
-        + '<div style="font-weight:500; font-size:14px; color:#262626; pointer-events:none;">' + u.name + '</div>'
-        + '<div style="font-size:11px; color:#999; pointer-events:none;">แผนก: ' + u.department + '</div>'
+        + '<div style="font-weight:500; font-size:14px; color:#1d1d1f; pointer-events:none;">' + u.name + '</div>'
+        + '<div style="font-size:11px; color:#86868b; pointer-events:none;">แผนก: ' + u.department + '</div>'
         + '</div>';
     });
     dropdown.innerHTML = html;
@@ -1399,17 +1326,17 @@
     document.getElementById('btnRadBatLow').className = (status === 'low') ? 'btn-outline active' : 'btn-outline';
     
     // Adjust colors
-    document.getElementById('btnRadBatReady').style.background = (status === 'ready') ? '#4caf50' : 'white';
-    document.getElementById('btnRadBatReady').style.color = (status === 'ready') ? 'white' : '#4caf50';
-    document.getElementById('btnRadBatReady').style.border = (status === 'ready') ? 'none' : '1px solid #4caf50';
+    document.getElementById('btnRadBatReady').style.background = (status === 'ready') ? '#34c759' : 'white';
+    document.getElementById('btnRadBatReady').style.color = (status === 'ready') ? 'white' : '#34c759';
+    document.getElementById('btnRadBatReady').style.border = (status === 'ready') ? 'none' : '1px solid #34c759';
     
-    document.getElementById('btnRadBatCharging').style.background = (status === 'charging') ? '#2196f3' : 'white';
-    document.getElementById('btnRadBatCharging').style.color = (status === 'charging') ? 'white' : '#2196f3';
-    document.getElementById('btnRadBatCharging').style.border = (status === 'charging') ? 'none' : '1px solid #2196f3';
+    document.getElementById('btnRadBatCharging').style.background = (status === 'charging') ? '#007aff' : 'white';
+    document.getElementById('btnRadBatCharging').style.color = (status === 'charging') ? 'white' : '#007aff';
+    document.getElementById('btnRadBatCharging').style.border = (status === 'charging') ? 'none' : '1px solid #007aff';
     
-    document.getElementById('btnRadBatLow').style.background = (status === 'low') ? '#f44336' : 'white';
-    document.getElementById('btnRadBatLow').style.color = (status === 'low') ? 'white' : '#f44336';
-    document.getElementById('btnRadBatLow').style.border = (status === 'low') ? 'none' : '1px solid #f44336';
+    document.getElementById('btnRadBatLow').style.background = (status === 'low') ? '#ff3b30' : 'white';
+    document.getElementById('btnRadBatLow').style.color = (status === 'low') ? 'white' : '#ff3b30';
+    document.getElementById('btnRadBatLow').style.border = (status === 'low') ? 'none' : '1px solid #ff3b30';
   }
 
   function confirmRadioReturn() {
@@ -1479,7 +1406,7 @@
 
   function openRadioQR(id, name) {
     document.getElementById('radioQRTitle').innerText = name;
-    document.getElementById('radioQRIdLabel').innerHTML = 'รหัสอ้างอิง: <strong style="color: #262626;">' + id + '</strong>';
+    document.getElementById('radioQRIdLabel').innerHTML = 'รหัสอ้างอิง: <strong style="color: #1d1d1f;">' + id + '</strong>';
     new QRious({
       element: document.getElementById('radioQRCanvas'),
       value: id,
@@ -1560,12 +1487,12 @@
              empty = false;
              let item = allEquipment.find(e => e.id === id);
              let card = document.createElement('div');
-             card.style = 'border:1px solid #ddd; padding:10px; margin-bottom:10px; border-radius:5px; display:flex; justify-content:space-between; align-items:center; background:white;';
-             card.innerHTML = '<div style="font-weight:bold;">' + item.name + '</div><div style="display:flex; align-items:center; gap:10px;"><span>จำนวน: ' + posCart[id] + '</span><button class="btn-danger" style="padding:5px 10px; border-radius:5px;" onclick="posCart[\'' + id + '\']--; renderPOSCart()">-</button></div>';
+             card.style = 'border:1px solid #f5f5f7; padding:12px; margin-bottom:10px; border-radius:12px; display:flex; justify-content:space-between; align-items:center; background:white; box-shadow: 0 4px 12px rgba(0,0,0,0.04);';
+             card.innerHTML = '<div style="font-weight:600; color:#1d1d1f;">' + item.name + '</div><div style="display:flex; align-items:center; gap:12px;"><span>จำนวน: ' + posCart[id] + '</span><button class="btn-danger" style="padding:6px 12px; border-radius:8px; font-weight:bold;" onclick="posCart[\'' + id + '\']--; renderPOSCart()">-</button></div>';
              listDiv.appendChild(card);
          }
      }
-     if (empty) listDiv.innerHTML = '<p style="color:#8e8e8e; text-align:center; margin-top: 50px;">ยังไม่มีอุปกรณ์</p>';
+     if (empty) listDiv.innerHTML = '<p style="color:#86868b; text-align:center; margin-top: 50px;">ยังไม่มีอุปกรณ์</p>';
   }
 
   function posCheckout() {
@@ -1618,27 +1545,5 @@
 
 </script>
 
-  
-    <!-- QR Scanner Modal -->
-    <div id="qrScannerModal" class="modal-bg">
-      <div class="modal-content" style="text-align: center;">
-        <h3>📷 สแกน QR Code</h3>
-        <div id="qr-reader" style="width: 100%; margin-bottom: 15px;"></div>
-        <button class="btn-danger" onclick="closeScannerModal()">ยกเลิก</button>
-      </div>
-    </div>
-
-    <!-- In-App Camera Modal -->
-    <div id="cameraModal" class="modal-bg">
-      <div class="modal-content" style="text-align: center; max-width: 500px; padding: 20px;">
-        <h3 style="margin-top: 0;">📷 ถ่ายรูป</h3>
-        <video id="cameraVideo" style="width: 100%; border-radius: 12px; background: #000; margin-bottom: 15px;" autoplay playsinline></video>
-        <div style="display: flex; gap: 10px;">
-          <button class="btn-primary" onclick="captureCameraPhoto()" style="flex: 2; margin-top: 0; font-size: 18px;">📸 กดถ่ายรูป</button>
-          <button class="btn-danger" onclick="closeCameraModal()" style="flex: 1; margin-top: 0;">ยกเลิก</button>
-        </div>
-      </div>
-    </div>
-    <div id="toastContainer"></div>
   </body>
 </html>
