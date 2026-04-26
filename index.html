@@ -600,7 +600,9 @@
     if (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') {
       google.script.run.withSuccessHandler(function(data) { allUsers = data || []; }).getAllUsers();
     }
-    window.history.replaceState({ tab: 'borrow' }, '', '#borrow');
+    try {
+      window.history.replaceState({ tab: 'borrow' }, '', '#borrow');
+    } catch(e) { console.warn('replaceState not supported on file://', e); }
   }
 
   function refreshData() { showLoading('กำลังโหลดข้อมูลระบบ...'); google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; google.script.run.withSuccessHandler(res => { if (res && res.success) allRadios = res.radios || []; hideLoading(); renderEquipment(); if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } else if (document.getElementById('tabAdmin').style.display === 'block') { showAdminSubTab('return'); } else if (document.getElementById('tabProfile').style.display === 'block') { } else { switchTab('tabBorrow'); } }).withFailureHandler(showError).getRadios(); }).withFailureHandler(showError).getInitialData(); }
@@ -632,7 +634,11 @@
     } else if (tabName === 'tabPOS') {
         renderPOSCart();
     }
-    if (!isHistoryBack) window.history.pushState({ tab: tabName }, '', '#' + tabName);
+    if (!isHistoryBack) {
+      try {
+        window.history.pushState({ tab: tabName }, '', '#' + tabName);
+      } catch(e) { console.warn('pushState not supported on file://', e); }
+    }
   }
 
   function saveMyProfile() { const u = document.getElementById('myProfileUsername').value; const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!u || !p || !n) return alert('กรุณากรอก Username รหัสผ่าน และชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); alert(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, p, d); }
@@ -724,6 +730,9 @@
         hideLoading();
         alert('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
       }
+    }).withFailureHandler(function(err) {
+      hideLoading();
+      alert('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
     }).uploadImageToDrive(base64Data, "RET_" + pendingReturnData.eqId + "_" + new Date().getTime());
   }
 
@@ -905,6 +914,9 @@
         hideLoading();
         alert('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
       }
+    }).withFailureHandler(function(err) {
+      hideLoading();
+      alert('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
     }).uploadImageToDrive(base64Data, "IMG_EQ_" + new Date().getTime());
   }
 
@@ -920,16 +932,7 @@
   function populateLocationSelect() { const s = document.getElementById('adminLocSelect'); let o = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(l => o += '<option value="' + l.id + '">' + l.name + '</option>'); if(s) s.innerHTML = o; }
   function populateEqSelect() { const s = document.getElementById('adminEqSelect'); let o = '<option value="">-- เลือกอุปกรณ์ --</option>'; allEquipment.forEach(e => o += '<option value="' + e.id + '">' + e.name + '</option>'); if(s) s.innerHTML = o; }
   function generateQR(type) { let selectElement = type === 'loc' ? document.getElementById('adminLocSelect') : document.getElementById('adminEqSelect'); let id = selectElement.value; const resDiv = document.getElementById('adminQRResult'); if(!id) { resDiv.innerHTML = ''; return; } let nameWithPrefix = selectElement.options[selectElement.selectedIndex].text; resDiv.innerHTML = `<div id="printArea" style="border: 2px dashed #0095f6; padding: 25px 20px; border-radius: 12px; display: inline-block; background: white; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 250px;"><h3 style="margin: 0 0 15px 0; color: #262626; font-size: 22px;">${nameWithPrefix}</h3><canvas id="qrDisplayCanvas" style="border: 1px solid #efefef; padding: 10px; border-radius: 8px;"></canvas><p style="margin: 15px 0 0 0; font-size: 16px; color: #8e8e8e;">รหัสอ้างอิง: <strong style="color: #262626;">${id}</strong></p></div><br><button class="btn-primary" style="width: auto; margin-top: 15px; border-radius: 30px;" onclick="printQR()">🖨️ พิมพ์ป้าย QR Code</button>`; new QRious({ element: document.getElementById('qrDisplayCanvas'), value: id, size: 200, level: 'H' }); }
-  function printQR() { var printContents = document.getElementById('printArea').outerHTML; var w = window.open('', '_blank', 'width=400,height=600'); w.document.write('<html><head><title>Print QR</title></head><body style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; font-family:sans-serif;">' + printContents + '
-    <!-- QR Scanner Modal -->
-    <div id="qrScannerModal" class="modal-bg">
-      <div class="modal-content" style="text-align: center;">
-        <h3>📷 สแกน QR Code</h3>
-        <div id="qr-reader" style="width: 100%; margin-bottom: 15px;"></div>
-        <button class="btn-danger" onclick="closeScannerModal()">ยกเลิก</button>
-      </div>
-    </div>
-  </body></html>'); w.document.close(); w.focus(); w.print(); w.close(); }
+  function printQR() { var printContents = document.getElementById('printArea').outerHTML; var w = window.open('', '_blank', 'width=400,height=600'); w.document.write('<html><head><title>Print QR</title></head><body style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; font-family:sans-serif;">' + printContents + '</body></html>'); w.document.close(); w.focus(); w.print(); w.close(); }
 
   async function downloadAllQRs() {
     if(allEquipment.length === 0 && allLocations.length === 0) return alert('ไม่มีข้อมูลอุปกรณ์หรือจุดวางในระบบครับ');
@@ -1347,5 +1350,14 @@
 
 </script>
 
+  
+    <!-- QR Scanner Modal -->
+    <div id="qrScannerModal" class="modal-bg">
+      <div class="modal-content" style="text-align: center;">
+        <h3>📷 สแกน QR Code</h3>
+        <div id="qr-reader" style="width: 100%; margin-bottom: 15px;"></div>
+        <button class="btn-danger" onclick="closeScannerModal()">ยกเลิก</button>
+      </div>
+    </div>
   </body>
 </html>
