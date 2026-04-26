@@ -133,7 +133,7 @@
       <div id="tabReturn" style="display:none;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
           <h3 style="margin:0;">อุปกรณ์ที่คุณกำลังใช้งานอยู่</h3>
-          <button class="btn-warning" style="width: 100%; margin-bottom: 20px; display:block; text-align:center; padding:10px; cursor:pointer; border-radius:20px; box-sizing:border-box;" onclick="openScanner('return')">
+          <button class="btn-warning" style="padding:8px 15px; cursor:pointer; border-radius:20px; font-size:14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="openScanner('return')">
             📷 สแกนคืนอุปกรณ์
           </button>
         </div>
@@ -648,8 +648,11 @@
     const listDiv = document.getElementById('myReturnList'); 
     if(!listDiv) return; 
     listDiv.innerHTML = ''; 
-    const myItems = allTransactions.filter(item => item.userId == currentUser.id); 
-    const myRadios = allRadios ? allRadios.filter(r => r.currentUserId == currentUser.id || (r.currentUserName && r.currentUserName === currentUser.name)) : [];
+    const myItems = allTransactions.filter(item => String(item.userId).trim() === String(currentUser.id).trim()); 
+    const myRadios = allRadios ? allRadios.filter(r => 
+      (r.currentUserId && String(r.currentUserId).trim() === String(currentUser.id).trim()) || 
+      (r.currentUserName && String(r.currentUserName).trim() === String(currentUser.name).trim())
+    ) : [];
     
     if(myItems.length === 0 && myRadios.length === 0) { 
       listDiv.innerHTML = '<div style="text-align:center; padding: 20px; color:#8e8e8e;">🎉 คุณไม่มีอุปกรณ์หรือวิทยุที่ค้างคืนอยู่ครับ</div>'; 
