@@ -250,7 +250,7 @@
           <strong style="color:#1565c0;">⚙️ Admin: จัดการวิทยุ</strong>
           <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
             <button class="btn-primary" style="width:auto;" onclick="openAddRadioModal()">+ เพิ่มวิทยุ</button>
-            <button class="btn-success" style="width:auto; background:#17a2b8;" onclick="openRadioQR('ALL', 'วิทยุทั้งหมด')">🖨️ พิมพ์/โหลดทั้งหมด</button>
+            <button class="btn-success" style="width:auto; background:#17a2b8;" onclick="openRadioQR('ALL', 'วิทยุทั้งหมด', 'ALL')">🖨️ พิมพ์/โหลด QR ทั้งหมด</button>
           </div>
         </div>
         <div id="radioGrid" class="equipment-grid"></div>
@@ -479,7 +479,7 @@
         </div>
         <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
           <button class="btn-success" id="btnRadioDownloadAction" style="flex:1; display:none; background:#ff9800;" onclick="downloadAllRadioCodesZip()">📥 โหลด ZIP</button>
-          <button class="btn-primary" id="btnRadioPrintAction" style="flex:1;" onclick="printRadioQR()">🖨️ พิมพ์</button>
+          <button class="btn-primary" id="btnRadioPrintAction" style="flex:1; display:none;" onclick="printRadioQR()">🖨️ พิมพ์</button>
           <button class="btn-danger" style="flex:1;" onclick="document.getElementById('radioQRModal').style.display='none'">ปิด</button>
         </div>
       </div>
@@ -1596,16 +1596,19 @@
     }
   });
 
-  function openRadioQR(id, name) {
-    document.getElementById('radioQRTitle').innerText = id === 'ALL' ? '🖨️ พิมพ์/โหลดป้ายทั้งหมด (23 เครื่อง)' : name;
+  let currentRadioModalAction = 'PRINT';
+
+  function openRadioQR(id, name, action) {
+    currentRadioModalAction = action || 'PRINT';
+    document.getElementById('radioQRTitle').innerText = id === 'ALL' ? '🖨️ พิมพ์/โหลด QR ทั้งหมด (23 เครื่อง)' : name;
     document.getElementById('radioQRIdLabel').innerHTML = id === 'ALL' ? 'รหัสวิทยุทั้งหมด' : 'รหัสอ้างอิง: <strong style="color: #1d1d1f;">' + id + '</strong>';
     
     if (id === 'ALL') {
-       document.getElementById('btnRadioPrintAction').style.display = 'block';
-       document.getElementById('btnRadioDownloadAction').style.display = 'block';
+      document.getElementById('btnRadioPrintAction').style.display = 'inline-block';
+      document.getElementById('btnRadioDownloadAction').style.display = 'inline-block';
     } else {
-       document.getElementById('btnRadioPrintAction').style.display = 'block';
-       document.getElementById('btnRadioDownloadAction').style.display = 'none';
+      document.getElementById('btnRadioPrintAction').style.display = 'inline-block';
+      document.getElementById('btnRadioDownloadAction').style.display = 'none';
     }
 
     currentRadioPrintId = id;
