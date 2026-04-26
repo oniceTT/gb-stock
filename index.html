@@ -836,7 +836,28 @@
     
     // === Optimistic UI Update (ทำทันทีเพื่อให้หายไปเลย ไม่ต้องรอโหลด) ===
     let eq = allEquipment.find(e => e.id === pendingReturnData.eqId);
-    if(eq) eq.available = parseInt(eq.available) + parseInt(pendingReturnData.qty);
+    if(eq) {
+      if(eq.location === locId || !eq.location || eq.location === "") {
+        eq.available = parseInt(eq.available) + parseInt(pendingReturnData.qty);
+        if(!eq.location) eq.location = locId;
+      } else {
+        eq.total = parseInt(eq.total) - parseInt(pendingReturnData.qty);
+        let existing = allEquipment.find(e => e.name === eq.name && e.location === locId && e.id !== eq.id);
+        if(existing) {
+          existing.total = parseInt(existing.total) + parseInt(pendingReturnData.qty);
+          existing.available = parseInt(existing.available) + parseInt(pendingReturnData.qty);
+        } else {
+          allEquipment.push({
+            id: 'sync_' + Date.now(),
+            name: eq.name,
+            image: eq.image,
+            total: parseInt(pendingReturnData.qty),
+            available: parseInt(pendingReturnData.qty),
+            location: locId
+          });
+        }
+      }
+    }
     allTransactions = allTransactions.filter(t => t.row !== pendingReturnData.row);
     renderMyReturnData();
     renderEquipment();
@@ -1098,7 +1119,7 @@
     }).withFailureHandler(err => { hideLoading(); showToast('บันทึกล้มเหลว: '+err.message); setTimeout(() => refreshData(true), 500); }).submitBorrow(currentUser.id, cartCopy); 
   }
 
-  function renderEquipment() { const grid = document.getElementById('equipmentGrid'); if(!grid) return; grid.innerHTML = ''; const searchTxt = document.getElementById('searchInput').value.toLowerCase(); const filteredData = allEquipment.filter(item => { const matchSearch = String(item.name).toLowerCase().includes(searchTxt); let matchStatus = true; if (currentFilter === 'available') matchStatus = item.available > 0; return matchSearch && matchStatus && item.total > 0; }); if (filteredData.length === 0) { grid.innerHTML = '<p>ไม่พบอุปกรณ์</p>'; return; } filteredData.forEach(item => { const card = document.createElement('div'); card.className = 'card'; let imgUrl = item.image ? item.image : 'https://via.placeholder.com/150?text=No+Image'; let fileIdMatch = imgUrl.match(/file\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/); if (fileIdMatch && fileIdMatch[1] && imgUrl.includes('drive.google.com')) { imgUrl = "https://drive.google.com/thumbnail?id=" + fileIdMatch[1] + "&sz=w800"; } const qty = cart[item.id] || 0; let locDisplay = '-'; if (item.location) { let foundLoc = allLocations.find(l => l.id === item.location); locDisplay = foundLoc ? foundLoc.name : item.location; } card.innerHTML = '<img src="' + imgUrl + '" class="card-img"><div class="card-body"><h3 class="card-title">' + item.name + '</h3><div class="card-status">เหลือ: ' + item.available + ' / ' + item.total + '<br><span style="color: #0095f6; font-weight: 500;">📍 ' + locDisplay + '</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', -1)">-</button><span>' + qty + '</span><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', 1)">+</button></div></div>'; grid.appendChild(card); }); }
+  function renderEquipment() { const grid = document.getElementById('equipmentGrid'); if(!grid) return; grid.innerHTML = ''; const searchTxt = document.getElementById('searchInput').value.toLowerCase(); const filteredData = allEquipment.filter(item => { const matchSearch = String(item.name).toLowerCase().includes(searchTxt); let matchStatus = true; if (currentFilter === 'available') matchStatus = item.available > 0; return matchSearch && matchStatus; }); if (filteredData.length === 0) { grid.innerHTML = '<p>ไม่พบอุปกรณ์</p>'; return; } filteredData.forEach(item => { const card = document.createElement('div'); card.className = 'card'; let imgUrl = item.image ? item.image : 'https://via.placeholder.com/150?text=No+Image'; let fileIdMatch = imgUrl.match(/file\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/); if (fileIdMatch && fileIdMatch[1] && imgUrl.includes('drive.google.com')) { imgUrl = "https://drive.google.com/thumbnail?id=" + fileIdMatch[1] + "&sz=w800"; } const qty = cart[item.id] || 0; let locDisplay = '-'; if (item.location) { let foundLoc = allLocations.find(l => l.id === item.location); locDisplay = foundLoc ? foundLoc.name : item.location; } card.innerHTML = '<img src="' + imgUrl + '" class="card-img"><div class="card-body"><h3 class="card-title">' + item.name + '</h3><div class="card-status">เหลือ: ' + item.available + ' / ' + item.total + '<br><span style="color: #0095f6; font-weight: 500;">📍 ' + locDisplay + '</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', -1)">-</button><span>' + qty + '</span><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', 1)">+</button></div></div>'; grid.appendChild(card); }); }
   function setFilter(type, btn) { currentFilter = type; document.querySelectorAll('.filters .filter-btn:not(.btn-warning)').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderEquipment(); }
 
   function loadUsersData() { google.script.run.withSuccessHandler(data => { allUsers = data || []; hideLoading(); renderUsersData(); }).getAllUsers(); }
