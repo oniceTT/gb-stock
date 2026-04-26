@@ -433,9 +433,11 @@
       <div class="modal-content">
         <h3 style="margin-top:0;">🤝 เบิกวิทยุ (Admin)</h3>
         <p style="color:#666; font-size:14px;">กำลังเบิก: <strong id="radioBorrowName" style="color:#262626;"></strong></p>
-        <label>เลือกชื่อผู้รับวิทยุ</label>
-        <input type="text" id="radioBorrowRecipient" list="userDatalist" placeholder="พิมพ์ค้นหาหรือเลือกผู้รับ" style="width:100%; padding:10px; border-radius:8px; border:1px solid #ddd; font-family:inherit;">
-        <datalist id="userDatalist"></datalist>
+        <label>ระบุชื่อผู้รับวิทยุ</label>
+        <div style="position:relative;" id="recipientDropdownWrap">
+          <input type="text" id="radioBorrowRecipient" autocomplete="off" placeholder="🔍 พิมพ์ค้นหาชื่อผู้รับวิทยุ..." style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #ddd; font-family:inherit; box-sizing:border-box;" oninput="filterRecipientList()" onfocus="showRecipientList()">
+          <div id="recipientDropdown" style="display:none; position:absolute; top:100%; left:0; right:0; max-height:200px; overflow-y:auto; background:white; border:1px solid #ddd; border-top:none; border-radius:0 0 8px 8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:999;"></div>
+        </div>
         <div style="display:flex; gap:10px; margin-top:15px;">
           <button class="btn-success" style="flex:1;" onclick="confirmBorrowRadioAdmin()">ยืนยันการเบิก</button>
           <button class="btn-danger" style="flex:1;" onclick="document.getElementById('radioBorrowModal').style.display='none'">ยกเลิก</button>
@@ -1000,25 +1002,70 @@
   }
 
   let pendingBorrowRadioId = null;
+  let recipientUsersList = [];
 
   function doBorrowRadio(radioId) {
     var radio = allRadios.find(function(r){ return r.id === radioId; });
     pendingBorrowRadioId = radioId;
     document.getElementById('radioBorrowName').innerText = radio ? radio.name : 'วิทยุ';
     
-    var dataListHtml = '';
+    recipientUsersList = [];
     if (allUsers && allUsers.length > 0) {
       allUsers.forEach(function(u) {
         if (u.status !== 'Pending') {
-          dataListHtml += '<option value="' + u.name + '">' + u.name + ' (' + u.department + ')</option>';
+          recipientUsersList.push({ name: u.name, department: u.department || '', id: u.id });
         }
       });
     }
-    document.getElementById('userDatalist').innerHTML = dataListHtml;
     document.getElementById('radioBorrowRecipient').value = '';
+    document.getElementById('recipientDropdown').style.display = 'none';
     
     document.getElementById('radioBorrowModal').style.display = 'flex';
   }
+
+  function showRecipientList() {
+    filterRecipientList();
+  }
+
+  function filterRecipientList() {
+    var input = document.getElementById('radioBorrowRecipient');
+    var dropdown = document.getElementById('recipientDropdown');
+    var query = input.value.trim().toLowerCase();
+    
+    var filtered = recipientUsersList.filter(function(u) {
+      return u.name.toLowerCase().includes(query) || u.department.toLowerCase().includes(query);
+    });
+    
+    if (filtered.length === 0) {
+      dropdown.innerHTML = '<div style="padding:10px 12px; color:#999; font-size:13px; text-align:center;">ไม่พบรายชื่อ</div>';
+      dropdown.style.display = 'block';
+      return;
+    }
+    
+    var html = '';
+    filtered.forEach(function(u) {
+      html += '<div class="recipient-item" onmousedown="selectRecipient(\'' + u.name.replace(/'/g, "\\'") + '\')" style="padding:10px 12px; cursor:pointer; border-bottom:1px solid #f0f0f0; transition:background 0.15s;"'
+        + ' onmouseover="this.style.background=\'#f0f7ff\'" onmouseout="this.style.background=\'white\'">'
+        + '<div style="font-weight:500; font-size:14px; color:#262626;">' + u.name + '</div>'
+        + '<div style="font-size:11px; color:#999;">แผนก: ' + u.department + '</div>'
+        + '</div>';
+    });
+    dropdown.innerHTML = html;
+    dropdown.style.display = 'block';
+  }
+
+  function selectRecipient(name) {
+    document.getElementById('radioBorrowRecipient').value = name;
+    document.getElementById('recipientDropdown').style.display = 'none';
+  }
+
+  // Close dropdown when clicking outside
+  document.addEventListener('click', function(e) {
+    var wrap = document.getElementById('recipientDropdownWrap');
+    if (wrap && !wrap.contains(e.target)) {
+      document.getElementById('recipientDropdown').style.display = 'none';
+    }
+  });
 
   function confirmBorrowRadioAdmin() {
     var recipientName = document.getElementById('radioBorrowRecipient').value.trim();
