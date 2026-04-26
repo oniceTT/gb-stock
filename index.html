@@ -505,7 +505,7 @@
     else if (actionName === 'loginUser') { payload.username = args[0]; payload.password = args[1]; } 
     else if (actionName === 'registerUser') { payload.username = args[0]; payload.password = args[1]; payload.name = args[2]; payload.department = args[3]; } 
     else if (actionName === 'updateMyProfile') { payload.userId = args[0]; payload.name = args[1]; payload.password = args[2]; payload.department = args[3]; } 
-    else if (actionName === 'processReturn') { payload.row = args[0]; payload.eqId = args[1]; payload.qty = args[2]; payload.locId = args[3]; payload.photoUrl = args[4]; } 
+    else if (actionName === 'processReturn') { payload.row = args[0]; payload.eqId = args[1]; payload.qty = args[2]; payload.locId = args[3]; payload.photoUrl = args[4]; payload.eqStatus = args[5]; } 
     else if (actionName === 'uploadImageToDrive') { payload.base64Data = args[0]; payload.filename = args[1]; } 
     else if (actionName === 'submitBorrow') { payload.userId = args[0]; payload.cart = args[1]; payload.source = args[2]; } 
     else if (actionName === 'approveUser') { payload.row = args[0]; } 
@@ -518,7 +518,7 @@
     else if (actionName === 'deleteLocationData') { payload.id = args[0]; }
     else if (actionName === 'getRadios') { }
     else if (actionName === 'borrowRadio') { payload.radioId = args[0]; payload.userId = args[1]; payload.userName = args[2]; }
-    else if (actionName === 'returnRadio') { payload.radioId = args[0]; payload.locId = args[1]; }
+    else if (actionName === 'returnRadio') { payload.radioId = args[0]; payload.locId = args[1]; payload.batteryStatus = args[2]; }
     else if (actionName === 'updateRadioBattery') { payload.radioId = args[0]; payload.status = args[1]; }
     else if (actionName === 'saveRadio') { payload.data = args[0]; }
     else if (actionName === 'deleteRadio') { payload.id = args[0]; }
@@ -579,7 +579,7 @@
     else if (currentUser) { switchTab('tabBorrow', true); }
   });
 
-  function refreshDataQuietly() { google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; renderEquipment(); if (document.getElementById('tabReturn').style.display === 'block') renderMyReturnData(); if (document.getElementById('tabAdmin').style.display === 'block') renderAdminData(); }).getInitialData(); }
+  function refreshDataQuietly() { google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; google.script.run.withSuccessHandler(function(res){ if(res && res.success) allRadios = res.radios || []; renderEquipment(); if (document.getElementById('tabReturn').style.display === 'block') renderMyReturnData(); if (document.getElementById('tabAdmin').style.display === 'block') renderAdminData(); }).getRadios(); }).getInitialData(); }
   function safeSetStorage(key, val) { try { localStorage.setItem(key, val); } catch(e){} }
   function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch(e){} }
   
@@ -920,7 +920,16 @@
   function populateLocationSelect() { const s = document.getElementById('adminLocSelect'); let o = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(l => o += '<option value="' + l.id + '">' + l.name + '</option>'); if(s) s.innerHTML = o; }
   function populateEqSelect() { const s = document.getElementById('adminEqSelect'); let o = '<option value="">-- เลือกอุปกรณ์ --</option>'; allEquipment.forEach(e => o += '<option value="' + e.id + '">' + e.name + '</option>'); if(s) s.innerHTML = o; }
   function generateQR(type) { let selectElement = type === 'loc' ? document.getElementById('adminLocSelect') : document.getElementById('adminEqSelect'); let id = selectElement.value; const resDiv = document.getElementById('adminQRResult'); if(!id) { resDiv.innerHTML = ''; return; } let nameWithPrefix = selectElement.options[selectElement.selectedIndex].text; resDiv.innerHTML = `<div id="printArea" style="border: 2px dashed #0095f6; padding: 25px 20px; border-radius: 12px; display: inline-block; background: white; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 250px;"><h3 style="margin: 0 0 15px 0; color: #262626; font-size: 22px;">${nameWithPrefix}</h3><canvas id="qrDisplayCanvas" style="border: 1px solid #efefef; padding: 10px; border-radius: 8px;"></canvas><p style="margin: 15px 0 0 0; font-size: 16px; color: #8e8e8e;">รหัสอ้างอิง: <strong style="color: #262626;">${id}</strong></p></div><br><button class="btn-primary" style="width: auto; margin-top: 15px; border-radius: 30px;" onclick="printQR()">🖨️ พิมพ์ป้าย QR Code</button>`; new QRious({ element: document.getElementById('qrDisplayCanvas'), value: id, size: 200, level: 'H' }); }
-  function printQR() { var printContents = document.getElementById('printArea').outerHTML; var originalContents = document.body.innerHTML; document.body.innerHTML = '<div style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center;">' + printContents + '</div>'; window.print(); document.body.innerHTML = originalContents; location.reload(); }
+  function printQR() { var printContents = document.getElementById('printArea').outerHTML; var w = window.open('', '_blank', 'width=400,height=600'); w.document.write('<html><head><title>Print QR</title></head><body style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; font-family:sans-serif;">' + printContents + '
+    <!-- QR Scanner Modal -->
+    <div id="qrScannerModal" class="modal-bg">
+      <div class="modal-content" style="text-align: center;">
+        <h3>📷 สแกน QR Code</h3>
+        <div id="qr-reader" style="width: 100%; margin-bottom: 15px;"></div>
+        <button class="btn-danger" onclick="closeScannerModal()">ยกเลิก</button>
+      </div>
+    </div>
+  </body></html>'); w.document.close(); w.focus(); w.print(); w.close(); }
 
   async function downloadAllQRs() {
     if(allEquipment.length === 0 && allLocations.length === 0) return alert('ไม่มีข้อมูลอุปกรณ์หรือจุดวางในระบบครับ');
@@ -1227,15 +1236,12 @@
   function printRadioQR() {
     var title = document.getElementById('radioQRTitle').innerText;
     var printContents = document.getElementById('radioQRPrintArea').outerHTML;
-    // Add title to the print area
     var printHtml = '<div style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; flex-direction:column;">'
       + '<h2 style="margin:0 0 15px 0; font-family:sans-serif;">' + title + '</h2>'
       + printContents + '</div>';
-    var originalContents = document.body.innerHTML;
-    document.body.innerHTML = printHtml;
-    window.print();
-    document.body.innerHTML = originalContents;
-    location.reload();
+    var w = window.open('', '_blank', 'width=400,height=600');
+    w.document.write('<html><head><title>Print Radio QR</title></head><body style="font-family:sans-serif;">' + printHtml + '</body></html>');
+    w.document.close(); w.focus(); w.print(); w.close();
   }
 
   // ==========================================
@@ -1324,30 +1330,22 @@
      }).withFailureHandler(showError).submitBorrow(currentUser.id, toSubmit, 'POS');
   }
 
+  let posAudioCtx = null;
   function playPOSBeep() {
-     const ctx = new (window.AudioContext || window.webkitAudioContext)();
-     const osc = ctx.createOscillator();
-     const gain = ctx.createGain();
+     if (!posAudioCtx) posAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+     const osc = posAudioCtx.createOscillator();
+     const gain = posAudioCtx.createGain();
      osc.connect(gain);
-     gain.connect(ctx.destination);
+     gain.connect(posAudioCtx.destination);
      osc.type = 'sine';
      osc.frequency.value = 1000;
-     gain.gain.setValueAtTime(1, ctx.currentTime);
-     gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+     gain.gain.setValueAtTime(1, posAudioCtx.currentTime);
+     gain.gain.exponentialRampToValueAtTime(0.001, posAudioCtx.currentTime + 0.1);
      osc.start();
-     osc.stop(ctx.currentTime + 0.1);
+     osc.stop(posAudioCtx.currentTime + 0.1);
   }
 
 </script>
 
-  
-    <!-- QR Scanner Modal -->
-    <div id="qrScannerModal" class="modal-bg">
-      <div class="modal-content" style="text-align: center;">
-        <h3>📷 สแกน QR Code</h3>
-        <div id="qr-reader" style="width: 100%; margin-bottom: 15px;"></div>
-        <button class="btn-danger" onclick="closeScannerModal()">ยกเลิก</button>
-      </div>
-    </div>
   </body>
 </html>
