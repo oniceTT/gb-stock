@@ -763,24 +763,28 @@
     if(!base64Data) return alert('กรุณาถ่ายรูปหลักฐานการคืนด้วยครับ');
     
     document.getElementById('returnLocModal').style.display = 'none'; 
-    
-    // Optimistic UI Update
-    let eq = allEquipment.find(e => e.id === pendingReturnData.eqId);
-    if(eq) eq.available = parseInt(eq.available) + parseInt(pendingReturnData.qty);
-    allTransactions = allTransactions.filter(t => t.row !== pendingReturnData.row);
-    renderMyReturnData();
-    renderEquipment();
+    showLoading('กำลังอัปโหลดรูปภาพและบันทึกการรับคืน...'); 
     
     google.script.run.withSuccessHandler(res => {
       if (res.success) {
         google.script.run.withSuccessHandler(retRes => {
+          hideLoading();
+          alert('✅ ' + retRes.message);
+          // Optimistic UI Update
+          let eq = allEquipment.find(e => e.id === pendingReturnData.eqId);
+          if(eq) eq.available = parseInt(eq.available) + parseInt(pendingReturnData.qty);
+          allTransactions = allTransactions.filter(t => t.row !== pendingReturnData.row);
+          renderMyReturnData();
+          renderEquipment();
           refreshData(true); 
-        }).withFailureHandler(err => { alert('อัปเดตข้อมูลล้มเหลว: '+err.message); refreshData(true); }).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url, eqStatus);
+        }).withFailureHandler(err => { hideLoading(); alert('อัปเดตข้อมูลล้มเหลว: '+err.message); refreshData(true); }).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url, eqStatus);
       } else {
+        hideLoading();
         alert('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
         refreshData(true);
       }
     }).withFailureHandler(function(err) {
+      hideLoading();
       alert('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
       refreshData(true);
     }).uploadImageToDrive(base64Data, "RET_" + pendingReturnData.eqId + "_" + new Date().getTime());
@@ -996,13 +1000,19 @@
   function updateCartFloat() { let total = 0; for(let k in cart) total += cart[k]; const floatBtn = document.getElementById('cartFloat'); document.getElementById('cartCount').innerText = "(" + total + ")"; floatBtn.style.display = (total > 0 && document.getElementById('tabBorrow').style.display === 'block') ? 'block' : 'none'; }
   function checkout() { 
     if(!confirm('ยืนยันเบิกอุปกรณ์ที่เลือกไว้?')) return; 
-    for (let eqId in cart) { let eq = allEquipment.find(e => e.id === eqId); if (eq) eq.available = parseInt(eq.available) - cart[eqId]; }
-    const cartCopy = {...cart}; cart = {}; 
-    updateCartFloat(); renderEquipment(); 
+    showLoading('กำลังบันทึก...');
+    const cartCopy = {...cart}; 
     google.script.run.withSuccessHandler(res => { 
-      if(!res.success) alert('❌ ' + res.message);
+      hideLoading();
+      if(!res.success) {
+          alert('❌ ' + res.message);
+      } else {
+          alert('✅ ' + res.message);
+          for (let eqId in cart) { let eq = allEquipment.find(e => e.id === eqId); if (eq) eq.available = parseInt(eq.available) - cart[eqId]; }
+          cart = {}; updateCartFloat(); renderEquipment(); 
+      }
       refreshData(true); 
-    }).withFailureHandler(err => { alert('บันทึกล้มเหลว: '+err.message); refreshData(true); }).submitBorrow(currentUser.id, cartCopy); 
+    }).withFailureHandler(err => { hideLoading(); alert('บันทึกล้มเหลว: '+err.message); refreshData(true); }).submitBorrow(currentUser.id, cartCopy); 
   }
 
   function renderEquipment() { const grid = document.getElementById('equipmentGrid'); if(!grid) return; grid.innerHTML = ''; const searchTxt = document.getElementById('searchInput').value.toLowerCase(); const filteredData = allEquipment.filter(item => { const matchSearch = String(item.name).toLowerCase().includes(searchTxt); let matchStatus = true; if (currentFilter === 'available') matchStatus = item.available > 0; return matchSearch && matchStatus && item.total > 0; }); if (filteredData.length === 0) { grid.innerHTML = '<p>ไม่พบอุปกรณ์</p>'; return; } filteredData.forEach(item => { const card = document.createElement('div'); card.className = 'card'; let imgUrl = item.image ? item.image : 'https://via.placeholder.com/150?text=No+Image'; let fileIdMatch = imgUrl.match(/file\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/); if (fileIdMatch && fileIdMatch[1] && imgUrl.includes('drive.google.com')) { imgUrl = "https://drive.google.com/thumbnail?id=" + fileIdMatch[1] + "&sz=w800"; } const qty = cart[item.id] || 0; let locDisplay = '-'; if (item.location) { let foundLoc = allLocations.find(l => l.id === item.location); locDisplay = foundLoc ? foundLoc.name : item.location; } card.innerHTML = '<img src="' + imgUrl + '" class="card-img"><div class="card-body"><h3 class="card-title">' + item.name + '</h3><div class="card-status">เหลือ: ' + item.available + ' / ' + item.total + '<br><span style="color: #0095f6; font-weight: 500;">📍 ' + locDisplay + '</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', -1)">-</button><span>' + qty + '</span><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', 1)">+</button></div></div>'; grid.appendChild(card); }); }
@@ -1451,15 +1461,19 @@
      if (!hasItem) return alert('ตะกร้าว่างเปล่า');
      if (!confirm('ยืนยันทำรายการ?')) return;
      
-     for (let id in toSubmit) { let eq = allEquipment.find(e => e.id === id); if (eq) eq.available = parseInt(eq.available) - toSubmit[id]; }
-     posCart = {};
-     renderPOSCart();
-     renderEquipment();
+     showLoading('กำลังบันทึก...');
      
      google.script.run.withSuccessHandler(res => {
-         if(!res.success) alert('❌ ' + res.message);
+         hideLoading();
+         if(!res.success) {
+             alert('❌ ' + res.message);
+         } else {
+             alert('✅ ' + res.message);
+             for (let id in toSubmit) { let eq = allEquipment.find(e => e.id === id); if (eq) eq.available = parseInt(eq.available) - toSubmit[id]; }
+             posCart = {}; renderPOSCart(); renderEquipment();
+         }
          refreshData(true);
-     }).withFailureHandler(err => { alert('การบันทึกเบื้องหลังล้มเหลว: ' + err.message); refreshData(true); }).submitBorrow(currentUser.id, toSubmit, 'POS');
+     }).withFailureHandler(err => { hideLoading(); alert('การบันทึกล้มเหลว: ' + err.message); refreshData(true); }).submitBorrow(currentUser.id, toSubmit, 'POS');
   }
 
   let posAudioCtx = null;
