@@ -503,7 +503,7 @@
 
   window.addEventListener('popstate', function(event) {
     if (event.state && event.state.tab) { switchTab(event.state.tab, true); } 
-    else if (currentUser) { switchTab('borrow', true); }
+    else if (currentUser) { switchTab('tabBorrow', true); }
   });
 
   function refreshDataQuietly() { google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; renderEquipment(); if (document.getElementById('tabReturn').style.display === 'block') renderMyReturnData(); if (document.getElementById('tabAdmin').style.display === 'block') renderAdminData(); }).getInitialData(); }
@@ -519,14 +519,14 @@
     document.getElementById('logoutBtn').style.display = 'block'; document.getElementById('mainNav').style.display = 'block';
     let roleText = currentUser.role === 'Superadmin' ? '🌟 Superadmin: ' : (currentUser.role === 'Admin' ? 'แอดมิน: ' : 'คุณ: ');
     document.getElementById('welcomeText').innerText = roleText + currentUser.name;
-    document.getElementById('btnTabAdmin').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'block' : 'none';
+    document.getElementById('navAdmin').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'block' : 'none';
     document.getElementById('myProfileUsername').value = currentUser.username || '';
     document.getElementById('myProfilePassword').value = currentUser.password || ''; document.getElementById('myProfileName').value = currentUser.name || ''; document.getElementById('myProfileDept').value = currentUser.department || '-';
     refreshData();
     window.history.replaceState({ tab: 'borrow' }, '', '#borrow');
   }
 
-  function refreshData() { showLoading('กำลังโหลดข้อมูลระบบ...'); google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; hideLoading(); renderEquipment(); if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } else if (document.getElementById('tabAdmin').style.display === 'block') { showAdminSubTab('return'); } else if (document.getElementById('tabProfile').style.display === 'block') { } else { switchTab('borrow'); } }).withFailureHandler(showError).getInitialData(); }
+  function refreshData() { showLoading('กำลังโหลดข้อมูลระบบ...'); google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; hideLoading(); renderEquipment(); if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } else if (document.getElementById('tabAdmin').style.display === 'block') { showAdminSubTab('return'); } else if (document.getElementById('tabProfile').style.display === 'block') { } else { switchTab('tabBorrow'); } }).withFailureHandler(showError).getInitialData(); }
   function logout() { if(!confirm('ยืนยันการออกจากระบบ?')) return; currentUser = null; cart = {}; safeRemoveStorage('myAppUser'); document.getElementById('authSection').style.display = 'block'; document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('mainNav').style.display = 'none'; document.getElementById('tabBorrow').style.display = 'none'; document.getElementById('tabReturn').style.display = 'none'; document.getElementById('tabProfile').style.display = 'none'; document.getElementById('tabAdmin').style.display = 'none'; document.getElementById('logoutBtn').style.display = 'none'; document.getElementById('welcomeText').innerText = ''; document.getElementById('cartFloat').style.display = 'none'; }
   
   function switchTab(tabName, navElement, isHistoryBack = false) { 
