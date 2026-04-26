@@ -798,6 +798,7 @@
     });
   }
   function prepareReturn(row, eqId, qty, eqName) { 
+    if (row === -1) return showToast('⏳ ระบบกำลังซิงค์ข้อมูลกับเซิร์ฟเวอร์ กรุณารอสักครู่แล้วลองใหม่ครับ');
     pendingReturnData = { row: row, eqId: eqId, qty: qty, eqName: eqName }; 
     document.getElementById('returnEqNamePreview').innerText = eqName; 
     const sel = document.getElementById('selectReturnLoc'); 
@@ -845,17 +846,17 @@
           allTransactions = allTransactions.filter(t => t.row !== pendingReturnData.row);
           renderMyReturnData();
           renderEquipment();
-          refreshData(true); 
-        }).withFailureHandler(err => { hideLoading(); showToast('อัปเดตข้อมูลล้มเหลว: '+err.message); refreshData(true); }).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url, eqStatus);
+          setTimeout(() => refreshData(true), 2500); 
+        }).withFailureHandler(err => { hideLoading(); showToast('อัปเดตข้อมูลล้มเหลว: '+err.message); setTimeout(() => refreshData(true), 2500); }).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url, eqStatus);
       } else {
         hideLoading();
         showToast('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
-        refreshData(true);
+        setTimeout(() => refreshData(true), 2500);
       }
     }).withFailureHandler(function(err) {
       hideLoading();
       showToast('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
-      refreshData(true);
+      setTimeout(() => refreshData(true), 2500);
     }).uploadImageToDrive(base64Data, "RET_" + pendingReturnData.eqId + "_" + new Date().getTime());
   }
 
@@ -1077,11 +1078,17 @@
           showToast('❌ ' + res.message);
       } else {
           showToast('✅ ' + res.message);
-          for (let eqId in cart) { let eq = allEquipment.find(e => e.id === eqId); if (eq) eq.available = parseInt(eq.available) - cart[eqId]; }
-          cart = {}; updateCartFloat(); renderEquipment(); 
+          for (let eqId in cart) { 
+              let eq = allEquipment.find(e => e.id === eqId); 
+              if (eq) {
+                  eq.available = parseInt(eq.available) - cart[eqId]; 
+                  allTransactions.unshift({ row: -1, transId: 'sync', userId: currentUser.id, userName: currentUser.name, eqId: eqId, eqName: eq.name, qty: cart[eqId], action: 'Borrow' });
+              }
+          }
+          cart = {}; updateCartFloat(); renderEquipment(); renderMyReturnData();
       }
-      refreshData(true); 
-    }).withFailureHandler(err => { hideLoading(); showToast('บันทึกล้มเหลว: '+err.message); refreshData(true); }).submitBorrow(currentUser.id, cartCopy); 
+      setTimeout(() => refreshData(true), 2500); 
+    }).withFailureHandler(err => { hideLoading(); showToast('บันทึกล้มเหลว: '+err.message); setTimeout(() => refreshData(true), 2500); }).submitBorrow(currentUser.id, cartCopy); 
   }
 
   function renderEquipment() { const grid = document.getElementById('equipmentGrid'); if(!grid) return; grid.innerHTML = ''; const searchTxt = document.getElementById('searchInput').value.toLowerCase(); const filteredData = allEquipment.filter(item => { const matchSearch = String(item.name).toLowerCase().includes(searchTxt); let matchStatus = true; if (currentFilter === 'available') matchStatus = item.available > 0; return matchSearch && matchStatus && item.total > 0; }); if (filteredData.length === 0) { grid.innerHTML = '<p>ไม่พบอุปกรณ์</p>'; return; } filteredData.forEach(item => { const card = document.createElement('div'); card.className = 'card'; let imgUrl = item.image ? item.image : 'https://via.placeholder.com/150?text=No+Image'; let fileIdMatch = imgUrl.match(/file\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/); if (fileIdMatch && fileIdMatch[1] && imgUrl.includes('drive.google.com')) { imgUrl = "https://drive.google.com/thumbnail?id=" + fileIdMatch[1] + "&sz=w800"; } const qty = cart[item.id] || 0; let locDisplay = '-'; if (item.location) { let foundLoc = allLocations.find(l => l.id === item.location); locDisplay = foundLoc ? foundLoc.name : item.location; } card.innerHTML = '<img src="' + imgUrl + '" class="card-img"><div class="card-body"><h3 class="card-title">' + item.name + '</h3><div class="card-status">เหลือ: ' + item.available + ' / ' + item.total + '<br><span style="color: #0095f6; font-weight: 500;">📍 ' + locDisplay + '</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', -1)">-</button><span>' + qty + '</span><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', 1)">+</button></div></div>'; grid.appendChild(card); }); }
@@ -1538,11 +1545,17 @@
              showToast('❌ ' + res.message);
          } else {
              showToast('✅ ' + res.message);
-             for (let id in toSubmit) { let eq = allEquipment.find(e => e.id === id); if (eq) eq.available = parseInt(eq.available) - toSubmit[id]; }
-             posCart = {}; renderPOSCart(); renderEquipment();
+             for (let id in toSubmit) { 
+                 let eq = allEquipment.find(e => e.id === id); 
+                 if (eq) {
+                     eq.available = parseInt(eq.available) - toSubmit[id]; 
+                     allTransactions.unshift({ row: -1, transId: 'sync', userId: currentUser.id, userName: currentUser.name, eqId: id, eqName: eq.name, qty: toSubmit[id], action: 'Borrow (POS)' });
+                 }
+             }
+             posCart = {}; renderPOSCart(); renderEquipment(); renderMyReturnData();
          }
-         refreshData(true);
-     }).withFailureHandler(err => { hideLoading(); showToast('การบันทึกล้มเหลว: ' + err.message); refreshData(true); }).submitBorrow(currentUser.id, toSubmit, 'POS');
+         setTimeout(() => refreshData(true), 2500);
+     }).withFailureHandler(err => { hideLoading(); showToast('การบันทึกล้มเหลว: ' + err.message); setTimeout(() => refreshData(true), 2500); }).submitBorrow(currentUser.id, toSubmit, 'POS');
   }
 
   let posAudioCtx = null;
