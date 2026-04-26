@@ -645,7 +645,10 @@
     if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } 
     if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } 
     else if (document.getElementById('tabAdmin').style.display === 'block') { showAdminSubTab('return'); } 
+    else if (document.getElementById('tabRadio').style.display === 'block') { renderRadioTab(); } 
+    else if (document.getElementById('tabPOS').style.display === 'block') { renderPOSCart(); } 
     else if (document.getElementById('tabProfile').style.display === 'block') { } 
+    else if (document.getElementById('tabBorrow').style.display === 'block') { } 
     else { switchTab('tabBorrow'); } 
   }
   function logout() { if(!confirm('ยืนยันการออกจากระบบ?')) return; currentUser = null; cart = {}; safeRemoveStorage('myAppUser'); document.getElementById('authSection').style.display = 'block'; document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('mainNav').style.display = 'none'; document.getElementById('tabBorrow').style.display = 'none'; document.getElementById('tabReturn').style.display = 'none'; document.getElementById('tabProfile').style.display = 'none'; document.getElementById('tabAdmin').style.display = 'none'; document.getElementById('logoutBtn').style.display = 'none'; document.getElementById('welcomeText').innerText = ''; document.getElementById('cartFloat').style.display = 'none'; }
