@@ -289,11 +289,10 @@
         </div>
         
         <h3 style="margin-top:10px; margin-bottom: 5px;">📸 ถ่ายรูปหลักฐานการคืน</h3>
-        <label class="upload-zone">
+        <button class="upload-zone" style="width: 100%; border: 2px dashed #007aff; background: #f0f8ff; color: #007aff;" onclick="openInAppCamera('returnImagePreview', 'returnImageBase64')">
           <span style="font-size: 28px; display: block; margin-bottom: 8px;">📷</span>
-          แตะเพื่อถ่ายรูปด้วยแอปกล้อง
-          <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleReturnPhoto(event)">
-        </label>
+          แตะเพื่อเปิดกล้องหน้าเว็บ (บังคับ)
+        </button>
         <img id="returnImagePreview" style="width:100%; display:none; border-radius:8px; margin-bottom:15px;">
         <input type="hidden" id="returnImageBase64">
         
@@ -313,10 +312,9 @@
         
         <label>📸 รูปภาพอุปกรณ์ (ถ่ายเอง หรืออัปโหลด)</label>
         <div style="display:flex; gap:10px; margin-top:5px; margin-bottom:15px;">
-          <label class="btn-primary" style="flex:1; margin-top: 0; padding: 12px; font-weight: 500;">
-            📷 ถ่ายรูป
-            <input type="file" accept="image/*" capture="environment" style="display:none;" onchange="handleEqPhoto(event)">
-          </label>
+          <button class="btn-primary" style="flex:1; margin-top: 0; padding: 12px; font-weight: 500;" onclick="openInAppCamera('editEqImagePreviewUI', 'editEqImageBase64')">
+            📷 ถ่ายรูปหน้าเว็บ
+          </button>
           <label class="btn-success" style="flex:1; margin-top: 0; padding: 12px; font-weight: 500; background-color: #17a2b8;">
             🖼️ เลือกจากเครื่อง
             <input type="file" accept="image/*" style="display:none;" onchange="handleEqPhoto(event)">
@@ -871,6 +869,66 @@
     reader.readAsDataURL(file);
   }
 
+  let currentCameraStream = null;
+  let currentCameraTargetPreview = null;
+  let currentCameraTargetBase64 = null;
+
+  function openInAppCamera(previewId, base64Id) {
+    currentCameraTargetPreview = previewId;
+    currentCameraTargetBase64 = base64Id;
+    document.getElementById('cameraModal').style.display = 'flex';
+    
+    const constraints = { video: { facingMode: 'environment' } };
+    navigator.mediaDevices.getUserMedia(constraints)
+      .then(function(stream) {
+        currentCameraStream = stream;
+        const video = document.getElementById('cameraVideo');
+        video.srcObject = stream;
+      })
+      .catch(function(err) {
+        alert("เบราว์เซอร์ไม่รองรับกล้อง หรือไม่ได้รับอนุญาต: " + err.message);
+        closeCameraModal();
+      });
+  }
+
+  function closeCameraModal() {
+    document.getElementById('cameraModal').style.display = 'none';
+    if (currentCameraStream) {
+      currentCameraStream.getTracks().forEach(track => track.stop());
+      currentCameraStream = null;
+    }
+    const video = document.getElementById('cameraVideo');
+    if (video) video.srcObject = null;
+  }
+
+  function captureCameraPhoto() {
+    const video = document.getElementById('cameraVideo');
+    if (!video || !video.videoWidth) return;
+    
+    const canvas = document.createElement('canvas');
+    let width = video.videoWidth;
+    let height = video.videoHeight;
+    const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
+    
+    if (width > height) {
+      if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+    } else {
+      if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+    }
+    
+    canvas.width = width; canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.6); // Compress to 60% quality directly
+    
+    document.getElementById(currentCameraTargetPreview).src = dataUrl;
+    document.getElementById(currentCameraTargetPreview).style.display = 'block';
+    document.getElementById(currentCameraTargetBase64).value = dataUrl;
+    
+    closeCameraModal();
+  }
+
+  // Fallback for upload file
   function handleReturnPhoto(event) {
     if (event.target.files.length == 0) return;
     compressImageAndSet(event.target.files[0], 'returnImagePreview', 'returnImageBase64');
@@ -1414,6 +1472,18 @@
         <h3>📷 สแกน QR Code</h3>
         <div id="qr-reader" style="width: 100%; margin-bottom: 15px;"></div>
         <button class="btn-danger" onclick="closeScannerModal()">ยกเลิก</button>
+      </div>
+    </div>
+
+    <!-- In-App Camera Modal -->
+    <div id="cameraModal" class="modal-bg">
+      <div class="modal-content" style="text-align: center; max-width: 500px; padding: 20px;">
+        <h3 style="margin-top: 0;">📷 ถ่ายรูป</h3>
+        <video id="cameraVideo" style="width: 100%; border-radius: 12px; background: #000; margin-bottom: 15px;" autoplay playsinline></video>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn-primary" onclick="captureCameraPhoto()" style="flex: 2; margin-top: 0; font-size: 18px;">📸 กดถ่ายรูป</button>
+          <button class="btn-danger" onclick="closeCameraModal()" style="flex: 1; margin-top: 0;">ยกเลิก</button>
+        </div>
       </div>
     </div>
   </body>
