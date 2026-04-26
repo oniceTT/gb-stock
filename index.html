@@ -584,7 +584,7 @@
     else if (currentUser) { switchTab('tabBorrow', true); }
   });
 
-  function refreshDataQuietly() { google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; google.script.run.withSuccessHandler(function(res){ if(res && res.success) allRadios = res.radios || []; renderEquipment(); if (document.getElementById('tabReturn').style.display === 'block') renderMyReturnData(); if (document.getElementById('tabAdmin').style.display === 'block') renderAdminData(); }).getRadios(); }).getInitialData(); }
+  function refreshDataQuietly() { refreshData(true); }
   function safeSetStorage(key, val) { try { localStorage.setItem(key, val); } catch(e){} }
   function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch(e){} }
   
@@ -610,7 +610,44 @@
     } catch(e) { console.warn('replaceState not supported on file://', e); }
   }
 
-  function refreshData() { showLoading('กำลังโหลดข้อมูลระบบ...'); google.script.run.withSuccessHandler(data => { allEquipment = data.equipments || []; allTransactions = data.transactions || []; allLocations = data.locations || []; google.script.run.withSuccessHandler(res => { if (res && res.success) allRadios = res.radios || []; hideLoading(); renderEquipment(); if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } else if (document.getElementById('tabAdmin').style.display === 'block') { showAdminSubTab('return'); } else if (document.getElementById('tabProfile').style.display === 'block') { } else { switchTab('tabBorrow'); } }).withFailureHandler(showError).getRadios(); }).withFailureHandler(showError).getInitialData(); }
+  async function refreshData(isQuiet = false) { 
+    if (!isQuiet) showLoading('กำลังโหลดข้อมูลระบบ...'); 
+    if (!isQuiet) {
+      try {
+        const cEq = localStorage.getItem('cache_equip'); const cTx = localStorage.getItem('cache_trans');
+        const cLoc = localStorage.getItem('cache_loc'); const cRad = localStorage.getItem('cache_radio');
+        if (cEq) allEquipment = JSON.parse(cEq); if (cTx) allTransactions = JSON.parse(cTx);
+        if (cLoc) allLocations = JSON.parse(cLoc); if (cRad) allRadios = JSON.parse(cRad);
+        if (cEq && cTx) {
+          hideLoading();
+          finishRenderData();
+          isQuiet = true;
+        }
+      } catch(e) {}
+    }
+    try {
+      const [initData, radData] = await Promise.all([
+        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getInitialData()),
+        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getRadios())
+      ]);
+      allEquipment = initData.equipments || []; allTransactions = initData.transactions || []; allLocations = initData.locations || [];
+      if (radData && radData.success) allRadios = radData.radios || [];
+      localStorage.setItem('cache_equip', JSON.stringify(allEquipment)); localStorage.setItem('cache_trans', JSON.stringify(allTransactions));
+      localStorage.setItem('cache_loc', JSON.stringify(allLocations)); localStorage.setItem('cache_radio', JSON.stringify(allRadios));
+      if (!isQuiet) hideLoading();
+      finishRenderData();
+      if (isQuiet && document.getElementById('tabAdmin').style.display === 'block') renderAdminData();
+    } catch(err) { if(!isQuiet) showError(err); }
+  }
+
+  function finishRenderData() {
+    renderEquipment(); 
+    if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } 
+    if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } 
+    else if (document.getElementById('tabAdmin').style.display === 'block') { showAdminSubTab('return'); } 
+    else if (document.getElementById('tabProfile').style.display === 'block') { } 
+    else { switchTab('tabBorrow'); } 
+  }
   function logout() { if(!confirm('ยืนยันการออกจากระบบ?')) return; currentUser = null; cart = {}; safeRemoveStorage('myAppUser'); document.getElementById('authSection').style.display = 'block'; document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('mainNav').style.display = 'none'; document.getElementById('tabBorrow').style.display = 'none'; document.getElementById('tabReturn').style.display = 'none'; document.getElementById('tabProfile').style.display = 'none'; document.getElementById('tabAdmin').style.display = 'none'; document.getElementById('logoutBtn').style.display = 'none'; document.getElementById('welcomeText').innerText = ''; document.getElementById('cartFloat').style.display = 'none'; }
   
   function switchTab(tabName, navElement, isHistoryBack = false) { 
@@ -647,15 +684,17 @@
   }
 
   function saveMyProfile() { const u = document.getElementById('myProfileUsername').value; const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!u || !p || !n) return alert('กรุณากรอก Username รหัสผ่าน และชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); alert(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, p, d); }
-  function loadTransactions(isAdminView) { 
-    google.script.run.withSuccessHandler(data => { 
-      allTransactions = data || []; 
-      google.script.run.withSuccessHandler(function(res) {
-         if (res && res.success) allRadios = res.radios || [];
-         hideLoading(); 
-         if(isAdminView) renderAdminData(); else renderMyReturnData(); 
-      }).withFailureHandler(showError).getRadios();
-    }).withFailureHandler(showError).getActiveTransactions(); 
+  async function loadTransactions(isAdminView) { 
+    try {
+      const [txData, radData] = await Promise.all([
+        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getActiveTransactions()),
+        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getRadios())
+      ]);
+      allTransactions = txData || [];
+      if (radData && radData.success) allRadios = radData.radios || [];
+      hideLoading();
+      if(isAdminView) renderAdminData(); else renderMyReturnData(); 
+    } catch(err) { showError(err); }
   }
   function renderMyReturnData() { 
     const listDiv = document.getElementById('myReturnList'); 
@@ -801,34 +840,44 @@
   // ระบบเชื่อมต่อกล้องและการถ่ายรูปหน้าเว็บ (Native Fallback)
   // ==========================================
   
-  function handleReturnPhoto(event) {
-    if (event.target.files.length == 0) return;
-    showLoading('กำลังโหลดรูปภาพ...');
-    const file = event.target.files[0];
+  function compressImageAndSet(file, previewId, base64Id) {
+    showLoading('กำลังเตรียมรูปภาพ...');
     const reader = new FileReader();
     reader.onload = function(e) {
-      hideLoading();
-      document.getElementById('returnImagePreview').src = e.target.result;
-      document.getElementById('returnImagePreview').style.display = 'block';
-      document.getElementById('returnImageBase64').value = e.target.result;
-      event.target.value = ''; // clear
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        let width = img.width; let height = img.height;
+        const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
+        if (width > height) {
+          if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+        } else {
+          if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+        }
+        canvas.width = width; canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.6); // 60% quality jpeg
+        hideLoading();
+        document.getElementById(previewId).src = dataUrl;
+        document.getElementById(previewId).style.display = 'block';
+        document.getElementById(base64Id).value = dataUrl;
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   }
 
+  function handleReturnPhoto(event) {
+    if (event.target.files.length == 0) return;
+    compressImageAndSet(event.target.files[0], 'returnImagePreview', 'returnImageBase64');
+    event.target.value = '';
+  }
+
   function handleEqPhoto(event) {
     if (event.target.files.length == 0) return;
-    showLoading('กำลังโหลดรูปภาพ...');
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      hideLoading();
-      document.getElementById('editEqImagePreviewUI').src = e.target.result;
-      document.getElementById('editEqImagePreviewUI').style.display = 'block';
-      document.getElementById('editEqImageBase64').value = e.target.result;
-      event.target.value = ''; // clear
-    };
-    reader.readAsDataURL(file);
+    compressImageAndSet(event.target.files[0], 'editEqImagePreviewUI', 'editEqImageBase64');
+    event.target.value = '';
   }
 
   // ==========================================
