@@ -250,7 +250,8 @@
           <strong style="color:#1565c0;">⚙️ Admin: จัดการวิทยุ</strong>
           <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
             <button class="btn-primary" style="width:auto;" onclick="openAddRadioModal()">+ เพิ่มวิทยุ</button>
-            <button class="btn-success" style="width:auto; background:#17a2b8;" onclick="openRadioQR('ALL', 'วิทยุทั้งหมด')">🖨️ พิมพ์ QR/Barcode ทั้งหมด</button>
+            <button class="btn-success" style="width:auto; background:#17a2b8;" onclick="openRadioQR('ALL', 'วิทยุทั้งหมด', 'PRINT')">🖨️ พิมพ์ทั้งหมด</button>
+            <button class="btn-success" style="width:auto; background:#ff9800;" onclick="openRadioQR('ALL', 'วิทยุทั้งหมด', 'DOWNLOAD')">📥 โหลดทั้งหมด (ZIP)</button>
           </div>
         </div>
         <div id="radioGrid" class="equipment-grid"></div>
@@ -477,8 +478,9 @@
           <svg id="radioBarcodeSvg" style="display:none; max-width: 100%;"></svg>
           <p id="radioQRIdLabel" style="margin: 10px 0 0 0; font-size: 13px; color: #8e8e8e;"></p>
         </div>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-          <button class="btn-primary" style="flex:1;" onclick="printRadioQR()">🖨️ พิมพ์</button>
+        <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
+          <button class="btn-success" id="btnRadioDownloadAction" style="flex:1; display:none; background:#ff9800;" onclick="downloadAllRadioCodesZip()">📥 โหลด ZIP</button>
+          <button class="btn-primary" id="btnRadioPrintAction" style="flex:1;" onclick="printRadioQR()">🖨️ พิมพ์</button>
           <button class="btn-danger" style="flex:1;" onclick="document.getElementById('radioQRModal').style.display='none'">ปิด</button>
         </div>
       </div>
@@ -1292,13 +1294,23 @@
       } else {
         batteryHtml = '<div style="font-size:12px;color:#86868b;margin-top:8px;">' + bsEmoji + ' ' + bsLabel + '</div>';
       }
-      var adminActions = isAdmin ? '<div style="display:flex;gap:5px;margin-top:10px;padding-top:10px;border-top:1px solid #f5f5f7;"><button class="btn-outline" style="flex:1;padding:6px;font-size:12px;border:1px solid #007aff;color:#007aff;border-radius:8px;background:transparent;" onclick="openRadioQR(\'' + radio.id + '\',\'' + radio.name + '\')">🖨️ พิมพ์ป้าย</button><button class="btn-outline" style="flex:1;padding:6px;font-size:12px;border:1px solid #ff3b30;color:#ff3b30;border-radius:8px;background:transparent;" onclick="doDeleteRadio(\'' + radio.id + '\',\'' + radio.name + '\')">🗑️ ลบ</button></div>' : '';
+      var adminMenuId = 'adminMenu_' + radio.id;
+      var adminMenuHtml = '';
+      if (isAdmin) {
+         adminMenuHtml = '<div style="position:relative; display:inline-block; margin-left:8px;">'
+            + '<button onclick="toggleAdminMenu(\'' + adminMenuId + '\')" style="background:none;border:none;cursor:pointer;font-size:20px;color:#8e8e8e;padding:0 5px;">☰</button>'
+            + '<div id="' + adminMenuId + '" class="radio-admin-menu" style="display:none; position:absolute; right:0; top:28px; background:white; border:1px solid #e0e0e0; box-shadow:0 4px 12px rgba(0,0,0,0.15); border-radius:8px; z-index:100; min-width:140px; overflow:hidden;">'
+            + '<button onclick="openRadioQR(\'' + radio.id + '\',\'' + radio.name + '\')" style="width:100%; text-align:left; background:none; border:none; padding:12px 15px; cursor:pointer; font-size:14px; color:#1d1d1f; border-bottom:1px solid #f5f5f7;">🖨️ พิมพ์ป้าย</button>'
+            + '<button onclick="doDeleteRadio(\'' + radio.id + '\',\'' + radio.name + '\')" style="width:100%; text-align:left; background:none; border:none; padding:12px 15px; cursor:pointer; font-size:14px; color:#ff3b30;">🗑️ ลบวิทยุ</button>'
+            + '</div></div>';
+      }
+
       var card = document.createElement('div');
       card.className = 'radio-card' + (isBorrowed ? ' is-borrowed' : '') + (isMine ? ' is-mine' : '');
       card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">'
         + '<div style="font-weight:600;font-size:15px;color:#1d1d1f;">' + radio.name + '</div>'
-        + '<div style="font-size:22px;">' + bsEmoji + '</div></div>'
-        + statusHtml + actionHtml + batteryHtml + adminActions;
+        + '<div style="display:flex; align-items:center;"><div style="font-size:22px;">' + bsEmoji + '</div>' + adminMenuHtml + '</div></div>'
+        + statusHtml + actionHtml + batteryHtml;
       grid.appendChild(card);
     });
   }
@@ -1569,9 +1581,42 @@
     }
   }
 
-  function openRadioQR(id, name) {
-    document.getElementById('radioQRTitle').innerText = id === 'ALL' ? '🖨️ พิมพ์ป้ายทั้งหมด (23 เครื่อง)' : name;
-    document.getElementById('radioQRIdLabel').innerHTML = id === 'ALL' ? 'พิมพ์รหัสวิทยุทั้งหมด' : 'รหัสอ้างอิง: <strong style="color: #1d1d1f;">' + id + '</strong>';
+  function toggleAdminMenu(menuId) {
+    var menu = document.getElementById(menuId);
+    if (menu) {
+      document.querySelectorAll('.radio-admin-menu').forEach(function(el) {
+         if (el.id !== menuId) el.style.display = 'none';
+      });
+      menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
+    }
+  }
+
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.radio-admin-menu') && !e.target.closest('button[onclick^="toggleAdminMenu"]')) {
+       document.querySelectorAll('.radio-admin-menu').forEach(function(el) { el.style.display = 'none'; });
+    }
+  });
+
+  let currentRadioModalAction = 'PRINT';
+
+  function openRadioQR(id, name, action) {
+    currentRadioModalAction = action || 'PRINT';
+    document.getElementById('radioQRTitle').innerText = id === 'ALL' ? (currentRadioModalAction === 'DOWNLOAD' ? '📥 โหลดป้ายทั้งหมด (23 เครื่อง)' : '🖨️ พิมพ์ป้ายทั้งหมด (23 เครื่อง)') : name;
+    document.getElementById('radioQRIdLabel').innerHTML = id === 'ALL' ? 'รหัสวิทยุทั้งหมด' : 'รหัสอ้างอิง: <strong style="color: #1d1d1f;">' + id + '</strong>';
+    
+    if (id === 'ALL') {
+       if (currentRadioModalAction === 'DOWNLOAD') {
+          document.getElementById('btnRadioPrintAction').style.display = 'none';
+          document.getElementById('btnRadioDownloadAction').style.display = 'inline-block';
+       } else {
+          document.getElementById('btnRadioPrintAction').style.display = 'inline-block';
+          document.getElementById('btnRadioDownloadAction').style.display = 'none';
+       }
+    } else {
+       document.getElementById('btnRadioPrintAction').style.display = 'inline-block';
+       document.getElementById('btnRadioDownloadAction').style.display = 'none';
+    }
+
     currentRadioPrintId = id;
     setRadioPrintFormat(currentRadioPrintFormat);
     document.getElementById('radioQRModal').style.display = 'flex';
@@ -1608,8 +1653,57 @@
       + '<h2 style="margin:0 0 15px 0; font-family:sans-serif;">' + title + '</h2>'
       + printContents + '</div>';
     var w = window.open('', '_blank', 'width=400,height=600');
-    w.document.write('<html><head><title>Print Radio QR</title></head><body style="font-family:sans-serif;">' + printHtml + '</body></html>');
+    w.document.write('<html><head><title>Print Radio Code</title></head><body style="font-family:sans-serif;">' + printHtml + '</body></html>');
     w.document.close(); w.focus(); w.print(); w.close();
+  }
+
+  async function downloadAllRadioCodesZip() {
+    showLoading('กำลังสร้างไฟล์ ZIP...\n(อาจใช้เวลาสักครู่)');
+    try {
+      var zip = new JSZip();
+      var folder = zip.folder("วิทยุ_" + currentRadioPrintFormat);
+      
+      allRadios.forEach(function(radio) {
+        var base64Data;
+        var canvas = document.createElement('canvas');
+        
+        if (currentRadioPrintFormat === 'QR') {
+          canvas.width = 400; canvas.height = 500;
+          var ctx = canvas.getContext('2d');
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 400, 500);
+          ctx.strokeStyle = '#007aff'; ctx.lineWidth = 6; ctx.setLineDash([15, 10]); ctx.strokeRect(15, 15, 370, 470);
+          ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(radio.name, 200, 75, 340);
+          var qr = new QRious({ value: radio.id, size: 260, level: 'H' });
+          ctx.drawImage(qr.canvas, 70, 110);
+          ctx.fillStyle = '#86868b'; ctx.font = '22px sans-serif'; ctx.fillText('รหัสอ้างอิง: ' + radio.id, 200, 420);
+          base64Data = canvas.toDataURL('image/png').split(',')[1];
+        } else {
+           try { JsBarcode(canvas, radio.id, { format: "CODE128", width: 3, height: 100, displayValue: false, margin: 20, background: "#ffffff" }); } catch(e){}
+           var finalCanvas = document.createElement('canvas');
+           finalCanvas.width = canvas.width; finalCanvas.height = canvas.height + 60;
+           var ctx = finalCanvas.getContext('2d');
+           ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
+           ctx.drawImage(canvas, 0, 0);
+           ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(radio.name, finalCanvas.width/2, canvas.height + 20);
+           ctx.fillStyle = '#86868b'; ctx.font = '16px sans-serif'; ctx.fillText('รหัส: ' + radio.id, finalCanvas.width/2, canvas.height + 45);
+           base64Data = finalCanvas.toDataURL('image/png').split(',')[1];
+        }
+        
+        var safeName = (radio.name + "_" + radio.id).replace(/[\/\\]/g, '-');
+        folder.file(safeName + ".png", base64Data, {base64: true});
+      });
+      
+      var content = await zip.generateAsync({type:"blob"});
+      var link = document.createElement('a');
+      link.href = URL.createObjectURL(content);
+      link.download = "Radios_" + currentRadioPrintFormat + ".zip";
+      link.click();
+      hideLoading();
+      showToast('✅ ดาวน์โหลดไฟล์ .ZIP สำเร็จแล้ว!');
+    } catch(err) {
+      hideLoading();
+      showToast('❌ เกิดข้อผิดพลาด: ' + err.message);
+    }
   }
 
   // ==========================================
