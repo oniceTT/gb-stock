@@ -263,7 +263,10 @@
           <div style="flex: 1 1 400px;">
             <div style="background:#f8f9fa; border:1px solid #ddd; border-radius:10px; padding:15px; margin-bottom:20px;">
                <button id="btnStartPOS" class="btn-primary" style="width:100%; border-radius:20px; font-size:16px; padding:12px;" onclick="startPOSScanner()">📷 เปิดกล้องสแกน</button>
-               <button id="btnStopPOS" class="btn-danger" style="width:100%; border-radius:20px; font-size:16px; padding:12px; display:none;" onclick="stopPOSScanner()">⏹️ ปิดกล้องสแกน</button>
+               <div id="posScannerControls" style="display:none; gap:10px;">
+                 <button id="btnFlipPOS" class="btn-outline" style="flex:1; border-radius:20px; font-size:16px; padding:12px; border:2px solid #007aff; color:#007aff; background:transparent;" onclick="flipPOSScanner()">🔄 สลับกล้อง</button>
+                 <button id="btnStopPOS" class="btn-danger" style="flex:1; border-radius:20px; font-size:16px; padding:12px;" onclick="stopPOSScanner()">⏹️ ปิดกล้อง</button>
+               </div>
                <div id="posReader" style="width:100%; margin-top:15px;"></div>
             </div>
           </div>
@@ -589,7 +592,10 @@
       <div class="modal-content" style="text-align: center;">
         <h3>📷 สแกน QR Code</h3>
         <div id="qr-reader" style="width: 100%; margin-bottom: 15px;"></div>
-        <button class="btn-danger" onclick="closeScannerModal()">ยกเลิก</button>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-outline" style="flex:1; border-radius:20px; font-weight:600; border:2px solid #007aff; color:#007aff; background:transparent;" onclick="toggleScannerCamera()">🔄 สลับกล้อง</button>
+          <button class="btn-danger" style="flex:1; border-radius:20px;" onclick="closeScannerModal()">ยกเลิก</button>
+        </div>
       </div>
     </div>
 
@@ -763,6 +769,7 @@
     var savedTab = 'tabBorrow';
     try { var st = localStorage.getItem('activeTab'); if(st && document.getElementById(st)) savedTab = st; } catch(e){}
     if (savedTab === 'tabBorrow') { var hash = window.location.hash.replace('#',''); if(hash && document.getElementById(hash)) savedTab = hash; }
+    if (savedTab === 'tabAdmin' && currentUser && currentUser.role !== 'Admin' && currentUser.role !== 'Superadmin') savedTab = 'tabBorrow';
     // Pre-show the saved tab so finishRenderData() won't reset it
     ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin'].forEach(function(id) { var el = document.getElementById(id); if(el) el.style.display = (id === savedTab) ? 'block' : 'none'; });
     document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.remove('active'); var oc = el.getAttribute('onclick') || ''; if(oc.indexOf(savedTab) !== -1) el.classList.add('active'); });
@@ -820,6 +827,7 @@
   function logout() { if(!confirm('ยืนยันการออกจากระบบ?')) return; currentUser = null; cart = {}; safeRemoveStorage('myAppUser'); safeRemoveStorage('activeTab'); document.getElementById('authSection').style.display = 'block'; document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('mainNav').style.display = 'none'; document.getElementById('tabBorrow').style.display = 'none'; document.getElementById('tabReturn').style.display = 'none'; document.getElementById('tabProfile').style.display = 'none'; document.getElementById('tabAdmin').style.display = 'none'; document.getElementById('logoutBtn').style.display = 'none'; document.getElementById('welcomeText').innerText = ''; document.getElementById('cartFloat').style.display = 'none'; }
   
   function switchTab(tabName, navElement, isHistoryBack = false) { 
+    if (tabName === 'tabAdmin' && currentUser && currentUser.role !== 'Admin' && currentUser.role !== 'Superadmin') { showToast("คุณไม่มีสิทธิ์เข้าถึงหน้านี้"); tabName = 'tabBorrow'; }
     safeSetStorage('activeTab', tabName);
     if (tabName !== 'tabPOS' && typeof posHtml5QrcodeScanner !== 'undefined' && posHtml5QrcodeScanner) {
         stopPOSScanner();
@@ -1198,26 +1206,36 @@
   // ==========================================
   // ระบบกล้องสแกน QR หน้าเว็บแบบเต็มรูปแบบ (GitHub Version)
   // ==========================================
-  function openScanner(mode) { 
-    currentScanMode = mode; 
-    document.getElementById('qrScannerModal').style.display = 'flex';
-    
-    if(!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader"); 
+  let currentScanFacingMode = "environment";
+  function toggleScannerCamera() {
+    currentScanFacingMode = currentScanFacingMode === "environment" ? "user" : "environment";
+    if (html5QrCode && html5QrCode.isScanning) {
+      html5QrCode.stop().then(() => {
+        startScannerWithCurrentMode();
+      }).catch(err => showToast("ไม่สามารถสลับกล้องได้"));
+    }
+  }
+  function startScannerWithCurrentMode() {
     html5QrCode.start(
-      { facingMode: "environment" }, 
+      { facingMode: currentScanFacingMode }, 
       { fps: 10, qrbox: { width: 250, height: 250 } },
       (decodedText) => {
         closeScannerModal();
         processScannedQR(decodedText);
       },
-      (errorMessage) => {
-        // parse errors are normal during scanning
-      }
+      (errorMessage) => {}
     ).catch(err => {
-      alert("❌ ไม่สามารถเปิดกล้องได้: " + err);
-      closeScannerModal();
+        // Ignore parse errors, report actual start failures
     });
   }
+  function openScanner(mode) { 
+    currentScanMode = mode; 
+    document.getElementById('qrScannerModal').style.display = 'flex';
+    
+    if(!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader"); 
+    startScannerWithCurrentMode();
+  }
+
   
   function closeScannerModal() {
     document.getElementById('qrScannerModal').style.display = 'none';
@@ -1809,20 +1827,32 @@
   let posLastScannedId = null;
   let posLastScannedTime = 0;
   let posCart = {};
+  let currentPOSFacingMode = "environment";
 
-  function startPOSScanner() {
+  function flipPOSScanner() {
+    currentPOSFacingMode = currentPOSFacingMode === "environment" ? "user" : "environment";
+    if (posHtml5QrcodeScanner) {
+        posHtml5QrcodeScanner.stop().then(() => {
+            posHtml5QrcodeScanner.clear();
+            posHtml5QrcodeScanner = null;
+            startPOSScanner(true); // pass true to indicate it's a flip, so it starts immediately
+        }).catch(err => console.error(err));
+    }
+  }
+
+  function startPOSScanner(isFlip = false) {
      if (posHtml5QrcodeScanner) return;
      posHtml5QrcodeScanner = new Html5Qrcode("posReader");
      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
      
-     posHtml5QrcodeScanner.start({ facingMode: "environment" }, config, (decodedText) => {
+     posHtml5QrcodeScanner.start({ facingMode: currentPOSFacingMode }, config, (decodedText) => {
          const now = new Date().getTime();
          if (posLastScannedId === decodedText && (now - posLastScannedTime) < 2000) return;
          posLastScannedId = decodedText; posLastScannedTime = now;
          handlePOSScan(decodedText);
      }).catch(err => showToast("ไม่สามารถเปิดกล้องได้: " + err));
      document.getElementById('btnStartPOS').style.display = 'none';
-     document.getElementById('btnStopPOS').style.display = 'inline-block';
+     document.getElementById('posScannerControls').style.display = 'flex';
   }
 
   function stopPOSScanner() {
@@ -1831,7 +1861,7 @@
              posHtml5QrcodeScanner.clear();
              posHtml5QrcodeScanner = null;
              document.getElementById('btnStartPOS').style.display = 'inline-block';
-             document.getElementById('btnStopPOS').style.display = 'none';
+             document.getElementById('posScannerControls').style.display = 'none';
          });
      }
   }
