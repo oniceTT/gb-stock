@@ -268,7 +268,7 @@
                  <button id="btnFlipPOS" class="btn-outline" style="flex:1; border-radius:20px; font-size:16px; padding:12px; border:2px solid #007aff; color:#007aff; background:transparent;" onclick="flipPOSScanner()">🔄 สลับกล้อง</button>
                  <button id="btnStopPOS" class="btn-danger" style="flex:1; border-radius:20px; font-size:16px; padding:12px;" onclick="stopPOSScanner()">⏹️ ปิดกล้อง</button>
                </div>
-               <div id="posReader" style="width:100%; margin-top:15px;"></div>
+               <div id="posReader" style="width:100%; max-width: 400px; margin: 15px auto 0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></div>
             </div>
           </div>
           <!-- Right side: Cart -->
@@ -592,7 +592,7 @@
     <div id="qrScannerModal" class="modal-bg">
       <div class="modal-content" style="text-align: center;">
         <h3>📷 สแกน QR Code</h3>
-        <div id="qr-reader" style="width: 100%; margin-bottom: 15px;"></div>
+        <div id="qr-reader" style="width:100%; max-width: 400px; margin: 0 auto; border-radius: 16px; overflow: hidden; margin-bottom: 15px;"></div>
         <div style="display:flex; gap:10px;">
           <button class="btn-outline" style="flex:1; border-radius:20px; font-weight:600; border:2px solid #007aff; color:#007aff; background:transparent;" onclick="toggleScannerCamera()">🔄 สลับกล้อง</button>
           <button class="btn-danger" style="flex:1; border-radius:20px;" onclick="closeScannerModal()">ยกเลิก</button>
@@ -1242,7 +1242,7 @@
   function startScannerWithCurrentMode() {
     html5QrCode.start(
       { facingMode: currentScanFacingMode }, 
-      { fps: 10, qrbox: { width: 250, height: 250 } },
+      { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
       (decodedText) => {
         closeScannerModal();
         processScannedQR(decodedText);
@@ -1867,7 +1867,7 @@
   function startPOSScanner(isFlip = false) {
      if (posHtml5QrcodeScanner) return;
      posHtml5QrcodeScanner = new Html5Qrcode("posReader");
-     const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+     const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
      
      posHtml5QrcodeScanner.start({ facingMode: currentPOSFacingMode }, config, (decodedText) => {
          const now = new Date().getTime();
