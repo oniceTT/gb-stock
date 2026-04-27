@@ -1123,12 +1123,56 @@
     const ctx = canvas.getContext('2d');
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
+    stopReturnCamera();
+    showToast('📍 กำลังบันทึกพิกัด GPS ลงบนภาพ...');
+    
+    if (navigator.geolocation) {
+       navigator.geolocation.getCurrentPosition(
+         (position) => {
+             const lat = position.coords.latitude.toFixed(6);
+             const lng = position.coords.longitude.toFixed(6);
+             const dateStr = new Date().toLocaleString('th-TH');
+             
+             // Draw GPS Background Box
+             const x = 15, y = canvas.height - 90, width = 350, height = 75, radius = 12;
+             ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
+             ctx.beginPath();
+             ctx.moveTo(x + radius, y);
+             ctx.lineTo(x + width - radius, y);
+             ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+             ctx.lineTo(x + width, y + height - radius);
+             ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+             ctx.lineTo(x + radius, y + height);
+             ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+             ctx.lineTo(x, y + radius);
+             ctx.quadraticCurveTo(x, y, x + radius, y);
+             ctx.closePath();
+             ctx.fill();
+             
+             // Draw Text
+             ctx.font = "20px 'Kanit', sans-serif";
+             ctx.fillStyle = "#ffffff";
+             ctx.fillText(`📍 พิกัด: ${lat}, ${lng}`, x + 15, y + 30);
+             ctx.fillText(`🕒 ${dateStr}`, x + 15, y + 60);
+             
+             finalizeReturnPhoto(canvas);
+         },
+         (error) => {
+             showToast('⚠️ ไม่สามารถบันทึกพิกัดได้ (' + error.message + ')');
+             finalizeReturnPhoto(canvas);
+         },
+         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+       );
+    } else {
+       finalizeReturnPhoto(canvas);
+    }
+  }
+
+  function finalizeReturnPhoto(canvas) {
     const base64 = canvas.toDataURL('image/jpeg', 0.8);
     document.getElementById('returnImageBase64').value = base64;
     document.getElementById('returnImagePreview').src = base64;
     document.getElementById('retakePhotoSection').style.display = 'block';
-    
-    stopReturnCamera();
   }
 
   function retakeReturnPhoto() {
