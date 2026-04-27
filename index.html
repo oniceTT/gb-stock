@@ -741,7 +741,7 @@
       hideLoading();
     }
     
-    setInterval(function() { if(currentUser) refreshDataQuietly(); }, 30000);
+    setInterval(function() { if(currentUser) refreshDataQuietly(true); }, 30000);
   };
 
   window.addEventListener('popstate', function(event) {
@@ -749,7 +749,7 @@
     else if (currentUser) { switchTab('tabBorrow', null, true); }
   });
 
-  function refreshDataQuietly() { refreshData(true); }
+  function refreshDataQuietly(isAuto = false) { refreshData(true, isAuto); }
   function safeSetStorage(key, val) { try { localStorage.setItem(key, val); } catch(e){} }
   function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch(e){} }
   
@@ -784,7 +784,7 @@
     } catch(e) { console.warn('replaceState not supported on file://', e); }
   }
 
-  async function refreshData(isQuiet = false) { 
+  async function refreshData(isQuiet = false, isAuto = false) { 
     if (!isQuiet) showLoading('กำลังโหลดข้อมูลระบบ...'); 
     if (!isQuiet) {
       try {
@@ -809,8 +809,13 @@
       localStorage.setItem('cache_equip', JSON.stringify(allEquipment)); localStorage.setItem('cache_trans', JSON.stringify(allTransactions));
       localStorage.setItem('cache_loc', JSON.stringify(allLocations)); localStorage.setItem('cache_radio', JSON.stringify(allRadios));
       if (!isQuiet) hideLoading();
-      finishRenderData();
-      if (isQuiet && document.getElementById('tabAdmin').style.display === 'block') renderAdminData();
+      
+      // Only re-render the DOM if it's NOT an automatic background refresh
+      // This prevents interrupting the user (resetting scroll, closing dropdowns, wiping search)
+      if (!isAuto) {
+        finishRenderData();
+        if (isQuiet && document.getElementById('tabAdmin').style.display === 'block') renderAdminData();
+      }
     } catch(err) { if(!isQuiet) showError(err); }
   }
 
