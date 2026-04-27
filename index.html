@@ -707,8 +707,8 @@
   };
 
   window.addEventListener('popstate', function(event) {
-    if (event.state && event.state.tab) { switchTab(event.state.tab, true); } 
-    else if (currentUser) { switchTab('tabBorrow', true); }
+    if (event.state && event.state.tab) { switchTab(event.state.tab, null, true); } 
+    else if (currentUser) { switchTab('tabBorrow', null, true); }
   });
 
   function refreshDataQuietly() { refreshData(true); }
@@ -728,12 +728,20 @@
     document.getElementById('navRadio').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'block' : 'none';
     document.getElementById('myProfileUsername').value = currentUser.username || '';
     document.getElementById('myProfilePassword').value = currentUser.password || ''; document.getElementById('myProfileName').value = currentUser.name || ''; document.getElementById('myProfileDept').value = currentUser.department || '-';
+    // Restore saved tab from localStorage or URL hash instead of always defaulting to tabBorrow
+    var savedTab = 'tabBorrow';
+    try { var st = localStorage.getItem('activeTab'); if(st && document.getElementById(st)) savedTab = st; } catch(e){}
+    if (savedTab === 'tabBorrow') { var hash = window.location.hash.replace('#',''); if(hash && document.getElementById(hash)) savedTab = hash; }
+    // Pre-show the saved tab so finishRenderData() won't reset it
+    ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin'].forEach(function(id) { var el = document.getElementById(id); if(el) el.style.display = (id === savedTab) ? 'block' : 'none'; });
+    document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.remove('active'); var oc = el.getAttribute('onclick') || ''; if(oc.indexOf(savedTab) !== -1) el.classList.add('active'); });
+    var cf = document.getElementById('cartFloat'); if(cf) cf.style.display = (savedTab === 'tabBorrow') ? 'block' : 'none';
     refreshData();
     if (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') {
       google.script.run.withSuccessHandler(function(data) { allUsers = data || []; }).getAllUsers();
     }
     try {
-      window.history.replaceState({ tab: 'borrow' }, '', '#borrow');
+      window.history.replaceState({ tab: savedTab }, '', '#' + savedTab);
     } catch(e) { console.warn('replaceState not supported on file://', e); }
   }
 
@@ -776,11 +784,12 @@
     else if (document.getElementById('tabPOS').style.display === 'block') { renderPOSCart(); } 
     else if (document.getElementById('tabProfile').style.display === 'block') { } 
     else if (document.getElementById('tabBorrow').style.display === 'block') { } 
-    else { switchTab('tabBorrow'); } 
+    else { var fb = 'tabBorrow'; try { var s = localStorage.getItem('activeTab'); if(s && document.getElementById(s)) fb = s; } catch(e){} switchTab(fb); } 
   }
-  function logout() { if(!confirm('ยืนยันการออกจากระบบ?')) return; currentUser = null; cart = {}; safeRemoveStorage('myAppUser'); document.getElementById('authSection').style.display = 'block'; document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('mainNav').style.display = 'none'; document.getElementById('tabBorrow').style.display = 'none'; document.getElementById('tabReturn').style.display = 'none'; document.getElementById('tabProfile').style.display = 'none'; document.getElementById('tabAdmin').style.display = 'none'; document.getElementById('logoutBtn').style.display = 'none'; document.getElementById('welcomeText').innerText = ''; document.getElementById('cartFloat').style.display = 'none'; }
+  function logout() { if(!confirm('ยืนยันการออกจากระบบ?')) return; currentUser = null; cart = {}; safeRemoveStorage('myAppUser'); safeRemoveStorage('activeTab'); document.getElementById('authSection').style.display = 'block'; document.getElementById('loginUser').value = ''; document.getElementById('loginPass').value = ''; document.getElementById('mainNav').style.display = 'none'; document.getElementById('tabBorrow').style.display = 'none'; document.getElementById('tabReturn').style.display = 'none'; document.getElementById('tabProfile').style.display = 'none'; document.getElementById('tabAdmin').style.display = 'none'; document.getElementById('logoutBtn').style.display = 'none'; document.getElementById('welcomeText').innerText = ''; document.getElementById('cartFloat').style.display = 'none'; }
   
   function switchTab(tabName, navElement, isHistoryBack = false) { 
+    safeSetStorage('activeTab', tabName);
     if (tabName !== 'tabPOS' && typeof posHtml5QrcodeScanner !== 'undefined' && posHtml5QrcodeScanner) {
         stopPOSScanner();
     }
@@ -793,7 +802,8 @@
     const cartFloat = document.getElementById('cartFloat');
     if (cartFloat) cartFloat.style.display = (tabName === 'tabBorrow') ? 'block' : 'none';
     document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); 
-    if(navElement) navElement.classList.add('active'); 
+    if(navElement && navElement.classList) { navElement.classList.add('active'); }
+    else { document.querySelectorAll('.nav-item').forEach(function(el) { var oc = el.getAttribute('onclick') || ''; if(oc.indexOf(tabName) !== -1) el.classList.add('active'); }); }
     updateCartFloat(); 
     // Render data for the selected tab
     if (tabName === 'tabReturn') {
@@ -813,7 +823,7 @@
     }
   }
 
-  function saveMyProfile() { const u = document.getElementById('myProfileUsername').value; const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!u || !p || !n) return showToast('กรุณากรอก Username รหัสผ่าน และชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, p, d); }
+  function saveMyProfile() { const u = document.getElementById('myProfileUsername').value; const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!u || !p || !n) return showToast('กรุณากรอก Username รหัสผ่าน และชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); let roleText = currentUser.role === 'Superadmin' ? '🌟 Superadmin: ' : (currentUser.role === 'Admin' ? 'แอดมิน: ' : 'คุณ: '); document.getElementById('welcomeText').innerText = roleText + currentUser.name; } }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, p, d); }
   async function loadTransactions(isAdminView) { 
     try {
       const [txData, radData] = await Promise.all([
