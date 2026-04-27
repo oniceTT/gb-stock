@@ -940,7 +940,13 @@
     document.getElementById('returnEqNamePreview').innerText = eqName; 
     const sel = document.getElementById('selectReturnLoc'); 
     sel.innerHTML = '<option value="">-- เลือกจุดวางจากรายการ --</option>'; 
-    allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); 
+    // Find the equipment's original location to pre-select it
+    var eq = allEquipment.find(e => e.id === eqId);
+    var originalLocId = eq ? eq.location : '';
+    allLocations.forEach(loc => {
+      var selected = (loc.id === originalLocId) ? ' selected' : '';
+      sel.innerHTML += '<option value="'+loc.id+'"'+selected+'>'+loc.name+'</option>';
+    });
     document.getElementById('returnImageBase64').value = ''; 
     document.getElementById('returnImagePreview').src = '';
     document.getElementById('retakePhotoSection').style.display = 'none';
@@ -1317,7 +1323,7 @@
     }
   }
 
-  function processScannedQR(scannedId) { if (currentScanMode === 'borrow') { let item = allEquipment.find(e => e.id === scannedId); if(item) { updateCart(item.id, 1); showToast('✅ หยิบ "' + item.name + '" ลงตะกร้าแล้ว!'); } else showToast('❌ ไม่พบอุปกรณ์รหัสนี้'); } else if (currentScanMode === 'return') { const myItems = allTransactions.filter(item => item.userId === currentUser.id && item.eqId === scannedId); if(myItems.length > 0) { prepareReturn(myItems[0].row, myItems[0].eqId, myItems[0].qty, myItems[0].eqName); } else showToast('❌ ไม่พบรายการที่คุณกำลังยืมของชิ้นนี้อยู่'); } else if (currentScanMode === 'admin_return') { const activeItems = allTransactions.filter(item => item.eqId === scannedId); if(activeItems.length > 0) { prepareReturn(activeItems[0].row, activeItems[0].eqId, activeItems[0].qty, activeItems[0].eqName); } else showToast('❌ ไม่พบรายการค้างคืนสำหรับอุปกรณ์ชิ้นนี้ในระบบครับ');   } else if (currentScanMode === 'radio_return_loc') {
+  function processScannedQR(scannedId) { if (currentScanMode === 'borrow') { let item = allEquipment.find(e => e.id === scannedId); if(item) { updateCart(item.id, 1); showToast('✅ หยิบ "' + item.name + '" ลงตะกร้าแล้ว!'); } else { let radio = allRadios ? allRadios.find(r => r.id === scannedId) : null; if (radio) { closeScannerModal(); if (radio.currentUserId) { showToast('⚠️ วิทยุ "' + radio.name + '" ถูกยืมไปแล้วโดย ' + radio.currentUserName); } else if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { doBorrowRadio(radio.id); } else { showToast('📻 วิทยุ "' + radio.name + '" - กรุณาติดต่อ Admin เพื่อเบิกวิทยุครับ'); } } else { showToast('❌ ไม่พบอุปกรณ์หรือวิทยุรหัสนี้'); } } } else if (currentScanMode === 'return') { const myItems = allTransactions.filter(item => item.userId === currentUser.id && item.eqId === scannedId); if(myItems.length > 0) { prepareReturn(myItems[0].row, myItems[0].eqId, myItems[0].qty, myItems[0].eqName); } else showToast('❌ ไม่พบรายการที่คุณกำลังยืมของชิ้นนี้อยู่'); } else if (currentScanMode === 'admin_return') { const activeItems = allTransactions.filter(item => item.eqId === scannedId); if(activeItems.length > 0) { prepareReturn(activeItems[0].row, activeItems[0].eqId, activeItems[0].qty, activeItems[0].eqName); } else showToast('❌ ไม่พบรายการค้างคืนสำหรับอุปกรณ์ชิ้นนี้ในระบบครับ');   } else if (currentScanMode === 'radio_return_loc') {
     let loc = allLocations.find(l => l.id === scannedId);
     if(loc) {
       pendingRadioReturnLocId = loc.id;
@@ -1951,7 +1957,20 @@
              showToast('ของหมดสต๊อก');
          }
      } else {
-         showToast('ไม่พบรหัสอุปกรณ์');
+         // Check if it's a radio QR
+         let radio = allRadios ? allRadios.find(r => r.id === decodedText) : null;
+         if (radio) {
+             playPOSBeep();
+             if (radio.currentUserId) {
+                 showToast('⚠️ วิทยุ "' + radio.name + '" ถูกยืมไปแล้วโดย ' + radio.currentUserName);
+             } else if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) {
+                 doBorrowRadio(radio.id);
+             } else {
+                 showToast('📻 วิทยุ "' + radio.name + '" - กรุณาติดต่อ Admin เพื่อเบิกวิทยุครับ');
+             }
+         } else {
+             showToast('ไม่พบรหัสอุปกรณ์หรือวิทยุ');
+         }
      }
   }
 
