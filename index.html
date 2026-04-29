@@ -66,7 +66,6 @@
   .btn-outline { font-family: inherit; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
   .glass-panel { background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 24px; padding: 24px; box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 16px 40px rgba(0,0,0,0.08); }
 
-  /* === Responsive Design === */
   @media (max-width: 480px) {
     .container { padding: 12px; }
     .header { padding: 10px 14px; }
@@ -91,7 +90,6 @@
     .nav-grid { grid-template-columns: repeat(6, 1fr); }
   }
 
-    /* Toast Notification */
     #toastContainer {
       position: fixed;
       bottom: 30px;
@@ -142,7 +140,6 @@
       <p id="loadingText" style="margin-top: 15px; font-weight: 500; color: #262626;">กำลังประมวลผล...</p>
     </div>
 
-    <!-- Fallback for in-app browsers (LINE) -->
     <input type="file" id="qrFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFileScan(event)">
     <input type="file" id="fallbackCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFallbackCamera(event)">
 
@@ -342,7 +339,6 @@
 
     <div id="cartFloat" onclick="checkout()">🛒 ตะกร้า <span id="cartCount">(0)</span> ➔ ยืนยันเบิก</div>
 
-    <!-- Modals -->
     <div id="returnLocModal" class="modal-bg">
       <div class="modal-content">
         <h3 style="margin-top:0;">📍 ระบุจุดวางที่นำไปคืน</h3>
@@ -405,8 +401,7 @@
         <label>ชื่ออุปกรณ์</label><input type="text" id="editEqName" placeholder="เช่น กล้อง DSLR">
         
         <label style="font-weight:600; margin-bottom:5px; display:block;">📸 รูปภาพอุปกรณ์</label>
-        
-        <!-- Camera open button -->
+
         <div id="eqCameraSection">
           <div style="background: linear-gradient(135deg, #f0f8ff 0%, #f5f5f7 100%); border-radius: 16px; padding: 20px; text-align: center; border: 1px dashed #b0d4f1; margin-bottom: 15px;">
             <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
@@ -431,7 +426,6 @@
         </div>
         <canvas id="eqCanvas" style="display:none;"></canvas>
 
-        <!-- Photo preview with retake -->
         <div id="eqRetakeSection" style="display:none; text-align:center; margin-bottom:15px;">
           <div style="position:relative; display:inline-block; width:100%;">
             <img id="editEqImagePreviewUI" style="width:100%; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
@@ -492,11 +486,7 @@
         </div>
       </div>
     </div>
-    
 
-    
-    
-    <!-- Radio QR/Barcode Modal -->
     <div id="radioQRModal" class="modal-bg">
       <div class="modal-content" style="text-align:center;">
         <h3 style="margin-top:0;" id="radioQRTitle">🖨️ พิมพ์ QR/Barcode วิทยุ</h3>
@@ -519,7 +509,7 @@
         </div>
       </div>
     </div>
-    <!-- Radio Return Modal -->
+
     <div id="radioReturnModal" class="modal-bg">
       <div class="modal-content">
         <h3 style="margin-top:0;">📦 คืนวิทยุ</h3>
@@ -559,7 +549,7 @@
         </div>
       </div>
     </div>
-    <!-- Radio Borrow Modal (Admin) -->
+
     <div id="radioBorrowModal" class="modal-bg">
       <div class="modal-content">
         <h3 style="margin-top:0;">🤝 เบิกวิทยุ (Admin)</h3>
@@ -575,7 +565,7 @@
         </div>
       </div>
     </div>
-    <!-- Radio Add/Edit Modal -->
+
     <div id="radioModal" class="modal-bg">
       <div class="modal-content">
         <h3 style="margin-top:0;">📻 เพิ่ม/แก้ไขวิทยุ</h3>
@@ -588,7 +578,7 @@
       </div>
     </div>
 
-    <!-- QR Scanner Modal -->
+
     <div id="qrScannerModal" class="modal-bg">
       <div class="modal-content" style="text-align: center;">
         <h3>📷 สแกน QR Code</h3>
@@ -603,9 +593,7 @@
     <div id="toastContainer"></div>
     <script>
 
-  // ==========================================
-  // GitHub Pages API Adapter
-  // ==========================================
+
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcpsuXWSH2w2ZBWtTpME0Nozb92aWNpRnr4w3JyqtBdsJBoFIAGA8LDVri96E10AEL/exec"; // REPLACE THIS URL WITH LATEST DEPLOYMENT
 
   const google = {
@@ -699,7 +687,7 @@
     const toast = document.createElement('div');
     toast.className = 'toast-msg toast-' + type;
     
-    // Add OK button and flex layout
+
     toast.innerHTML = `<span style="flex-grow: 1;">${message}</span><button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.25); border: none; color: white; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 15px; flex-shrink: 0;">ตกลง</button>`;
     
     container.appendChild(toast);
@@ -766,12 +754,12 @@
     document.getElementById('navRadio').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'block' : 'none';
     document.getElementById('myProfileUsername').value = currentUser.username || '';
     document.getElementById('myProfilePassword').value = currentUser.password || ''; document.getElementById('myProfileName').value = currentUser.name || ''; document.getElementById('myProfileDept').value = currentUser.department || '-';
-    // Restore saved tab from localStorage or URL hash instead of always defaulting to tabBorrow
+
     var savedTab = 'tabBorrow';
     try { var st = localStorage.getItem('activeTab'); if(st && document.getElementById(st)) savedTab = st; } catch(e){}
     if (savedTab === 'tabBorrow') { var hash = window.location.hash.replace('#',''); if(hash && document.getElementById(hash)) savedTab = hash; }
     if (savedTab === 'tabAdmin' && currentUser && currentUser.role !== 'Admin' && currentUser.role !== 'Superadmin') savedTab = 'tabBorrow';
-    // Pre-show the saved tab so finishRenderData() won't reset it
+
     ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin'].forEach(function(id) { var el = document.getElementById(id); if(el) el.style.display = (id === savedTab) ? 'block' : 'none'; });
     document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.remove('active'); var oc = el.getAttribute('onclick') || ''; if(oc.indexOf(savedTab) !== -1) el.classList.add('active'); });
     var cf = document.getElementById('cartFloat'); if(cf) cf.style.display = (savedTab === 'tabBorrow') ? 'block' : 'none';
@@ -810,8 +798,7 @@
       localStorage.setItem('cache_loc', JSON.stringify(allLocations)); localStorage.setItem('cache_radio', JSON.stringify(allRadios));
       if (!isQuiet) hideLoading();
       
-      // Only re-render the DOM if it's NOT an automatic background refresh
-      // This prevents interrupting the user (resetting scroll, closing dropdowns, wiping search)
+
       if (!isAuto) {
         finishRenderData();
         if (isQuiet && document.getElementById('tabAdmin').style.display === 'block') renderAdminData();
@@ -820,7 +807,7 @@
   }
 
   function finishRenderData() {
-    if (!currentUser) return; // Prevent rendering tabs if logged out
+    if (!currentUser) return;
     renderEquipment(); 
     if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } 
     if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } 
@@ -841,7 +828,6 @@
     document.getElementById('loginPass').value = ''; 
     document.getElementById('mainNav').style.display = 'none'; 
     
-    // Hide ALL tabs properly
     ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin'].forEach(id => {
        const el = document.getElementById(id);
        if(el) el.style.display = 'none';
@@ -850,8 +836,7 @@
     document.getElementById('logoutBtn').style.display = 'none'; 
     document.getElementById('welcomeText').innerText = ''; 
     document.getElementById('cartFloat').style.display = 'none'; 
-    
-    // reset url hash
+
     try { window.history.replaceState(null, '', window.location.pathname); } catch(e){}
   }
   
@@ -873,7 +858,7 @@
     if(navElement && navElement.classList) { navElement.classList.add('active'); }
     else { document.querySelectorAll('.nav-item').forEach(function(el) { var oc = el.getAttribute('onclick') || ''; if(oc.indexOf(tabName) !== -1) el.classList.add('active'); }); }
     updateCartFloat(); 
-    // Render data for the selected tab
+
     if (tabName === 'tabReturn') {
         showLoading('กำลังโหลดรายการยืม...');
         loadTransactions(false);
@@ -940,7 +925,7 @@
     document.getElementById('returnEqNamePreview').innerText = eqName; 
     const sel = document.getElementById('selectReturnLoc'); 
     sel.innerHTML = '<option value="">-- เลือกจุดวางจากรายการ --</option>'; 
-    // Find the equipment's original location to pre-select it
+
     var eq = allEquipment.find(e => e.id === eqId);
     var originalLocId = eq ? eq.location : '';
     allLocations.forEach(loc => {
@@ -960,7 +945,6 @@
     document.getElementById('btnEqStatusReady').className = (status === 'สมบูรณ์') ? 'btn-outline active' : 'btn-outline';
     document.getElementById('btnEqStatusBroken').className = (status === 'ชำรุด') ? 'btn-outline active' : 'btn-outline';
     
-    // Adjust colors
     document.getElementById('btnEqStatusReady').style.background = (status === 'สมบูรณ์') ? '#4caf50' : 'white';
     document.getElementById('btnEqStatusReady').style.color = (status === 'สมบูรณ์') ? 'white' : '#4caf50';
     document.getElementById('btnEqStatusReady').style.border = (status === 'สมบูรณ์') ? 'none' : '1px solid #4caf50';
@@ -980,7 +964,6 @@
     
     document.getElementById('returnLocModal').style.display = 'none'; 
 
-    // === Optimistic UI Update ===
     try {
       let eq = allEquipment.find(e => e.id === pendingReturnData.eqId);
       if (eq) {
@@ -1008,7 +991,6 @@
       console.warn("Optimistic UI failed:", err);
     }
 
-    // Delay 50ms so the browser can repaint the DOM and make the item disappear instantly BEFORE showing the loader
     setTimeout(() => {
       showLoading('กำลังอัปโหลดรูปภาพและบันทึกการรับคืน...'); 
       
@@ -1138,8 +1120,7 @@
              const lat = position.coords.latitude.toFixed(6);
              const lng = position.coords.longitude.toFixed(6);
              const dateStr = new Date().toLocaleString('th-TH');
-             
-             // Draw GPS Background Box
+
              const x = 15, y = canvas.height - 90, width = 350, height = 75, radius = 12;
              ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
              ctx.beginPath();
@@ -1154,8 +1135,7 @@
              ctx.quadraticCurveTo(x, y, x + radius, y);
              ctx.closePath();
              ctx.fill();
-             
-             // Draw Text
+
              ctx.font = "20px 'Kanit', sans-serif";
              ctx.fillStyle = "#ffffff";
              ctx.fillText(`📍 พิกัด: ${lat}, ${lng}`, x + 15, y + 30);
@@ -1203,7 +1183,7 @@
       document.getElementById('returnImageBase64').value = e.target.result;
       document.getElementById('returnCameraSection').style.display = 'none';
       document.getElementById('retakePhotoSection').style.display = 'block';
-      event.target.value = ''; // clear
+      event.target.value = '';
     };
     reader.readAsDataURL(file);
   }
@@ -1281,10 +1261,6 @@
     startEqCamera();
   }
 
-  
-  // ==========================================
-  // ระบบกล้องสแกน QR หน้าเว็บแบบเต็มรูปแบบ (GitHub Version)
-  // ==========================================
   let currentScanFacingMode = "environment";
   function toggleScannerCamera() {
     currentScanFacingMode = currentScanFacingMode === "environment" ? "user" : "environment";
@@ -1304,7 +1280,7 @@
       },
       (errorMessage) => {}
     ).catch(err => {
-        // Ignore parse errors, report actual start failures
+
     });
   }
   function openScanner(mode) { 
@@ -1339,8 +1315,7 @@
   
   function checkout() { 
     if(!confirm('ยืนยันเบิกอุปกรณ์ที่เลือกไว้?')) return; 
-    
-    // === Optimistic UI Update ===
+
     const cartCopy = {...cart}; 
     for (let eqId in cart) { 
         let eq = allEquipment.find(e => e.id === eqId); 
@@ -1351,7 +1326,7 @@
     }
     cart = {}; updateCartFloat(); renderEquipment(); renderMyReturnData();
 
-    // Delay 50ms to allow DOM repaint
+
     setTimeout(() => {
       showLoading('กำลังบันทึก...');
       
@@ -1359,7 +1334,7 @@
         hideLoading();
         if(!res.success) {
             showToast('❌ ' + res.message);
-            setTimeout(() => refreshData(true), 500); // Revert if failed
+            setTimeout(() => refreshData(true), 500);
         } else {
             showToast('✅ ' + res.message);
         }
@@ -1429,9 +1404,6 @@
     try { var zip = new JSZip(); var eqFolder = zip.folder("QR_อุปกรณ์"); var locFolder = zip.folder("QR_จุดวาง"); function createTicketBase64(name, id) { const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 500; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 400, 500); ctx.strokeStyle = '#007aff'; ctx.lineWidth = 6; ctx.setLineDash([15, 10]); ctx.strokeRect(15, 15, 370, 470); ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, 200, 75, 340); const qr = new QRious({ value: id, size: 260, level: 'H' }); ctx.drawImage(qr.canvas, 70, 110); ctx.fillStyle = '#86868b'; ctx.font = '22px sans-serif'; ctx.fillText('รหัสอ้างอิง: ' + id, 200, 420); return canvas.toDataURL('image/png').split(',')[1]; } allEquipment.forEach(eq => { var base64Data = createTicketBase64(eq.name, eq.id); var safeName = (eq.name + "_" + eq.id).replace(/[\/\\]/g, '-'); eqFolder.file(safeName + ".png", base64Data, {base64: true}); }); allLocations.forEach(loc => { var base64Data = createTicketBase64(loc.name, loc.id); var safeName = (loc.name + "_" + loc.id).replace(/[\/\\]/g, '-'); locFolder.file(safeName + ".png", base64Data, {base64: true}); }); if(typeof allRadios !== 'undefined') { var radioFolder = zip.folder("QR_วิทยุ"); allRadios.forEach(radio => { var base64Data = createTicketBase64(radio.name, radio.id); var safeName = (radio.name + "_" + radio.id).replace(/[\/\\]/g, '-'); radioFolder.file(safeName + ".png", base64Data, {base64: true}); }); } var content = await zip.generateAsync({type:"blob"}); var link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = "QR_Codes_Tickets.zip"; link.click(); hideLoading(); showToast('✅ ดาวน์โหลดไฟล์ .ZIP สำเร็จแล้ว!'); } catch(error) { hideLoading(); showToast('❌ เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: ' + error.message); }
   }
 
-  // ==========================================
-  // Radio Management JS
-  // ==========================================
   let allRadios = [];
   let radioFilter = 'all';
 
@@ -1571,7 +1543,6 @@
     document.getElementById('recipientDropdown').style.display = 'none';
   }
 
-  // Close dropdown when clicking outside
   document.addEventListener('click', function(e) {
     var wrap = document.getElementById('recipientDropdownWrap');
     if (wrap && !wrap.contains(e.target)) {
@@ -1611,7 +1582,7 @@
     document.getElementById('radioReturnLocDisplay').style.display = 'none';
     var btn = document.getElementById('confirmRadioReturnBtn');
     if (isAdmin) {
-      // Admin can return without scanning
+
       document.getElementById('radioReturnScanSection').style.display = 'none';
       document.getElementById('radioReturnAdminBypass').style.display = 'block';
       btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
@@ -1645,7 +1616,6 @@
     document.getElementById('btnRadBatCharging').className = (status === 'charging') ? 'btn-outline active' : 'btn-outline';
     document.getElementById('btnRadBatLow').className = (status === 'low') ? 'btn-outline active' : 'btn-outline';
     
-    // Adjust colors
     document.getElementById('btnRadBatReady').style.background = (status === 'ready') ? '#34c759' : 'white';
     document.getElementById('btnRadBatReady').style.color = (status === 'ready') ? 'white' : '#34c759';
     document.getElementById('btnRadBatReady').style.border = (status === 'ready') ? 'none' : '1px solid #34c759';
@@ -1661,8 +1631,7 @@
 
   function confirmRadioReturn() {
     if (!pendingRadioReturnId || !pendingRadioReturnLocId) return;
-    
-    // Save variables before closing modal clears them
+
     var radioIdToReturn = pendingRadioReturnId;
     var locIdToReturn = pendingRadioReturnLocId;
     var batteryStatus = document.getElementById('radReturnBat').value;
@@ -1899,9 +1868,6 @@
     }
   }
 
-  // ==========================================
-  // POS Scanner Logic
-  // ==========================================
   let posHtml5QrcodeScanner = null;
   let posLastScannedId = null;
   let posLastScannedTime = 0;
@@ -2000,8 +1966,7 @@
      for (let id in posCart) { if (posCart[id] > 0) { toSubmit[id] = posCart[id]; hasItem = true; } }
      if (!hasItem) return showToast('ตะกร้าว่างเปล่า');
      if (!confirm('ยืนยันทำรายการ?')) return;
-     
-     // === Optimistic UI Update ===
+
      for (let id in toSubmit) { 
          let eq = allEquipment.find(e => e.id === id); 
          if (eq) {
@@ -2018,7 +1983,7 @@
            hideLoading();
            if(!res.success) {
                showToast('❌ ' + res.message);
-               setTimeout(() => refreshData(true), 500); // Revert
+               setTimeout(() => refreshData(true), 500);
            } else {
                showToast('✅ ' + res.message);
            }
