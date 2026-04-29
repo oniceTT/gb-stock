@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Kanit', "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f7; color: #1d1d1f; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Kanit', "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #f5f7fa 0%, #e8ddf1 50%, #d4e0eb 100%); color: #1d1d1f; min-height: 100vh; }
   .header { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: #1d1d1f; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.05); }
   .header-title { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
   .logout-btn { background: #e5e5ea; border: none; color: #1d1d1f; padding: 6px 14px; border-radius: 12px; cursor: pointer; display: none; font-weight: 600; transition: background 0.2s;}
@@ -155,13 +155,13 @@
       </div>
 
       <div id="mainNav" style="display:none;">
-        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
-          <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">🛒<br>เบิกอุปกรณ์</button>
-          <button class="nav-item" onclick="switchTab('tabReturn', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📦<br>คืนอุปกรณ์</button>
-          <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📻<br>วิทยุ</button>
-          <button class="nav-item" onclick="switchTab('tabPOS', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">💻<br>โหมด POS</button>
-          <button class="nav-item" onclick="switchTab('tabProfile', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">👤<br>โปรไฟล์</button>
-          <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">⚙️<br>จัดการระบบ</button>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+          <button class="nav-item" onclick="switchTab('tabPOS', this)" style="padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">💻<br>โหมด POS</button>
+          <button class="nav-item" onclick="switchTab('tabProfile', this)" style="padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">👤<br>โปรไฟล์</button>
+          <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">🛒<br>เบิกอุปกรณ์</button>
+          <button class="nav-item" onclick="switchTab('tabReturn', this)" style="padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">📦<br>คืนอุปกรณ์</button>
+          <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">📻<br>วิทยุ</button>
+          <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">⚙️<br>จัดการระบบ</button>
         </div>
       </div>
 
