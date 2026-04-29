@@ -155,13 +155,19 @@
       </div>
 
       <div id="mainNav" style="display:none;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
-          <button class="nav-item" onclick="switchTab('tabPOS', this)" style="padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">💻<br>โหมด POS</button>
-          <button class="nav-item" onclick="switchTab('tabProfile', this)" style="padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">👤<br>โปรไฟล์</button>
-          <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">🛒<br>เบิกอุปกรณ์</button>
-          <button class="nav-item" onclick="switchTab('tabReturn', this)" style="padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">📦<br>คืนอุปกรณ์</button>
-          <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">📻<br>วิทยุ</button>
-          <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="padding: 18px 10px; border-radius: 12px; background: white; cursor: pointer; font-size: 14px; text-align: center;">⚙️<br>จัดการระบบ</button>
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+          <!-- Top Row: Small Buttons -->
+          <div style="display: flex; gap: 10px; width: 100%;">
+            <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; flex: 1; padding: 12px 5px; font-size: 13px; text-align: center;">📻<br><span style="margin-top:6px; display:inline-block;">วิทยุ</span></button>
+            <button class="nav-item" onclick="switchTab('tabPOS', this)" style="flex: 1; padding: 12px 5px; font-size: 13px; text-align: center;">💻<br><span style="margin-top:6px; display:inline-block;">โหมด POS</span></button>
+            <button class="nav-item" onclick="switchTab('tabProfile', this)" style="flex: 1; padding: 12px 5px; font-size: 13px; text-align: center;">👤<br><span style="margin-top:6px; display:inline-block;">โปรไฟล์</span></button>
+            <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="flex: 1; padding: 12px 5px; font-size: 13px; text-align: center;">⚙️<br><span style="margin-top:6px; display:inline-block;">จัดการระบบ</span></button>
+          </div>
+          <!-- Bottom Row: Big Buttons -->
+          <div style="display: flex; gap: 10px; width: 100%;">
+            <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="flex: 1; padding: 22px 10px; font-size: 15px; text-align: center;">🛒<br><span style="margin-top:8px; display:inline-block;">เบิกอุปกรณ์</span></button>
+            <button class="nav-item" onclick="switchTab('tabReturn', this)" style="flex: 1; padding: 22px 10px; font-size: 15px; text-align: center;">📦<br><span style="margin-top:8px; display:inline-block;">คืนอุปกรณ์</span></button>
+          </div>
         </div>
       </div>
 
