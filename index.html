@@ -156,18 +156,18 @@
       </div>
 
       <div id="mainNav" style="display:none;">
-        <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+        <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
           <!-- Top Row: 4 small functions -->
-          <div style="display: flex; gap: 10px; width: 100%;">
-            <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; flex: 1; padding: 12px 5px; font-size: 14px; text-align: center;">📻<br><span style="margin-top:6px; display:inline-block; font-size:12px;">วิทยุ</span></button>
-            <button class="nav-item" onclick="switchTab('tabPOS', this)" style="flex: 1; padding: 12px 5px; font-size: 14px; text-align: center;">💻<br><span style="margin-top:6px; display:inline-block; font-size:12px;">โหมด POS</span></button>
-            <button class="nav-item" onclick="switchTab('tabProfile', this)" style="flex: 1; padding: 12px 5px; font-size: 14px; text-align: center;">👤<br><span style="margin-top:6px; display:inline-block; font-size:12px;">โปรไฟล์</span></button>
-            <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="flex: 1; padding: 12px 5px; font-size: 14px; text-align: center;">⚙️<br><span style="margin-top:6px; display:inline-block; font-size:12px;">จัดการระบบ</span></button>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; width: 100%;">
+            <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📻<br>วิทยุ</button>
+            <button class="nav-item" onclick="switchTab('tabPOS', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">💻<br>โหมด POS</button>
+            <button class="nav-item" onclick="switchTab('tabProfile', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">👤<br>โปรไฟล์</button>
+            <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">⚙️<br>จัดการระบบ</button>
           </div>
           <!-- Bottom Row: 2 large main actions -->
-          <div style="display: flex; gap: 10px; width: 100%;">
-            <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="flex: 1; padding: 22px 10px; font-size: 15px; text-align: center;">🛒<br><span style="margin-top:8px; display:inline-block;">เบิกอุปกรณ์</span></button>
-            <button class="nav-item" onclick="switchTab('tabReturn', this)" style="flex: 1; padding: 22px 10px; font-size: 15px; text-align: center;">📦<br><span style="margin-top:8px; display:inline-block;">คืนอุปกรณ์</span></button>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; width: 100%;">
+            <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="flex:1; min-width: 80px; padding: 20px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 15px; text-align: center;">🛒<br>เบิกอุปกรณ์</button>
+            <button class="nav-item" onclick="switchTab('tabReturn', this)" style="flex:1; min-width: 80px; padding: 20px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 15px; text-align: center;">📦<br>คืนอุปกรณ์</button>
           </div>
         </div>
       </div>
@@ -271,7 +271,7 @@
           <button class="filter-btn" onclick="showAdminSubTab('locations')">📍 จุดวาง</button>
           <button class="filter-btn" onclick="showAdminSubTab('qr')">🔲 QR</button>
           <button class="filter-btn" onclick="showAdminSubTab('dashboard')">📊 Dashboard</button>
-          <button class="filter-btn" onclick="showAdminSubTab('settings')">⚙️ ตั้งค่า</button>
+          <button class="filter-btn" id="adminFilterSettings" onclick="showAdminSubTab('settings')">⚙️ ตั้งค่า</button>
         </div>
 
         <div id="adminTabReturn">
@@ -746,6 +746,10 @@
     document.getElementById('welcomeText').innerText = roleText + currentUser.name;
     document.getElementById('navAdmin').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'block' : 'none';
     document.getElementById('navRadio').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'block' : 'none';
+    const settingsBtn = document.getElementById('adminFilterSettings');
+    if (settingsBtn) {
+      settingsBtn.style.display = (currentUser.role === 'Superadmin') ? 'inline-block' : 'none';
+    }
     document.getElementById('myProfileUsername').value = currentUser.username || '';
     document.getElementById('myProfilePassword').value = ''; document.getElementById('myProfileName').value = currentUser.name || ''; document.getElementById('myProfileDept').value = currentUser.department || '-';
     refreshData();
