@@ -26,7 +26,7 @@
   button.btn-primary { background-color: #007aff; color: white; border: none; padding: 14px 20px; border-radius: 12px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px;}
   button.btn-success { background-color: #34c759; color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer;}
   button.btn-danger { background-color: #ff3b30; color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer;}
-  button.btn-warning { background-color: #ff9500; color: white; border: none; padding: 12px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 10px rgba(255,149,0,0.3); }
+  button.btn-warning { background-color: #ff9500; color: white; border: none; padding: 12px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 10px rgba(255,149,0,0.3); white-space: nowrap; }
   button.btn-text { background: none; border: none; color: #007aff; cursor: pointer; margin-top: 15px; padding: 10px;}
   .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;}
   .nav-btn { flex: 1; padding: 10px; border: none; background: #e5e5ea; border-radius: 12px; cursor: pointer; color: #1d1d1f; white-space: nowrap; text-align: center;}
@@ -63,8 +63,8 @@
   .rc-battery.active-low { background:#ffebee; color:#ff3b30; }
   .upload-zone { display:block; border:2px dashed #d2d2d7; border-radius:16px; padding:24px; text-align:center; cursor:pointer; background:#f5f5f7; margin-bottom:15px; font-size:15px; color:#86868b; transition: all 0.2s; }
   .upload-zone:hover { border-color:#007aff; background:#f0f8ff; color:#007aff; }
-  .nav-item { border: none !important; background: #e5e5ea !important; color: #1d1d1f !important; border-radius: 12px !important; font-weight: 600 !important; transition: all 0.2s; box-shadow: none !important; }
-  .nav-item.active { background: #1d1d1f !important; color: white !important; }
+  .nav-item { border: none; background: #e5e5ea; color: #1d1d1f; border-radius: 12px; font-weight: 600; transition: all 0.2s; box-shadow: none; }
+  .nav-item.active { background: #1d1d1f; color: white; }
   .btn-outline { font-family: inherit; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
 
     /* Toast Notification */
@@ -158,16 +158,16 @@
       <div id="mainNav" style="display:none;">
         <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
           <!-- Top Row: 4 small functions -->
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; width: 100%;">
-            <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📻<br>วิทยุ</button>
-            <button class="nav-item" onclick="switchTab('tabPOS', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">💻<br>โหมด POS</button>
-            <button class="nav-item" onclick="switchTab('tabProfile', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">👤<br>โปรไฟล์</button>
-            <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">⚙️<br>จัดการระบบ</button>
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; width: 100%;">
+            <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; padding: 10px 2px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📻<br>วิทยุ</button>
+            <button class="nav-item" onclick="switchTab('tabPOS', this)" style="padding: 10px 2px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">💻<br>โหมด POS</button>
+            <button class="nav-item" onclick="switchTab('tabProfile', this)" style="padding: 10px 2px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">👤<br>โปรไฟล์</button>
+            <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="padding: 10px 2px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">⚙️<br>จัดการระบบ</button>
           </div>
           <!-- Bottom Row: 2 large main actions -->
-          <div style="display: flex; flex-wrap: wrap; gap: 8px; width: 100%;">
-            <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="flex:1; min-width: 80px; padding: 20px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 15px; text-align: center;">🛒<br>เบิกอุปกรณ์</button>
-            <button class="nav-item" onclick="switchTab('tabReturn', this)" style="flex:1; min-width: 80px; padding: 20px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 15px; text-align: center;">📦<br>คืนอุปกรณ์</button>
+          <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; width: 100%;">
+            <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="padding: 16px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 15px; text-align: center; font-weight:600;">🛒<br>เบิกอุปกรณ์</button>
+            <button class="nav-item" onclick="switchTab('tabReturn', this)" style="padding: 16px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 15px; text-align: center; font-weight:600;">📦<br>คืนอุปกรณ์</button>
           </div>
         </div>
       </div>
