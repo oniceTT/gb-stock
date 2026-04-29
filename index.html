@@ -12,7 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Kanit', "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #f5f7fa 0%, #e8ddf1 50%, #d4e0eb 100%); color: #1d1d1f; min-height: 100vh; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Kanit', "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f7; color: #1d1d1f; }
   .header { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: #1d1d1f; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(0,0,0,0.05); }
   .header-title { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
   .logout-btn { background: #e5e5ea; border: none; color: #1d1d1f; padding: 6px 14px; border-radius: 12px; cursor: pointer; display: none; font-weight: 600; transition: background 0.2s;}
@@ -26,15 +26,15 @@
   button.btn-primary { background-color: #007aff; color: white; border: none; padding: 14px 20px; border-radius: 12px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px;}
   button.btn-success { background-color: #34c759; color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer;}
   button.btn-danger { background-color: #ff3b30; color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer;}
-  button.btn-warning { background-color: #ff9500; color: white; border: none; padding: 12px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; box-shadow: 0 4px 10px rgba(255,149,0,0.3); }
+  button.btn-warning { background-color: #ff9500; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;}
   button.btn-text { background: none; border: none; color: #007aff; cursor: pointer; margin-top: 15px; padding: 10px;}
   .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;}
   .nav-btn { flex: 1; padding: 10px; border: none; background: #e5e5ea; border-radius: 12px; cursor: pointer; color: #1d1d1f; white-space: nowrap; text-align: center;}
   .nav-btn.active { background: #1d1d1f; color: white; }
   .controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
   .filters { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; align-items: center;}
-  .filter-btn { padding: 10px 18px; border: none; background-color: white; border-radius: 30px; cursor: pointer; white-space: nowrap; color: #1d1d1f; font-weight: 600; box-shadow: 0 2px 8px rgba(0,0,0,0.04); transition: background 0.2s;}
-  .filter-btn.active { background-color: #2c2c2e; color: white; }
+  .filter-btn { padding: 8px 16px; border: none; background-color: #e5e5ea; border-radius: 20px; cursor: pointer; white-space: nowrap; color: #1d1d1f; font-weight: 500; transition: background 0.2s;}
+  .filter-btn.active { background-color: #1d1d1f; color: white; }
   .equipment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
   .card { background: white; border: none; border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; box-shadow: 0 4px 12px rgba(0,0,0,0.04); transition: transform 0.2s, box-shadow 0.2s; }
   .card:hover { transform: translateY(-3px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
@@ -46,8 +46,7 @@
   .qty-btn { background: white; border: none; border-radius: 6px; width: 28px; height: 28px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); color: #1d1d1f; font-weight: 500;}
   #cartFloat { position: fixed; bottom: 30px; right: 30px; background: rgba(29, 29, 31, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: white; padding: 16px 24px; border-radius: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); cursor: pointer; display: none; z-index: 1000; font-weight: 600;}
   .list-card { background: white; border: none; border-radius: 16px; padding: 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-  .list-info { flex: 1; min-width: 200px; font-size: 15px; line-height: 1.5; color: #1d1d1f; }
-  .list-card button { white-space: nowrap; }
+  .list-info { font-size: 15px; line-height: 1.5; color: #1d1d1f; }
   .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 2000; align-items: center; justify-content: center; }
   .modal-content { background: white; padding: 24px; border-radius: 20px; max-width: 400px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
   #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
@@ -156,19 +155,13 @@
       </div>
 
       <div id="mainNav" style="display:none;">
-        <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
-          <!-- Top Row: Small Buttons -->
-          <div style="display: flex; gap: 10px; width: 100%;">
-            <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; flex: 1; padding: 12px 5px; font-size: 13px; text-align: center;">📻<br><span style="margin-top:6px; display:inline-block;">วิทยุ</span></button>
-            <button class="nav-item" onclick="switchTab('tabPOS', this)" style="flex: 1; padding: 12px 5px; font-size: 13px; text-align: center;">💻<br><span style="margin-top:6px; display:inline-block;">โหมด POS</span></button>
-            <button class="nav-item" onclick="switchTab('tabProfile', this)" style="flex: 1; padding: 12px 5px; font-size: 13px; text-align: center;">👤<br><span style="margin-top:6px; display:inline-block;">โปรไฟล์</span></button>
-            <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="flex: 1; padding: 12px 5px; font-size: 13px; text-align: center;">⚙️<br><span style="margin-top:6px; display:inline-block;">จัดการระบบ</span></button>
-          </div>
-          <!-- Bottom Row: Big Buttons -->
-          <div style="display: flex; gap: 10px; width: 100%;">
-            <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="flex: 1; padding: 22px 10px; font-size: 15px; text-align: center;">🛒<br><span style="margin-top:8px; display:inline-block;">เบิกอุปกรณ์</span></button>
-            <button class="nav-item" onclick="switchTab('tabReturn', this)" style="flex: 1; padding: 22px 10px; font-size: 15px; text-align: center;">📦<br><span style="margin-top:8px; display:inline-block;">คืนอุปกรณ์</span></button>
-          </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;">
+          <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">🛒<br>เบิกอุปกรณ์</button>
+          <button class="nav-item" onclick="switchTab('tabReturn', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📦<br>คืนอุปกรณ์</button>
+          <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">📻<br>วิทยุ</button>
+          <button class="nav-item" onclick="switchTab('tabPOS', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">💻<br>โหมด POS</button>
+          <button class="nav-item" onclick="switchTab('tabProfile', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">👤<br>โปรไฟล์</button>
+          <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="flex:1; min-width: 80px; padding: 10px 5px; border: 1px solid #dbdbdb; border-radius: 8px; background: white; cursor: pointer; font-size: 13px; text-align: center;">⚙️<br>จัดการระบบ</button>
         </div>
       </div>
 
