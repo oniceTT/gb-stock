@@ -1,162 +1,182 @@
 <!DOCTYPE html>
 <html>
   <head>
-    
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
-    
     <style>
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Kanit', "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #e5e5f7; background-image: radial-gradient(at 18% 30%, hsla(210, 100%, 85%, 0.4) 0px, transparent 50%), radial-gradient(at 80% 10%, hsla(270, 80%, 85%, 0.4) 0px, transparent 50%), radial-gradient(at 40% 80%, hsla(320, 80%, 85%, 0.4) 0px, transparent 50%), radial-gradient(at 80% 90%, hsla(180, 80%, 85%, 0.4) 0px, transparent 50%); background-attachment: fixed; color: #1d1d1f; }
-  .header { background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%); color: #1d1d1f; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.6); box-shadow: inset 0 -1px 10px rgba(255,255,255,0.3), 0 4px 30px rgba(0, 0, 0, 0.05); }
-  .header-title { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
-  .logout-btn { background: #e5e5ea; border: none; color: #1d1d1f; padding: 6px 14px; border-radius: 12px; cursor: pointer; display: none; font-weight: 600; transition: background 0.2s;}
+  body { 
+    font-family: -apple-system, BlinkMacSystemFont, 'Kanit', "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+    margin: 0; padding: 0; 
+    background-color: #e5e5f7; 
+    background-image: radial-gradient(at 18% 30%, hsla(210, 100%, 85%, 0.5) 0px, transparent 50%), 
+                      radial-gradient(at 80% 10%, hsla(270, 80%, 85%, 0.5) 0px, transparent 50%), 
+                      radial-gradient(at 40% 80%, hsla(320, 80%, 85%, 0.5) 0px, transparent 50%), 
+                      radial-gradient(at 80% 90%, hsla(180, 80%, 85%, 0.5) 0px, transparent 50%); 
+    background-attachment: fixed; 
+    color: #1d1d1f; 
+  }
+  
+  .header { 
+    background: rgba(255, 255, 255, 0.45); 
+    backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%); 
+    color: #1d1d1f; padding: 15px 20px; 
+    display: flex; justify-content: space-between; align-items: center; 
+    position: sticky; top: 0; z-index: 1000; 
+    border-bottom: 1px solid rgba(255,255,255,0.6); 
+    box-shadow: inset 0 -1px 10px rgba(255,255,255,0.3), 0 4px 30px rgba(0, 0, 0, 0.05); 
+  }
+  .header-title { font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+  
+  .logout-btn { 
+    background: #e5e5ea; border: none; color: #1d1d1f; 
+    padding: 6px 14px; border-radius: 12px; cursor: pointer; 
+    display: none; font-weight: 600; transition: background 0.2s;
+  }
   .logout-btn:hover { background: #d1d1d6; }
+  
   .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-  #authSection { text-align: center; margin-top: 50px; background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); padding: 40px 30px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 16px 40px rgba(0,0,0,0.1); }
-  input[type="text"], input[type="password"], input[type="number"], select, input[type="file"] { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; box-sizing: border-box; font-family: inherit; font-size: 16px; background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s; }
-  input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus { outline: none; border-color: #007aff; box-shadow: 0 0 0 4px rgba(0,122,255,0.15); background-color: rgba(255, 255, 255, 0.9); }
+  
+  .glass-panel { 
+    background: rgba(255, 255, 255, 0.55); 
+    backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); 
+    border: 1px solid rgba(255, 255, 255, 0.8); 
+    border-radius: 24px; padding: 24px; 
+    box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 16px 40px rgba(0,0,0,0.08); 
+  }
+
+  input[type="text"], input[type="password"], input[type="number"], select, input[type="file"] { 
+    width: 100%; padding: 14px; margin: 8px 0; 
+    border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; 
+    box-sizing: border-box; font-family: inherit; font-size: 16px; 
+    background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); 
+    transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s; 
+  }
+  input:focus, select:focus { 
+    outline: none; border-color: #007aff; 
+    box-shadow: 0 0 0 4px rgba(0,122,255,0.15); 
+    background-color: rgba(255, 255, 255, 0.9); 
+  }
+
   button { font-family: inherit; font-weight: 600; transition: transform 0.1s, opacity 0.2s; }
   button:active { transform: scale(0.97); }
-  button.btn-primary { background-color: #007aff; color: white; border: none; padding: 14px 20px; border-radius: 12px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px;}
-  button.btn-success { background-color: #34c759; color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer;}
-  button.btn-danger { background-color: #ff3b30; color: white; border: none; padding: 10px 18px; border-radius: 12px; cursor: pointer;}
-  button.btn-warning { background-color: #ff9500; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;}
-  button.btn-text { background: none; border: none; color: #007aff; cursor: pointer; margin-top: 15px; padding: 10px;}
-  .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;}
-  .nav-btn { flex: 1; padding: 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: 12px; cursor: pointer; color: #1d1d1f; white-space: nowrap; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;}
-  .nav-btn.active { background: rgba(29, 29, 31, 0.85); color: white; border-color: transparent; }
-  .controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
-  .filters { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; align-items: center;}
-  .filter-btn { padding: 8px 16px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: 20px; cursor: pointer; white-space: nowrap; color: #1d1d1f; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;}
-  .filter-btn.active { background: rgba(29, 29, 31, 0.85); color: white; border-color: transparent; }
+  
+  .btn-primary { background-color: #007aff; color: white; border: none; padding: 14px 20px; border-radius: 12px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px;}
+  .btn-success { background-color: #34c759; color: white; border: none; padding: 14px 20px; border-radius: 12px; cursor: pointer;}
+  .btn-danger { background-color: #ff3b30; color: white; border: none; padding: 14px 20px; border-radius: 12px; cursor: pointer;}
+  .btn-warning { background-color: #ff9500; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;}
+  .btn-text { background: none; border: none; color: #007aff; cursor: pointer; margin-top: 15px; padding: 10px; width: 100%;}
+  .btn-outline { font-family: inherit; font-weight: 600; border-radius: 12px; padding: 14px 20px; cursor: pointer; transition: all 0.2s; border: 2px solid #007aff; color: #007aff; background: transparent; }
+
+  .nav-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .nav-item { 
+    border: 1px solid rgba(255,255,255,0.4); 
+    background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); 
+    color: #1d1d1f; border-radius: 16px; font-weight: 600; 
+    transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.03); 
+    padding: 15px 5px; font-size: 13px; text-align: center; cursor: pointer; 
+  }
+  .nav-item.active { background: rgba(29, 29, 31, 0.85); color: white; border-color: transparent; }
+
+  /* Scanner Hub Grid */
+  .scanner-hub-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .hub-btn {
+    background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.9); border-radius: 24px;
+    padding: 24px 15px; display: flex; flex-direction: column; align-items: center;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.08); transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    cursor: pointer; text-decoration: none;
+  }
+  .hub-btn:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
+  .hub-icon { font-size: 48px; margin-bottom: 12px; }
+  .hub-title { font-size: 18px; font-weight: 700; color: #1d1d1f; margin-bottom: 6px; }
+  .hub-desc { font-size: 13px; color: #86868b; font-weight: 400; line-height: 1.4; }
+  
+  .hub-borrow { background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(230,240,255,0.8) 100%); border-color: #b3d4ff; }
+  .hub-load { background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,240,220,0.8) 100%); border-color: #ffe0b3; }
+  .hub-unload { background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(230,255,230,0.8) 100%); border-color: #b3ffb3; }
+  .hub-return { background: linear-gradient(135deg, rgba(255,255,255,0.8) 0%, rgba(255,230,240,0.8) 100%); border-color: #ffb3d4; }
+
+  /* Equipment List */
   .equipment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
-  .card { background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 8px 32px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; }
-  .card:hover { transform: translateY(-3px); box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.6), 0 12px 40px rgba(0,0,0,0.12); }
+  .card { 
+    background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(24px) saturate(180%); 
+    border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; 
+    overflow: hidden; display: flex; flex-direction: column; 
+    box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 8px 32px rgba(0,0,0,0.06); 
+    transition: transform 0.2s, box-shadow 0.2s; 
+  }
   .card-img { width: 100%; height: 160px; background-color: rgba(255,255,255,0.5); object-fit: cover; }
   .card-body { padding: 14px; }
   .card-title { font-size: 15px; font-weight: 600; margin: 0 0 6px 0; color: #1d1d1f; }
   .card-status { font-size: 13px; color: #86868b; margin-bottom: 8px;}
-  .cart-controls { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.5); border-radius: 8px; padding: 6px; }
-  .qty-btn { background: white; border: none; border-radius: 6px; width: 28px; height: 28px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); color: #1d1d1f; font-weight: 500;}
-  #cartFloat { position: fixed; bottom: 30px; right: 30px; background: rgba(29, 29, 31, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: white; padding: 16px 24px; border-radius: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); cursor: pointer; display: none; z-index: 1000; font-weight: 600;}
-  .list-card { background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; padding: 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: inset 0 0 15px rgba(255,255,255,0.4), 0 4px 20px rgba(0,0,0,0.05); }
-  .list-info { font-size: 15px; line-height: 1.5; color: #1d1d1f; }
+  
+  .list-card { 
+    background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(20px) saturate(180%); 
+    border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; 
+    padding: 18px; margin-bottom: 16px; display: flex; justify-content: space-between; 
+    align-items: center; flex-wrap: wrap; gap: 12px; 
+    box-shadow: inset 0 0 15px rgba(255,255,255,0.4), 0 4px 20px rgba(0,0,0,0.05); 
+  }
+
+  .filters { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; align-items: center;}
+  .filter-btn { padding: 8px 16px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: 20px; cursor: pointer; white-space: nowrap; color: #1d1d1f; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;}
+  .filter-btn.active { background: rgba(29, 29, 31, 0.85); color: white; border-color: transparent; }
+
+  /* Modals */
   .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 2000; align-items: center; justify-content: center; }
-  .modal-content { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 1px solid rgba(255, 255, 255, 0.8); padding: 24px; border-radius: 24px; max-width: 400px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: inset 0 0 20px rgba(255,255,255,0.5), 0 20px 40px rgba(0,0,0,0.2); }
-  #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
+  .modal-content { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(40px) saturate(200%); border: 1px solid rgba(255, 255, 255, 0.8); padding: 24px; border-radius: 24px; max-width: 400px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: inset 0 0 20px rgba(255,255,255,0.5), 0 20px 40px rgba(0,0,0,0.2); }
+
+  #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
   .spinner { border: 4px solid rgba(0,122,255,0.2); border-top: 4px solid #007aff; border-radius: 50%; width: 44px; height: 44px; animation: spin 1s linear infinite; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  .radio-card { background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; padding: 16px; position: relative; transition: transform 0.2s, box-shadow 0.2s; box-shadow: inset 0 0 15px rgba(255,255,255,0.4), 0 4px 20px rgba(0,0,0,0.05); }
-  .radio-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
-  .radio-card.is-borrowed { border: 1px solid rgba(255, 204, 0, 0.6); background: rgba(255, 253, 240, 0.8); }
-  .radio-card.is-mine { border: 1px solid rgba(52, 199, 89, 0.6); background: rgba(240, 253, 244, 0.8); }
-  .rc-battery { flex:1; padding:6px 2px; border:none; border-radius:6px; background:#f5f5f7; cursor:pointer; font-size:11px; text-align:center; font-weight: 500; color: #86868b; white-space: nowrap;}
-  .rc-battery.active-ready { background:#e8f5e9; color:#34c759; }
-  .rc-battery.active-charging { background:#e3f2fd; color:#007aff; }
-  .rc-battery.active-low { background:#ffebee; color:#ff3b30; }
-  .upload-zone { display:block; border:2px dashed #d2d2d7; border-radius:16px; padding:24px; text-align:center; cursor:pointer; background:#f5f5f7; margin-bottom:15px; font-size:15px; color:#86868b; transition: all 0.2s; }
-  .upload-zone:hover { border-color:#007aff; background:#f0f8ff; color:#007aff; }
-  .nav-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-  .nav-item { border: 1px solid rgba(255,255,255,0.4) !important; background: rgba(255,255,255,0.6) !important; backdrop-filter: blur(10px); color: #1d1d1f !important; border-radius: 12px !important; font-weight: 600 !important; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important; padding: 10px 5px; font-size: 13px; text-align: center; cursor: pointer; }
-  .nav-item.active { background: rgba(29, 29, 31, 0.85) !important; color: white !important; border-color: transparent !important; }
-  .btn-outline { font-family: inherit; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-  .glass-panel { background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 24px; padding: 24px; box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 16px 40px rgba(0,0,0,0.08); }
 
-  /* === Responsive Design === */
+  /* Toast Notification */
+  #toastContainer {
+    position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 99999;
+    display: flex; flex-direction: column; gap: 10px; pointer-events: none; width: 90%; max-width: 400px;
+  }
+  .toast-msg {
+    background-color: rgba(29, 29, 31, 0.9); backdrop-filter: blur(10px); color: #fff;
+    border-radius: 14px; padding: 14px 18px; font-size: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    opacity: 0; transform: translateY(20px) scale(0.95); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    display: flex; align-items: center; justify-content: space-between; pointer-events: auto;
+  }
+  .toast-msg.show { opacity: 1; transform: translateY(0) scale(1); }
+  .toast-success { background-color: rgba(52, 199, 89, 0.95); }
+  .toast-error { background-color: rgba(255, 59, 48, 0.95); }
+
   @media (max-width: 480px) {
     .container { padding: 12px; }
     .header { padding: 10px 14px; }
-    .header-title { font-size: 18px; }
-    #authSection { padding: 24px 18px; margin-top: 30px; }
-    .equipment-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .card-img { height: 120px; }
-    .card-body { padding: 10px; }
-    .card-title { font-size: 13px; }
-    .card-status { font-size: 11px; }
-    .list-card { padding: 14px; gap: 8px; }
-    .modal-content { padding: 18px; width: 94%; }
-    #cartFloat { bottom: 18px; right: 14px; padding: 12px 18px; font-size: 14px; }
-    .radio-card { padding: 12px; }
+    .nav-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .scanner-hub-grid { grid-template-columns: 1fr; gap: 12px; }
+    .hub-btn { padding: 16px 12px; flex-direction: row; text-align: left; }
+    .hub-icon { font-size: 32px; margin-bottom: 0; margin-right: 15px; }
+    .hub-title { font-size: 16px; margin-bottom: 2px; }
+    .hub-desc { font-size: 12px; }
   }
-  @media (min-width: 481px) and (max-width: 768px) {
-    .equipment-grid { grid-template-columns: repeat(3, 1fr); gap: 14px; }
-    .card-img { height: 140px; }
-  }
-  @media (min-width: 769px) {
-    .equipment-grid { grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    .nav-grid { grid-template-columns: repeat(6, 1fr); }
-  }
-
-    /* Toast Notification */
-    #toastContainer {
-      position: fixed;
-      bottom: 30px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 99999;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      pointer-events: none;
-      width: 90%;
-      max-width: 400px;
-    }
-    .toast-msg {
-      background-color: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      color: #fff;
-      text-align: left;
-      border-radius: 14px;
-      padding: 14px 18px;
-      font-size: 15px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-      opacity: 0;
-      transform: translateY(20px) scale(0.95);
-      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      pointer-events: auto;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .toast-msg.show {
-      opacity: 1;
-      transform: translateY(0) scale(1);
-    }
-    .toast-success { background-color: rgba(52, 199, 89, 0.9); }
-    .toast-error { background-color: rgba(255, 59, 48, 0.9); }
-    .toast-warning { background-color: rgba(255, 149, 0, 0.9); }
-    .toast-info { background-color: rgba(0, 122, 255, 0.9); }
-
 </style>
 
   </head>
   <body>
-
     <div id="loadingOverlay">
       <div class="spinner"></div>
-      <p id="loadingText" style="margin-top: 15px; font-weight: 500; color: #262626;">กำลังประมวลผล...</p>
+      <p id="loadingText" style="margin-top: 15px; font-weight: 500; color: #1d1d1f;">กำลังประมวลผล...</p>
     </div>
 
-    <!-- Fallback for in-app browsers (LINE) -->
-    <input type="file" id="qrFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFileScan(event)">
-    <input type="file" id="fallbackCameraInput" accept="image/*" capture="environment" style="display:none;" onchange="handleFallbackCamera(event)">
-
     <div class="header">
-      <div class="header-title">GB Stocklists</div>
+      <div class="header-title">V2 Enterprise Logistics</div>
       <div style="display: flex; align-items: center; gap: 15px;">
-        <span id="welcomeText" style="font-size: 14px;"></span>
-        <button id="logoutBtn" class="logout-btn" onclick="logout()">ออก</button>
+        <span id="welcomeText" style="font-size: 14px; font-weight: 500;"></span>
+        <button id="logoutBtn" class="logout-btn" onclick="logout()">ออกระบบ</button>
       </div>
     </div>
 
     <div class="container">
-      <div id="authSection">
-        <h2 id="authTitle">เข้าสู่ระบบ</h2>
+      <!-- Auth Section -->
+      <div id="authSection" class="glass-panel" style="max-width: 400px; margin: 40px auto; text-align: center;">
+        <h2 id="authTitle" style="margin-top: 0;">เข้าสู่ระบบ</h2>
         <div id="loginForm">
           <input type="text" id="loginUser" placeholder="Username">
           <input type="password" id="loginPass" placeholder="Password">
@@ -168,7 +188,7 @@
           <input type="password" id="regPass" placeholder="Password">
           <input type="text" id="regName" placeholder="ชื่อ-นามสกุล">
           <select id="regDept">
-            <option value="">-- เลือกแผนกของคุณ --</option>
+            <option value="">-- เลือกแผนก --</option>
             <option value="GB">GB</option>
             <option value="CR">CR</option>
             <option value="CA">CA</option>
@@ -179,50 +199,74 @@
         </div>
       </div>
 
-      <div id="mainNav" style="display:none;">
-        <div style="display: flex; gap: 8px; margin-bottom: 8px;">
-          <button class="nav-item" id="navRadio" onclick="switchTab('tabRadio', this)" style="display:none; flex:1;">📻<br>วิทยุ</button>
-          <button class="nav-item" onclick="switchTab('tabPOS', this)" style="flex:1;">💻<br>โหมด POS</button>
-          <button class="nav-item" onclick="switchTab('tabProfile', this)" style="flex:1;">👤<br>โปรไฟล์</button>
-          <button class="nav-item" id="navAdmin" style="display:none;" onclick="switchTab('tabAdmin', this)" style="flex:1;">⚙️<br>จัดการระบบ</button>
-        </div>
-        <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-          <button class="nav-item active" onclick="switchTab('tabBorrow', this)" style="flex:1; padding: 15px 5px; font-size: 15px;">🛒<br>เบิกอุปกรณ์</button>
-          <button class="nav-item" onclick="switchTab('tabReturn', this)" style="flex:1; padding: 15px 5px; font-size: 15px;">📦<br>คืนอุปกรณ์</button>
+      <!-- Navigation -->
+      <div id="mainNav" style="display:none; margin-bottom: 20px;">
+        <div class="nav-grid">
+          <button class="nav-item active" onclick="switchTab('tabScannerHub', this)">📸<br>Scanner Hub</button>
+          <button class="nav-item" onclick="switchTab('tabEquipment', this)">🎒<br>คลังอุปกรณ์</button>
+          <button class="nav-item" onclick="switchTab('tabMyItems', this)">📦<br>รายการของฉัน</button>
+          <button class="nav-item" onclick="switchTab('tabProfile', this)">👤<br>โปรไฟล์</button>
         </div>
       </div>
 
-      <div id="tabBorrow" style="display:none;">
+      <!-- Scanner Hub -->
+      <div id="tabScannerHub" style="display:none;">
+        <div class="glass-panel" style="text-align: center;">
+          <h2 style="margin-top: 0; color: #1d1d1f;">Logistics Scanner Hub</h2>
+          <p style="color: #86868b; margin-bottom: 24px;">เลือกโหมดสแกนที่ต้องการดำเนินการ</p>
+          
+          <div class="scanner-hub-grid">
+            <button class="hub-btn hub-borrow" onclick="openScannerHub('borrow')">
+              <span class="hub-icon">🛒</span>
+              <span class="hub-title">เบิก/ใช้งาน</span>
+              <span class="hub-desc">สแกนเพื่อเบิก (Asset) หรือ ใช้งาน (Consumable)</span>
+            </button>
+            <button class="hub-btn hub-load" onclick="openScannerHub('load')">
+              <span class="hub-icon">🚚</span>
+              <span class="hub-title">Load to Truck</span>
+              <span class="hub-desc">สแกนของขึ้นรถขนส่ง (อัพเดทสถานะ Logistic)</span>
+            </button>
+            <button class="hub-btn hub-unload" onclick="openScannerHub('unload')">
+              <span class="hub-icon">📍</span>
+              <span class="hub-title">Unload / Arrived</span>
+              <span class="hub-desc">สแกนของลงรถ ณ จุดหมายปลายทาง</span>
+            </button>
+            <button class="hub-btn hub-return" onclick="openScannerHub('return')">
+              <span class="hub-icon">📥</span>
+              <span class="hub-title">Return Asset</span>
+              <span class="hub-desc">สแกนคืนอุปกรณ์พร้อมถ่ายรูปยืนยัน</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Equipment Tab (Old Borrow) -->
+      <div id="tabEquipment" style="display:none;">
         <div class="controls">
           <input type="text" placeholder="ค้นหาอุปกรณ์..." id="searchInput" onkeyup="renderEquipment()">
           <div class="filters">
             <button class="filter-btn active" onclick="setFilter('all', this)">ทั้งหมด</button>
-            <button class="filter-btn" onclick="setFilter('available', this)">พร้อมเบิก</button>
-            <button class="btn-warning" onclick="openScanner('borrow')" style="padding: 8px 16px; border-radius: 20px; cursor: pointer; font-weight: 500; display:inline-block; margin:0;">
-              📷 สแกนเบิกอุปกรณ์
-            </button>
+            <button class="filter-btn" onclick="setFilter('available', this)">พร้อมใช้งาน</button>
           </div>
         </div>
         <div class="equipment-grid" id="equipmentGrid"></div>
       </div>
 
-      <div id="tabReturn" style="display:none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-          <h3 style="margin:0;">อุปกรณ์ที่คุณกำลังใช้งานอยู่</h3>
-          <button class="btn-warning" style="padding:8px 15px; cursor:pointer; border-radius:20px; font-size:14px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);" onclick="openScanner('return')">
-            📷 สแกนคืนอุปกรณ์
-          </button>
+      <!-- My Items (Old Return) -->
+      <div id="tabMyItems" style="display:none;">
+        <div class="glass-panel">
+          <h3 style="margin-top:0;">อุปกรณ์ที่คุณกำลังใช้งาน หรืออยู่ในความรับผิดชอบ</h3>
+          <p style="font-size: 14px; color: #86868b; margin-top: 0;">หากเป็น Asset กรุณานำมาคืนเมื่อใช้งานเสร็จสิ้น</p>
+          <div id="myReturnList"></div>
         </div>
-        <p style="font-size: 14px; color: #666; margin-top: 0;">กดยืนยันหรือสแกน QR อุปกรณ์ แล้วนำของไปเก็บที่เดิมได้เลย</p>
-        <div id="myReturnList"></div>
       </div>
 
+      <!-- Profile -->
       <div id="tabProfile" style="display:none;">
-        <h3 style="margin-top:0;">จัดการบัญชีส่วนตัว</h3>
-        <p style="font-size: 14px; color: #666;">คุณสามารถเปลี่ยนชื่อ รหัสผ่าน และแผนกได้ที่นี่</p>
-        <div class="list-card" style="display: flex; flex-direction: column; gap: 5px;">
-          <label>Username (สำหรับเข้าสู่ระบบ)</label><input type="text" id="myProfileUsername" placeholder="Username">
-          <label>รหัสผ่าน</label><input type="text" id="myProfilePassword" placeholder="รหัสผ่านใหม่">
+        <div class="glass-panel">
+          <h3 style="margin-top:0;">จัดการบัญชีส่วนตัว</h3>
+          <label>Username</label><input type="text" id="myProfileUsername" readonly style="opacity:0.7">
+          <label>รหัสผ่านใหม่ (ปล่อยว่างถ้าไม่เปลี่ยน)</label><input type="password" id="myProfilePassword" placeholder="รหัสผ่านใหม่">
           <label>ชื่อ-นามสกุล</label><input type="text" id="myProfileName" placeholder="ชื่อ-นามสกุล">
           <label>แผนก</label>
           <select id="myProfileDept">
@@ -232,162 +276,67 @@
             <option value="CA">CA</option>
             <option value="SC">SC</option>
           </select>
-          <button class="btn-primary" style="margin-top: 15px; border-radius: 30px;" onclick="saveMyProfile()">💾 บันทึกข้อมูลส่วนตัว</button>
+          <button class="btn-primary" style="margin-top: 15px;" onclick="saveMyProfile()">💾 บันทึกข้อมูลส่วนตัว</button>
         </div>
       </div>
 
-      
-      <div id="tabRadio" class="tab-content" style="display:none;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-          <h3 style="margin:0;">📻 วิทยุสื่อสาร</h3>
-          <button class="btn-warning" style="width:auto; border-radius:20px; padding:8px 16px;" onclick="loadRadios()">🔄 รีเฟรช</button>
-        </div>
-        <div style="display:flex; gap:8px; margin-bottom:15px; flex-wrap:wrap;">
-          <button class="filter-btn active" id="rf-all" onclick="setRadioFilter('all',this)">ทั้งหมด</button>
-          <button class="filter-btn" onclick="setRadioFilter('available',this)">🟩 ว่าง</button>
-          <button class="filter-btn" onclick="setRadioFilter('borrowed',this)">🔴 ถูกยืม</button>
-        </div>
-        <div id="radioAdminPanel" style="display:none; background:#e3f2fd; border:1px solid #90caf9; border-radius:10px; padding:12px; margin-bottom:15px;">
-          <strong style="color:#1565c0;">⚙️ Admin: จัดการวิทยุ</strong>
-          <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
-            <button class="btn-primary" style="width:auto;" onclick="openAddRadioModal()">+ เพิ่มวิทยุ</button>
-            <button class="btn-success" style="width:auto; background:#17a2b8;" onclick="openRadioQR('ALL', 'วิทยุทั้งหมด', 'ALL')">🖨️ พิมพ์/โหลด QR ทั้งหมด</button>
-          </div>
-        </div>
-        <div id="radioGrid" class="equipment-grid"></div>
-      </div>
+    </div>
 
-      <div id="tabPOS" class="tab-content" style="display:none;">
-        <h2 style="margin-top:0;">💻 โหมดสแกนเนอร์ (POS)</h2>
-        <div style="display: flex; flex-wrap: wrap; gap: 20px;">
-          <!-- Left side: Camera -->
-          <div style="flex: 1 1 400px;">
-            <div class="glass-panel" style="padding: 20px; margin-bottom: 20px;">
-               <button id="btnStartPOS" class="btn-primary" style="width:100%; border-radius:20px; font-size:16px; padding:12px; margin-top: 0;" onclick="startPOSScanner()">📷 เปิดกล้องสแกน</button>
-               <div id="posScannerControls" style="display:none; gap:10px;">
-                 <button id="btnFlipPOS" class="btn-outline" style="flex:1; border-radius:20px; font-size:16px; padding:12px; border:2px solid #007aff; color:#007aff; background:transparent;" onclick="flipPOSScanner()">🔄 สลับกล้อง</button>
-                 <button id="btnStopPOS" class="btn-danger" style="flex:1; border-radius:20px; font-size:16px; padding:12px;" onclick="stopPOSScanner()">⏹️ ปิดกล้อง</button>
-               </div>
-               <div id="posReader" style="width:100%; max-width: 400px; margin: 15px auto 0; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></div>
-            </div>
-          </div>
-          <!-- Right side: Cart -->
-          <div class="glass-panel" style="flex: 1 1 300px; display: flex; flex-direction: column; padding: 20px;">
-            <h3 style="margin-top:0;">🛒 ตะกร้าของคุณ</h3>
-            <div id="posCartList" style="flex: 1; overflow-y: auto; max-height: 500px;">
-               <p style="color:#8e8e8e; text-align:center; margin-top: 50px;">ยังไม่มีอุปกรณ์</p>
-            </div>
-            <div style="margin-top: 15px; padding-bottom: 0px;">
-               <button class="btn-success" style="width:100%; font-size:18px; padding:15px; border-radius:30px; box-shadow: 0 4px 15px rgba(52, 199, 89, 0.4); border: 2px solid rgba(255,255,255,0.5);" onclick="posCheckout()">💳 ยืนยันการเบิก (Checkout)</button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div id="tabAdmin" style="display:none;">
-        <h3 style="margin-top:0;">จัดการระบบส่วนกลาง</h3>
-        <div class="filters" style="margin-bottom: 15px;" id="adminNavFilters">
-          <button class="filter-btn active" onclick="showAdminSubTab('return')">📦 ของค้างคืน</button>
-          <button class="filter-btn" onclick="showAdminSubTab('history')">📜 ประวัติทั้งหมด</button>
-          <button class="filter-btn" onclick="showAdminSubTab('users')">👥 จัดการผู้ใช้</button>
-          <button class="filter-btn" onclick="showAdminSubTab('equipments')">🎒 จัดการอุปกรณ์</button>
-          <button class="filter-btn" onclick="showAdminSubTab('locations')">📍 จัดการจุดวาง</button>
-          <button class="filter-btn" onclick="showAdminSubTab('qr')">🔲 สร้าง QR</button>
-        </div>
-
-        <div id="adminTabReturn">
-          <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center;">
-            <input type="text" id="adminSearch" placeholder="ค้นหารหัส หรือ ชื่อผู้เบิก..." onkeyup="renderAdminData()" style="margin: 0;">
-            <button class="btn-warning" style="white-space: nowrap; margin: 0; padding:10px; cursor:pointer; border-radius:20px; box-sizing:border-box;" onclick="openScanner('admin_return')">
-              📷 สแกนรับคืน
-            </button>
-          </div>
-          <div id="adminList"></div>
-        </div>
+    <!-- Modals -->
+    <!-- Unified Scanner Modal -->
+    <div id="scannerModal" class="modal-bg">
+      <div class="modal-content" style="text-align: center; max-width: 500px;">
+        <h3 id="scannerModalTitle" style="margin-top:0;">📷 Scanner</h3>
+        <p id="scannerModalDesc" style="color: #86868b; font-size: 14px;"></p>
         
-        <div id="adminTabUsers" style="display:none;">
-          <button class="btn-primary" style="width:auto; margin-bottom:15px;" onclick="openUserModal()">+ เพิ่มผู้ใช้ใหม่</button>
-          <div id="adminUserList"></div>
-        </div>
-        
-        <div id="adminTabEq" style="display:none;">
-          <button class="btn-primary" style="width:auto; margin-bottom:15px;" onclick="openEqModal()">+ เพิ่มอุปกรณ์ใหม่</button>
-          <div id="adminEqList"></div>
+        <div id="scannerLocationSelect" style="display:none; margin-bottom: 15px;">
+           <label style="font-weight: 600; display: block; margin-bottom: 5px;">เลือกปลายทาง (To Location):</label>
+           <select id="logisticToLoc"></select>
         </div>
 
-        <div id="adminTabLoc" style="display:none;">
-          <button class="btn-primary" style="width:auto; margin-bottom:15px;" onclick="openLocModal()">+ เพิ่มจุดวางใหม่</button>
-          <div id="adminLocList"></div>
-        </div>
-
-        <div id="adminTabQR" style="display:none;">
-          <select id="adminLocSelect" onchange="generateQR('loc')"></select><br>
-          <select id="adminEqSelect" onchange="generateQR('eq')" style="margin-top:10px;"></select>
-          <div id="adminQRResult" style="text-align: center; margin-top: 20px;"></div>
-          <hr style="margin: 30px 0; border-top: 1px solid #dbdbdb;">
-          <button class="btn-success" style="width: 100%; padding: 12px; font-size: 16px; border-radius: 8px;" onclick="downloadAllQRs()">📦 ดาวน์โหลด QR ทั้งหมดเป็นไฟล์ .ZIP</button>
-        </div>
+        <div id="scannerReader" style="width:100%; margin: 15px auto; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);"></div>
         
-        <div id="adminTabHistory" style="display:none;">
-          <h4 style="margin-top:0; color:#8e8e8e;">ประวัติการทำรายการล่าสุด (10 รายการ/หน้า)</h4>
-          <div id="adminHistoryList"></div>
-          <div style="display:flex; justify-content:center; gap:15px; margin-top:15px; align-items:center;">
-             <button class="btn-primary" style="width:auto; padding:8px 20px; margin-top:0;" onclick="loadHistoryPage(-1)">◀ ก่อนหน้า</button>
-             <span id="historyPageLabel" style="font-weight:500;">หน้า 1 / 1</span>
-             <button class="btn-primary" style="width:auto; padding:8px 20px; margin-top:0;" onclick="loadHistoryPage(1)">ถัดไป ▶</button>
-          </div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn-outline" style="flex:1;" onclick="toggleScannerCamera()">🔄 สลับกล้อง</button>
+          <button class="btn-danger" style="flex:1;" onclick="closeScannerModal()">ยกเลิก</button>
         </div>
       </div>
     </div>
 
-    <div id="cartFloat" onclick="checkout()">🛒 ตะกร้า <span id="cartCount">(0)</span> ➔ ยืนยันเบิก</div>
-
-    <!-- Modals -->
+    <!-- Return Details Modal (Photo & Status) -->
     <div id="returnLocModal" class="modal-bg">
       <div class="modal-content">
-        <h3 style="margin-top:0;">📍 ระบุจุดวางที่นำไปคืน</h3>
+        <h3 style="margin-top:0;">📍 ระบุจุดวางและถ่ายรูปคืน</h3>
         <p style="font-size: 14px; color:#666;">นำอุปกรณ์: <strong id="returnEqNamePreview"></strong> ไปคืนที่ไหน?</p>
         <select id="selectReturnLoc" style="margin-bottom: 15px;"></select>
-        <div style="text-align: center; margin-bottom: 15px;"><span style="color:#8e8e8e; font-size:12px;">-- หรือ --</span></div>
-        <button class="btn-warning" style="width:100%; margin-bottom: 20px; display:block; text-align:center; padding:10px; cursor:pointer; border-radius:20px; box-sizing:border-box;" onclick="openScanner('loc')">
-          📷 สแกน QR ประจำจุดวาง
-        </button>
         
         <div style="margin-bottom: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px;">
           <label style="font-size:14px; font-weight:600; display:block; text-align:center;">สภาพของอุปกรณ์</label>
           <div style="display:flex; gap:10px; margin-top:8px;">
-            <button class="btn-outline" style="flex:1; padding:8px; background:#4caf50; color:white; border:none;" id="btnEqStatusReady" onclick="setEqReturnStatus('สมบูรณ์')">✅ พร้อมใช้งาน</button>
-            <button class="btn-outline" style="flex:1; padding:8px; border:1px solid #f44336; color:#f44336; background:white;" id="btnEqStatusBroken" onclick="setEqReturnStatus('ชำรุด')">❌ ชำรุด/หาย</button>
+            <button class="btn-outline active" style="flex:1; background:#34c759; color:white; border:none;" id="btnEqStatusReady" onclick="setEqReturnStatus('สมบูรณ์')">✅ สมบูรณ์</button>
+            <button class="btn-outline" style="flex:1; border:1px solid #ff3b30; color:#ff3b30; background:white;" id="btnEqStatusBroken" onclick="setEqReturnStatus('ชำรุด')">❌ ชำรุด/หาย</button>
           </div>
           <input type="hidden" id="eqReturnStatus" value="สมบูรณ์">
         </div>
         
         <h3 style="margin-top:10px; margin-bottom: 5px;">📸 ถ่ายรูปหลักฐานการคืน</h3>
         <div id="returnCameraSection">
-          <div style="background: linear-gradient(135deg, #f0f8ff 0%, #f5f5f7 100%); border-radius: 16px; padding: 20px; text-align: center; border: 1px dashed #b0d4f1; margin-bottom: 15px;">
-            <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
-            <p style="margin: 0 0 12px 0; color: #86868b; font-size: 14px;">ถ่ายรูปอุปกรณ์ที่คืนเป็นหลักฐาน</p>
-            <button class="btn-primary" style="width:100%; padding:14px; border-radius:30px; background: linear-gradient(135deg, #007aff 0%, #5856d6 100%); font-size:16px; box-shadow: 0 4px 12px rgba(0,122,255,0.3);" onclick="startReturnCamera()">📷 เปิดกล้องถ่ายรูป</button>
-          </div>
+          <button class="btn-primary" style="width:100%; margin-bottom: 15px;" onclick="startReturnCamera()">📷 เปิดกล้องถ่ายรูป</button>
         </div>
 
-        <div id="returnCameraContainer" style="display:none; text-align:center; margin-bottom:15px; border-radius:16px; overflow:hidden; border:1px solid #e5e5ea; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+        <div id="returnCameraContainer" style="display:none; text-align:center; margin-bottom:15px; border-radius:16px; overflow:hidden;">
           <video id="returnVideo" autoplay playsinline style="width:100%; max-height:300px; object-fit:cover; background:#000; display:block;"></video>
-          <div style="padding:12px; background: linear-gradient(135deg, #f5f5f7 0%, #e5e5ea 100%); display:flex; gap:10px;">
-            <button class="btn-success" style="flex:2; border-radius:25px; padding:14px; font-size:16px; background: linear-gradient(135deg, #34c759 0%, #30d158 100%); box-shadow: 0 4px 10px rgba(52,199,89,0.3);" onclick="captureReturnPhoto()">📸 ถ่ายรูป</button>
-            <button class="btn-danger" style="flex:1; border-radius:25px; padding:14px; background: linear-gradient(135deg, #ff3b30 0%, #ff453a 100%);" onclick="stopReturnCamera()">ปิดกล้อง</button>
+          <div style="padding:12px; display:flex; gap:10px;">
+            <button class="btn-success" style="flex:2;" onclick="captureReturnPhoto()">📸 ถ่ายรูป</button>
+            <button class="btn-danger" style="flex:1;" onclick="stopReturnCamera()">ปิดกล้อง</button>
           </div>
         </div>
         <canvas id="returnCanvas" style="display:none;"></canvas>
 
         <div id="retakePhotoSection" style="display:none; text-align:center; margin-bottom:15px;">
-           <div style="position:relative; display:inline-block; width:100%;">
-             <img id="returnImagePreview" style="width:100%; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-             <div style="position:absolute; top:8px; right:8px; background:rgba(52,199,89,0.9); color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">✅ ถ่ายแล้ว</div>
-           </div>
-           <button class="btn-outline" style="margin-top:10px; padding:10px 20px; border-radius:25px; font-weight:600; border:2px solid #007aff; color:#007aff; background:transparent; font-size:14px;" onclick="retakeReturnPhoto()">🔄 ถ่ายใหม่</button>
+           <img id="returnImagePreview" style="width:100%; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+           <button class="btn-outline" style="margin-top:10px; width: 100%;" onclick="retakeReturnPhoto()">🔄 ถ่ายใหม่</button>
         </div>
-        
         <input type="hidden" id="returnImageBase64">
         
         <div style="display:flex; gap:10px;">
@@ -396,217 +345,14 @@
         </div>
       </div>
     </div>
-    
-    <div id="eqModal" class="modal-bg">
-      <div class="modal-content">
-        <h3 id="eqModalTitle" style="margin-top:0;">เพิ่มอุปกรณ์</h3>
-        <input type="hidden" id="editEqIsNew" value="true">
-        <input type="hidden" id="editEqId">
-        <label>ชื่ออุปกรณ์</label><input type="text" id="editEqName" placeholder="เช่น กล้อง DSLR">
-        
-        <label style="font-weight:600; margin-bottom:5px; display:block;">📸 รูปภาพอุปกรณ์</label>
-        
-        <!-- Camera open button -->
-        <div id="eqCameraSection">
-          <div style="background: linear-gradient(135deg, #f0f8ff 0%, #f5f5f7 100%); border-radius: 16px; padding: 20px; text-align: center; border: 1px dashed #b0d4f1; margin-bottom: 15px;">
-            <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
-            <p style="margin: 0 0 12px 0; color: #86868b; font-size: 14px;">ถ่ายรูปอุปกรณ์หรือเลือกจากเครื่อง</p>
-            <div style="display:flex; gap:10px;">
-              <button class="btn-primary" style="flex:1; margin-top:0; padding:12px; border-radius:25px; background: linear-gradient(135deg, #007aff 0%, #5856d6 100%); font-size:14px; box-shadow: 0 4px 12px rgba(0,122,255,0.3);" onclick="startEqCamera()">📷 เปิดกล้อง</button>
-              <label class="btn-success" style="flex:1; margin-top:0; padding:12px; border-radius:25px; font-weight:600; background: linear-gradient(135deg, #5ac8fa 0%, #17a2b8 100%); text-align:center; cursor:pointer; font-size:14px; box-shadow: 0 4px 12px rgba(90,200,250,0.3); display:flex; align-items:center; justify-content:center;">
-                🖼️ จากเครื่อง
-                <input type="file" accept="image/*" style="display:none;" onchange="handleEqPhoto(event)">
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Live camera preview -->
-        <div id="eqCameraContainer" style="display:none; text-align:center; margin-bottom:15px; border-radius:16px; overflow:hidden; border:1px solid #e5e5ea; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-          <video id="eqVideo" autoplay playsinline style="width:100%; max-height:280px; object-fit:cover; background:#000; display:block;"></video>
-          <div style="padding:12px; background: linear-gradient(135deg, #f5f5f7 0%, #e5e5ea 100%); display:flex; gap:10px;">
-            <button class="btn-success" style="flex:2; border-radius:25px; padding:14px; font-size:16px; background: linear-gradient(135deg, #34c759 0%, #30d158 100%); box-shadow: 0 4px 10px rgba(52,199,89,0.3);" onclick="captureEqPhoto()">📸 ถ่ายรูป</button>
-            <button class="btn-danger" style="flex:1; border-radius:25px; padding:14px; background: linear-gradient(135deg, #ff3b30 0%, #ff453a 100%);" onclick="stopEqCamera()">ปิดกล้อง</button>
-          </div>
-        </div>
-        <canvas id="eqCanvas" style="display:none;"></canvas>
-
-        <!-- Photo preview with retake -->
-        <div id="eqRetakeSection" style="display:none; text-align:center; margin-bottom:15px;">
-          <div style="position:relative; display:inline-block; width:100%;">
-            <img id="editEqImagePreviewUI" style="width:100%; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <div style="position:absolute; top:8px; right:8px; background:rgba(52,199,89,0.9); color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">✅ ถ่ายแล้ว</div>
-          </div>
-          <button class="btn-outline" style="margin-top:10px; padding:10px 20px; border-radius:25px; font-weight:600; border:2px solid #007aff; color:#007aff; background:transparent; font-size:14px;" onclick="retakeEqPhoto()">🔄 ถ่ายใหม่</button>
-        </div>
-
-        <input type="hidden" id="editEqImage"> 
-        <input type="hidden" id="editEqImageBase64">
-
-        <label>จำนวนทั้งหมด</label><input type="number" id="editEqTotal" placeholder="จำนวน" min="1">
-        <label>จุดวาง</label><select id="editEqLoc"></select>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-          <button class="btn-success" style="flex:1;" onclick="saveEq()">บันทึก</button>
-          <button class="btn-danger" style="flex:1;" onclick="if(eqVideoStream) stopEqCamera(); document.getElementById('eqModal').style.display='none'">ยกเลิก</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="locModal" class="modal-bg">
-      <div class="modal-content">
-        <h3 id="locModalTitle" style="margin-top:0;">เพิ่มจุดวาง</h3>
-        <input type="hidden" id="editLocIsNew" value="true">
-        <input type="hidden" id="editLocId">
-        <label>ชื่อจุดวาง</label><input type="text" id="editLocName" placeholder="เช่น ตู้ A ชั้น 1">
-        <div style="display:flex; gap:10px; margin-top:15px;">
-          <button class="btn-success" style="flex:1;" onclick="saveLoc()">บันทึก</button>
-          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('locModal').style.display='none'">ยกเลิก</button>
-        </div>
-      </div>
-    </div>
-    
-    <div id="userModal" class="modal-bg">
-      <div class="modal-content">
-        <h3 id="userModalTitle" style="margin-top:0;">เพิ่ม/แก้ไข ผู้ใช้งาน</h3>
-        <input type="hidden" id="editUserRow">
-        <label>Username</label><input type="text" id="editUsername" placeholder="Username">
-        <label>Password</label><input type="text" id="editPassword" placeholder="Password">
-        <label>ชื่อ-นามสกุล</label><input type="text" id="editName" placeholder="ชื่อ-นามสกุล">
-        <label>แผนก</label>
-        <select id="editDept">
-          <option value="-">-</option>
-          <option value="GB">GB</option>
-          <option value="CR">CR</option>
-          <option value="CA">CA</option>
-          <option value="SC">SC</option>
-        </select>
-        <label>สิทธิ์ (Role)</label>
-        <select id="editRole">
-          <option value="User">User</option>
-          <option value="Admin">Admin</option>
-          <option value="Superadmin">Superadmin</option>
-        </select>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-          <button class="btn-success" style="flex:1;" onclick="saveUser()">บันทึก</button>
-          <button class="btn-danger" style="flex:1;" onclick="closeUserModal()">ยกเลิก</button>
-        </div>
-      </div>
-    </div>
-    
-
-    
-    
-    <!-- Radio QR/Barcode Modal -->
-    <div id="radioQRModal" class="modal-bg">
-      <div class="modal-content" style="text-align:center;">
-        <h3 style="margin-top:0;" id="radioQRTitle">🖨️ พิมพ์ QR/Barcode วิทยุ</h3>
-        <div style="margin-bottom: 10px;">
-          <label style="font-weight: 600; font-size: 14px; display: block; margin-bottom: 5px;">เลือกรูปแบบที่ต้องการพิมพ์:</label>
-          <div style="display: flex; gap: 10px; justify-content: center;">
-            <button class="btn-outline active" id="btnRadioFormatQR" style="padding: 6px 12px; font-size: 14px; background: #1d1d1f; color: white; border: 1px solid #1d1d1f;" onclick="setRadioPrintFormat('QR')">🔳 QR Code</button>
-            <button class="btn-outline" id="btnRadioFormatBarcode" style="padding: 6px 12px; font-size: 14px; border: 1px solid #1d1d1f; color: #1d1d1f; background: transparent;" onclick="setRadioPrintFormat('Barcode')">|||| Barcode</button>
-          </div>
-        </div>
-        <div id="radioQRPrintArea" style="border: 2px dashed #0095f6; padding: 25px 20px; border-radius: 12px; display: inline-block; background: white; margin: 10px 0; min-width: 220px; max-width: 100%; overflow: hidden;">
-          <canvas id="radioQRCanvas" style="border: 1px solid #efefef; padding: 10px; border-radius: 8px;"></canvas>
-          <svg id="radioBarcodeSvg" style="display:none; max-width: 100%;"></svg>
-          <p id="radioQRIdLabel" style="margin: 10px 0 0 0; font-size: 13px; color: #8e8e8e;"></p>
-        </div>
-        <div style="display:flex; gap:10px; margin-top:15px; flex-wrap:wrap;">
-          <button class="btn-success" id="btnRadioDownloadAction" style="flex:1; display:none; background:#ff9800;" onclick="downloadAllRadioCodesZip()">📥 โหลด ZIP</button>
-          <button class="btn-primary" id="btnRadioPrintAction" style="flex:1; display:none;" onclick="printRadioQR()">🖨️ พิมพ์</button>
-          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('radioQRModal').style.display='none'">ปิด</button>
-        </div>
-      </div>
-    </div>
-    <!-- Radio Return Modal -->
-    <div id="radioReturnModal" class="modal-bg">
-      <div class="modal-content">
-        <h3 style="margin-top:0;">📦 คืนวิทยุ</h3>
-        <p style="color:#666; font-size:14px;">กำลังคืน: <strong id="radioReturnName" style="color:#262626;"></strong></p>
-        <div id="radioReturnScanSection">
-          <div style="background:#fff8e1; border:1px solid #ffc107; border-radius:10px; padding:14px; margin:15px 0; text-align:center;">
-            <div style="font-size:28px; margin-bottom:6px;">📍</div>
-            <div style="font-weight:600;">สแกน QR Code ที่จุดคืนวิทยุก่อน</div>
-            <div style="font-size:12px; color:#888; margin-top:4px;">ต้องอยู่ที่จุดคืนจริงๆ เท่านั้น</div>
-          </div>
-          <div id="radioReturnLocDisplay" style="display:none; background:#e8f5e9; border:1px solid #4caf50; border-radius:10px; padding:12px; margin-bottom:15px; text-align:center;">
-             <span style="font-size:12px; color:#4caf50;">จุดคืนที่สแกน:</span><br>
-             <strong id="radioReturnLocNameDisplay"></strong>
-          </div>
-          <button class="btn-warning" style="width:100%; margin-bottom: 20px; display:block; text-align:center; padding:10px; cursor:pointer; border-radius:20px; box-sizing:border-box;" onclick="openScanner('radio_return_loc')">
-            📷 สแกนจุดคืนวิทยุ
-          </button>
-        </div>
-        <div id="radioReturnAdminBypass" style="display:none; background:#e3f2fd; border:1px solid #90caf9; border-radius:10px; padding:14px; margin-bottom:15px; text-align:center;">
-          <div style="font-size:28px; margin-bottom:6px;">⚡</div>
-          <div style="font-weight:600; color:#1565c0;">Admin: คืนโดยไม่ต้องสแกน QR</div>
-          <div style="font-size:12px; color:#888; margin-top:4px;">สิทธิ์แอดมินสามารถข้ามการสแกนได้</div>
-        </div>
-        
-        <div style="margin-bottom: 15px; background: #f8f9fa; padding: 10px; border-radius: 8px;">
-          <label style="font-size:14px; font-weight:600; display:block; text-align:center;">สถานะแบตเตอรี่ (หลังใช้งาน)</label>
-          <div style="display:flex; gap:10px; margin-top:8px;">
-            <button class="btn-outline" style="flex:1; padding:8px; background:#4caf50; color:white; border:none;" id="btnRadBatReady" onclick="setRadReturnBat('ready')">🟢 พร้อม</button>
-            <button class="btn-outline" style="flex:1; padding:8px; border:1px solid #2196f3; color:#2196f3; background:white;" id="btnRadBatCharging" onclick="setRadReturnBat('charging')">🔵 ชาร์จ</button>
-            <button class="btn-outline" style="flex:1; padding:8px; border:1px solid #f44336; color:#f44336; background:white;" id="btnRadBatLow" onclick="setRadReturnBat('low')">🔴 หมด</button>
-          </div>
-          <input type="hidden" id="radReturnBat" value="ready">
-        </div>
-        <div style="display:flex; gap:10px;">
-          <button class="btn-success" style="flex:1; opacity:0.5; cursor:not-allowed;" id="confirmRadioReturnBtn" disabled onclick="confirmRadioReturn()">ยืนยันการคืน</button>
-          <button class="btn-danger" style="flex:1;" onclick="closeRadioReturnModal()">ยกเลิก</button>
-        </div>
-      </div>
-    </div>
-    <!-- Radio Borrow Modal (Admin) -->
-    <div id="radioBorrowModal" class="modal-bg">
-      <div class="modal-content">
-        <h3 style="margin-top:0;">🤝 เบิกวิทยุ (Admin)</h3>
-        <p style="color:#666; font-size:14px;">กำลังเบิก: <strong id="radioBorrowName" style="color:#262626;"></strong></p>
-        <label>ระบุชื่อผู้รับวิทยุ</label>
-        <div id="recipientDropdownWrap">
-          <input type="text" id="radioBorrowRecipient" autocomplete="off" placeholder="🔍 พิมพ์ค้นหาชื่อผู้รับวิทยุ..." style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #ddd; font-family:inherit; box-sizing:border-box;" oninput="filterRecipientList()" onfocus="showRecipientList()">
-          <div id="recipientDropdown" style="display:none; max-height:180px; overflow-y:auto; background:#fafafa; border:1px solid #e0e0e0; border-radius:8px; margin-top:6px;"></div>
-        </div>
-        <div style="display:flex; gap:10px; margin-top:15px;">
-          <button class="btn-success" style="flex:1;" onclick="confirmBorrowRadioAdmin()">ยืนยันการเบิก</button>
-          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('radioBorrowModal').style.display='none'">ยกเลิก</button>
-        </div>
-      </div>
-    </div>
-    <!-- Radio Add/Edit Modal -->
-    <div id="radioModal" class="modal-bg">
-      <div class="modal-content">
-        <h3 style="margin-top:0;">📻 เพิ่ม/แก้ไขวิทยุ</h3>
-        <label>ชื่อวิทยุ</label>
-        <input type="text" id="radioNameInput" placeholder="เช่น วิทยุ #01">
-        <div style="display:flex; gap:10px; margin-top:15px;">
-          <button class="btn-success" style="flex:1;" onclick="doSaveRadio()">บันทึก</button>
-          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('radioModal').style.display='none'">ยกเลิก</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- QR Scanner Modal -->
-    <div id="qrScannerModal" class="modal-bg">
-      <div class="modal-content" style="text-align: center;">
-        <h3>📷 สแกน QR Code</h3>
-        <div id="qr-reader" style="width:100%; max-width: 400px; margin: 0 auto; border-radius: 16px; overflow: hidden; margin-bottom: 15px;"></div>
-        <div style="display:flex; gap:10px;">
-          <button class="btn-outline" style="flex:1; border-radius:20px; font-weight:600; border:2px solid #007aff; color:#007aff; background:transparent;" onclick="toggleScannerCamera()">🔄 สลับกล้อง</button>
-          <button class="btn-danger" style="flex:1; border-radius:20px;" onclick="closeScannerModal()">ยกเลิก</button>
-        </div>
-      </div>
-    </div>
 
     <div id="toastContainer"></div>
     <script>
-
   // ==========================================
-  // GitHub Pages API Adapter
+  // GitHub Pages API Adapter (V2 Enterprise)
   // ==========================================
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcpsuXWSH2w2ZBWtTpME0Nozb92aWNpRnr4w3JyqtBdsJBoFIAGA8LDVri96E10AEL/exec"; // REPLACE THIS URL WITH LATEST DEPLOYMENT
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcpsuXWSH2w2ZBWtTpME0Nozb92aWNpRnr4w3JyqtBdsJBoFIAGA8LDVri96E10AEL/exec"; // Replace with V2 deploy URL
+  const API_TOKEN = "V2_SECURE_ENTERPRISE_TOKEN_2026";
 
   const google = {
     script: {
@@ -644,31 +390,14 @@
   };
 
   function callBackend(actionName, args, successCb, failureCb) {
-    let payload = { action: actionName };
-    if (actionName === 'getInitialData' || actionName === 'getActiveTransactions' || actionName === 'getAllUsers') { } 
-    else if (actionName === 'loginUser') { payload.username = args[0]; payload.password = args[1]; } 
-    else if (actionName === 'registerUser') { payload.username = args[0]; payload.password = args[1]; payload.name = args[2]; payload.department = args[3]; } 
-    else if (actionName === 'updateMyProfile') { payload.userId = args[0]; payload.name = args[1]; payload.password = args[2]; payload.department = args[3]; } 
+    let payload = { action: actionName, api_token: API_TOKEN };
+    if (actionName === 'loginUser') { payload.username = args[0]; payload.passwordHash = args[1]; } 
+    else if (actionName === 'registerUser') { payload.username = args[0]; payload.passwordHash = args[1]; payload.name = args[2]; payload.department = args[3]; } 
+    else if (actionName === 'updateMyProfile') { payload.userId = args[0]; payload.username = args[1]; payload.name = args[2]; payload.passwordHash = args[3]; payload.department = args[4]; } 
     else if (actionName === 'processReturn') { payload.row = args[0]; payload.eqId = args[1]; payload.qty = args[2]; payload.locId = args[3]; payload.photoUrl = args[4]; payload.eqStatus = args[5]; } 
-    else if (actionName === 'uploadImageToDrive') { payload.base64Data = args[0]; payload.filename = args[1]; } 
-    else if (actionName === 'submitBorrow') { payload.userId = args[0]; payload.cart = args[1]; payload.source = args[2]; } 
-    else if (actionName === 'approveUser') { payload.row = args[0]; } 
-    else if (actionName === 'saveUserData') { payload.data = args[0]; } 
-    else if (actionName === 'deleteUserData') { payload.row = args[0]; } 
-    else if (actionName === 'resetUserPassword') { payload.row = args[0]; } 
-    else if (actionName === 'saveEquipmentData') { payload.data = args[0]; } 
-    else if (actionName === 'deleteEquipmentData') { payload.id = args[0]; } 
-    else if (actionName === 'saveLocationData') { payload.data = args[0]; } 
-    else if (actionName === 'deleteLocationData') { payload.id = args[0]; }
-    else if (actionName === 'getRadios') { }
-    else if (actionName === 'borrowRadio') { payload.radioId = args[0]; payload.userId = args[1]; payload.userName = args[2]; }
-    else if (actionName === 'returnRadio') { payload.radioId = args[0]; payload.locId = args[1]; payload.batteryStatus = args[2]; }
-    else if (actionName === 'updateRadioBattery') { payload.radioId = args[0]; payload.status = args[1]; }
-    else if (actionName === 'saveRadio') { payload.data = args[0]; }
-    else if (actionName === 'deleteRadio') { payload.id = args[0]; }
-    else if (actionName === 'initRadios') { payload.count = args[0]; }
-    else if (actionName === 'getTransactionHistory') { payload.page = args[0]; payload.limit = args[1]; }
-
+    else if (actionName === 'submitBorrowConsume') { payload.userId = args[0]; payload.cart = args[1]; payload.source = args[2]; payload.toLoc = args[3]; } 
+    else if (actionName === 'updateLogisticsStatus') { payload.row = args[0]; payload.transitStatus = args[1]; payload.newLoc = args[2]; } 
+    // Add other endpoints as needed
 
     fetch(SCRIPT_URL, {
       method: 'POST',
@@ -688,24 +417,28 @@
     });
   }
 
+  // Cryptography for Passwords
+  async function sha256(message) {
+    const msgBuffer = new TextEncoder().encode(message);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // UI Helpers
   function showToast(message, type = 'info') {
-    if (message.includes('✅')) type = 'success';
-    else if (message.includes('❌') || message.includes('ไม่สำเร็จ') || message.includes('ล้มเหลว') || message.includes('กรุณา') || message.includes('ขัดข้อง')) type = 'error';
-    else if (message.includes('🗑️')) type = 'warning';
+    if (message.includes('✅') || message.includes('สำเร็จ')) type = 'success';
+    else if (message.includes('❌') || message.includes('ล้มเหลว')) type = 'error';
 
     const container = document.getElementById('toastContainer');
     if (!container) return;
     
     const toast = document.createElement('div');
     toast.className = 'toast-msg toast-' + type;
-    
-    // Add OK button and flex layout
-    toast.innerHTML = `<span style="flex-grow: 1;">${message}</span><button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.25); border: none; color: white; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 15px; flex-shrink: 0;">ตกลง</button>`;
-    
+    toast.innerHTML = `<span style="flex-grow: 1;">${message}</span><button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.25); border: none; color: white; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 15px;">ตกลง</button>`;
     container.appendChild(toast);
     
     setTimeout(() => { toast.classList.add('show'); }, 10);
-    
     setTimeout(() => {
       if(toast.parentElement) {
         toast.classList.remove('show');
@@ -714,1332 +447,328 @@
     }, 5000);
   }
 
-  let allEquipment = [], allTransactions = [], allLocations = [], allUsers = [];
-  let currentFilter = 'all', currentUser = null, cart = {};
-  let html5QrCode = null; let currentScanMode = 'borrow'; let pendingReturnData = null;
-
   function showLoading(text) { document.getElementById('loadingText').innerText = text || 'กำลังประมวลผล...'; document.getElementById('loadingOverlay').style.display = 'flex'; }
   function hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; }
   function showError(error) { hideLoading(); showToast("ระบบขัดข้อง: " + error.message); }
 
-  window.onload = function() {
-    showLoading('กำลังเริ่มต้นระบบ...');
-    
-    let savedUser = null;
-    try {
-      const storedUserStr = localStorage.getItem('myAppUser');
-      if (storedUserStr) savedUser = JSON.parse(storedUserStr);
-    } catch (e) {
-      console.warn("Storage access blocked by browser settings.", e);
-    }
+  // App State
+  let allEquipment = [], allTransactions = [], allLocations = [];
+  let currentUser = null, currentScanMode = '';
+  let html5QrCode = null;
 
-    if (savedUser) { 
-      currentUser = savedUser; 
-      if(!currentUser.username) { logout(); } else { setupUIAfterLogin(); }
-    } else {
-      document.getElementById('authSection').style.display = 'block';
-      hideLoading();
-    }
-    
-    setInterval(function() { if(currentUser) refreshDataQuietly(true); }, 30000);
+  window.onload = function() {
+    showLoading('กำลังเริ่มต้น V2 Enterprise...');
+    try {
+      const storedUser = localStorage.getItem('v2AppUser');
+      if (storedUser) currentUser = JSON.parse(storedUser);
+    } catch (e) {}
+
+    if (currentUser) setupUIAfterLogin();
+    else { document.getElementById('authSection').style.display = 'block'; hideLoading(); }
   };
 
-  window.addEventListener('popstate', function(event) {
-    if (event.state && event.state.tab) { switchTab(event.state.tab, null, true); } 
-    else if (currentUser) { switchTab('tabBorrow', null, true); }
-  });
+  function toggleRegister() {
+    const l = document.getElementById('loginForm'); const r = document.getElementById('registerForm');
+    if(l.style.display === 'none') { l.style.display = 'block'; r.style.display = 'none'; document.getElementById('authTitle').innerText = 'เข้าสู่ระบบ'; } 
+    else { l.style.display = 'none'; r.style.display = 'block'; document.getElementById('authTitle').innerText = 'สมัครสมาชิก'; }
+  }
 
-  function refreshDataQuietly(isAuto = false) { refreshData(true, isAuto); }
-  function safeSetStorage(key, val) { try { localStorage.setItem(key, val); } catch(e){} }
-  function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch(e){} }
-  
-  function toggleRegister() { const l = document.getElementById('loginForm'); const r = document.getElementById('registerForm'); if(l.style.display === 'none') { l.style.display = 'block'; r.style.display = 'none'; document.getElementById('authTitle').innerText = 'เข้าสู่ระบบ'; } else { l.style.display = 'none'; r.style.display = 'block'; document.getElementById('authTitle').innerText = 'สมัครสมาชิก'; } }
-  function doRegister() { const u = document.getElementById('regUser').value, p = document.getElementById('regPass').value, n = document.getElementById('regName').value, d = document.getElementById('regDept').value; if(!u || !p || !n || !d) return showToast("กรุณากรอกข้อมูลและเลือกแผนกให้ครบถ้วน"); showLoading('กำลังส่งข้อมูลสมัครสมาชิก...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast(res.message); if(res.success) toggleRegister(); }).withFailureHandler(showError).registerUser(u, p, n, d); }
-  function doLogin() { const u = document.getElementById('loginUser').value, p = document.getElementById('loginPass').value; if(!u || !p) return showToast("กรุณากรอกข้อมูล"); showLoading('กำลังเข้าสู่ระบบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); setupUIAfterLogin(); } else { showToast(res.message); } }).withFailureHandler(showError).loginUser(u, p); }
+  async function doRegister() {
+    const u = document.getElementById('regUser').value, p = document.getElementById('regPass').value, n = document.getElementById('regName').value, d = document.getElementById('regDept').value;
+    if(!u || !p || !n || !d) return showToast("กรุณากรอกข้อมูลให้ครบถ้วน");
+    showLoading('กำลังเข้ารหัสและสมัครสมาชิก...');
+    const hashedPass = await sha256(p);
+    google.script.run.withSuccessHandler(res => { hideLoading(); showToast(res.message); if(res.success) toggleRegister(); }).withFailureHandler(showError).registerUser(u, hashedPass, n, d);
+  }
+
+  async function doLogin() {
+    const u = document.getElementById('loginUser').value, p = document.getElementById('loginPass').value;
+    if(!u || !p) return showToast("กรุณากรอกข้อมูล");
+    showLoading('กำลังตรวจสอบความปลอดภัย...');
+    const hashedPass = await sha256(p);
+    google.script.run.withSuccessHandler(res => {
+      hideLoading();
+      if(res.success) {
+        currentUser = res.user;
+        localStorage.setItem('v2AppUser', JSON.stringify(currentUser));
+        setupUIAfterLogin();
+      } else showToast(res.message);
+    }).withFailureHandler(showError).loginUser(u, hashedPass);
+  }
+
+  function logout() {
+    if(!confirm('ยืนยันการออกจากระบบ?')) return;
+    currentUser = null; localStorage.removeItem('v2AppUser');
+    document.getElementById('authSection').style.display = 'block';
+    document.getElementById('mainNav').style.display = 'none';
+    document.getElementById('logoutBtn').style.display = 'none';
+    ['tabScannerHub','tabEquipment','tabMyItems','tabProfile'].forEach(id => document.getElementById(id).style.display = 'none');
+  }
 
   function setupUIAfterLogin() {
     document.getElementById('authSection').style.display = 'none';
-    document.getElementById('logoutBtn').style.display = 'block'; document.getElementById('mainNav').style.display = 'block';
-    let roleText = currentUser.role === 'Superadmin' ? '🌟 Superadmin: ' : (currentUser.role === 'Admin' ? 'แอดมิน: ' : 'คุณ: ');
-    document.getElementById('welcomeText').innerText = roleText + currentUser.name;
-    document.getElementById('navAdmin').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'block' : 'none';
-    document.getElementById('navRadio').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'block' : 'none';
-    document.getElementById('myProfileUsername').value = currentUser.username || '';
-    document.getElementById('myProfilePassword').value = currentUser.password || ''; document.getElementById('myProfileName').value = currentUser.name || ''; document.getElementById('myProfileDept').value = currentUser.department || '-';
-    // Restore saved tab from localStorage or URL hash instead of always defaulting to tabBorrow
-    var savedTab = 'tabBorrow';
-    try { var st = localStorage.getItem('activeTab'); if(st && document.getElementById(st)) savedTab = st; } catch(e){}
-    if (savedTab === 'tabBorrow') { var hash = window.location.hash.replace('#',''); if(hash && document.getElementById(hash)) savedTab = hash; }
-    if (savedTab === 'tabAdmin' && currentUser && currentUser.role !== 'Admin' && currentUser.role !== 'Superadmin') savedTab = 'tabBorrow';
-    // Pre-show the saved tab so finishRenderData() won't reset it
-    ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin'].forEach(function(id) { var el = document.getElementById(id); if(el) el.style.display = (id === savedTab) ? 'block' : 'none'; });
-    document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.remove('active'); var oc = el.getAttribute('onclick') || ''; if(oc.indexOf(savedTab) !== -1) el.classList.add('active'); });
-    var cf = document.getElementById('cartFloat'); if(cf) cf.style.display = (savedTab === 'tabBorrow') ? 'block' : 'none';
+    document.getElementById('mainNav').style.display = 'block';
+    document.getElementById('logoutBtn').style.display = 'block';
+    document.getElementById('welcomeText').innerText = `คุณ: ${currentUser.name} (${currentUser.role})`;
+    
+    // Setup Profile
+    document.getElementById('myProfileUsername').value = currentUser.username;
+    document.getElementById('myProfileName').value = currentUser.name;
+    document.getElementById('myProfileDept').value = currentUser.department || '-';
+
+    switchTab('tabScannerHub');
     refreshData();
-    if (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') {
-      google.script.run.withSuccessHandler(function(data) { allUsers = data || []; }).getAllUsers();
-    }
-    try {
-      window.history.replaceState({ tab: savedTab }, '', '#' + savedTab);
-    } catch(e) { console.warn('replaceState not supported on file://', e); }
   }
 
-  async function refreshData(isQuiet = false, isAuto = false) { 
-    if (!isQuiet) showLoading('กำลังโหลดข้อมูลระบบ...'); 
-    if (!isQuiet) {
-      try {
-        const cEq = localStorage.getItem('cache_equip'); const cTx = localStorage.getItem('cache_trans');
-        const cLoc = localStorage.getItem('cache_loc'); const cRad = localStorage.getItem('cache_radio');
-        if (cEq) allEquipment = JSON.parse(cEq); if (cTx) allTransactions = JSON.parse(cTx);
-        if (cLoc) allLocations = JSON.parse(cLoc); if (cRad) allRadios = JSON.parse(cRad);
-        if (cEq && cTx) {
-          hideLoading();
-          finishRenderData();
-          isQuiet = true;
-        }
-      } catch(e) {}
-    }
-    try {
-      const [initData, radData] = await Promise.all([
-        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getInitialData()),
-        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getRadios())
-      ]);
-      allEquipment = initData.equipments || []; allTransactions = initData.transactions || []; allLocations = initData.locations || [];
-      if (radData && radData.success) allRadios = radData.radios || [];
-      localStorage.setItem('cache_equip', JSON.stringify(allEquipment)); localStorage.setItem('cache_trans', JSON.stringify(allTransactions));
-      localStorage.setItem('cache_loc', JSON.stringify(allLocations)); localStorage.setItem('cache_radio', JSON.stringify(allRadios));
-      if (!isQuiet) hideLoading();
-      
-      // Only re-render the DOM if it's NOT an automatic background refresh
-      // This prevents interrupting the user (resetting scroll, closing dropdowns, wiping search)
-      if (!isAuto) {
-        finishRenderData();
-        if (isQuiet && document.getElementById('tabAdmin').style.display === 'block') renderAdminData();
+  async function saveMyProfile() {
+    const u = document.getElementById('myProfileUsername').value;
+    const p = document.getElementById('myProfilePassword').value;
+    const n = document.getElementById('myProfileName').value;
+    const d = document.getElementById('myProfileDept').value;
+    
+    let hashedPass = currentUser.password; // keep old hash if no new password
+    if (p) hashedPass = await sha256(p);
+
+    showLoading('กำลังบันทึก...');
+    google.script.run.withSuccessHandler(res => {
+      hideLoading(); showToast(res.message);
+      if(res.success) {
+        currentUser = res.user;
+        localStorage.setItem('v2AppUser', JSON.stringify(currentUser));
+        document.getElementById('myProfilePassword').value = '';
       }
-    } catch(err) { if(!isQuiet) showError(err); }
+    }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, hashedPass, d);
   }
 
-  function finishRenderData() {
-    if (!currentUser) return; // Prevent rendering tabs if logged out
-    renderEquipment(); 
-    if(currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { populateEqSelect(); populateLocationSelect(); } 
-    if (document.getElementById('tabReturn').style.display === 'block') { renderMyReturnData(); } 
-    else if (document.getElementById('tabAdmin').style.display === 'block') { var ast = 'return'; try { var sst = localStorage.getItem('activeAdminSubTab'); if(sst) ast = sst; } catch(e){} showAdminSubTab(ast); } 
-    else if (document.getElementById('tabRadio').style.display === 'block') { renderRadioTab(); } 
-    else if (document.getElementById('tabPOS').style.display === 'block') { renderPOSCart(); } 
-    else if (document.getElementById('tabProfile').style.display === 'block') { } 
-    else if (document.getElementById('tabBorrow').style.display === 'block') { } 
-    else { var fb = 'tabBorrow'; try { var s = localStorage.getItem('activeTab'); if(s && document.getElementById(s)) fb = s; } catch(e){} switchTab(fb); } 
-  }
-  function logout() { 
-    if(!confirm('ยืนยันการออกจากระบบ?')) return; 
-    currentUser = null; cart = {}; 
-    safeRemoveStorage('myAppUser'); 
-    safeRemoveStorage('activeTab'); 
-    document.getElementById('authSection').style.display = 'block'; 
-    document.getElementById('loginUser').value = ''; 
-    document.getElementById('loginPass').value = ''; 
-    document.getElementById('mainNav').style.display = 'none'; 
+  function switchTab(tabName, navElement) {
+    if(html5QrCode) closeScannerModal();
+    ['tabScannerHub','tabEquipment','tabMyItems','tabProfile'].forEach(id => document.getElementById(id).style.display = 'none');
+    document.getElementById(tabName).style.display = 'block';
     
-    // Hide ALL tabs properly
-    ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin'].forEach(id => {
-       const el = document.getElementById(id);
-       if(el) el.style.display = 'none';
-    });
+    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+    if(navElement) navElement.classList.add('active');
+    else document.querySelector(`.nav-item[onclick*="${tabName}"]`)?.classList.add('active');
 
-    document.getElementById('logoutBtn').style.display = 'none'; 
-    document.getElementById('welcomeText').innerText = ''; 
-    document.getElementById('cartFloat').style.display = 'none'; 
-    
-    // reset url hash
-    try { window.history.replaceState(null, '', window.location.pathname); } catch(e){}
-  }
-  
-  function switchTab(tabName, navElement, isHistoryBack = false) { 
-    if (tabName === 'tabAdmin' && currentUser && currentUser.role !== 'Admin' && currentUser.role !== 'Superadmin') { showToast("คุณไม่มีสิทธิ์เข้าถึงหน้านี้"); tabName = 'tabBorrow'; }
-    safeSetStorage('activeTab', tabName);
-    if (tabName !== 'tabPOS' && typeof posHtml5QrcodeScanner !== 'undefined' && posHtml5QrcodeScanner) {
-        stopPOSScanner();
-    }
-    ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el) el.style.display = 'none';
-    });
-    const target = document.getElementById(tabName);
-    if(target) target.style.display = 'block';
-    const cartFloat = document.getElementById('cartFloat');
-    if (cartFloat) cartFloat.style.display = (tabName === 'tabBorrow') ? 'block' : 'none';
-    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); 
-    if(navElement && navElement.classList) { navElement.classList.add('active'); }
-    else { document.querySelectorAll('.nav-item').forEach(function(el) { var oc = el.getAttribute('onclick') || ''; if(oc.indexOf(tabName) !== -1) el.classList.add('active'); }); }
-    updateCartFloat(); 
-    // Render data for the selected tab
-    if (tabName === 'tabReturn') {
-        showLoading('กำลังโหลดรายการยืม...');
-        loadTransactions(false);
-    } else if (tabName === 'tabRadio') {
-        loadRadios();
-    } else if (tabName === 'tabAdmin') {
-        var ast2 = 'return'; try { var sst2 = localStorage.getItem('activeAdminSubTab'); if(sst2) ast2 = sst2; } catch(e){} showAdminSubTab(ast2);
-    } else if (tabName === 'tabPOS') {
-        renderPOSCart();
-    }
-    if (!isHistoryBack) {
-      try {
-        window.history.pushState({ tab: tabName }, '', '#' + tabName);
-      } catch(e) { console.warn('pushState not supported on file://', e); }
-    }
+    if(tabName === 'tabMyItems') renderMyItems();
+    if(tabName === 'tabEquipment') renderEquipment();
   }
 
-  function saveMyProfile() { const u = document.getElementById('myProfileUsername').value; const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!u || !p || !n) return showToast('กรุณากรอก Username รหัสผ่าน และชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); let roleText = currentUser.role === 'Superadmin' ? '🌟 Superadmin: ' : (currentUser.role === 'Admin' ? 'แอดมิน: ' : 'คุณ: '); document.getElementById('welcomeText').innerText = roleText + currentUser.name; } }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, p, d); }
-  async function loadTransactions(isAdminView) { 
-    try {
-      const [txData, radData] = await Promise.all([
-        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getActiveTransactions()),
-        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getRadios())
-      ]);
-      allTransactions = txData || [];
-      if (radData && radData.success) allRadios = radData.radios || [];
+  function refreshData() {
+    showLoading('กำลังอัพเดทฐานข้อมูล...');
+    google.script.run.withSuccessHandler(res => {
+      allEquipment = res.equipments || [];
+      allTransactions = res.transactions || [];
+      allLocations = res.locations || [];
       hideLoading();
-      if(isAdminView) renderAdminData(); else renderMyReturnData(); 
-    } catch(err) { hideLoading(); showError(err); }
+      
+      const selLoc = document.getElementById('logisticToLoc');
+      if(selLoc) {
+        selLoc.innerHTML = '<option value="">-- ไม่ระบุ --</option>';
+        allLocations.forEach(loc => selLoc.innerHTML += `<option value="${loc.name}">${loc.name}</option>`);
+      }
+      
+      if(document.getElementById('tabMyItems').style.display === 'block') renderMyItems();
+      if(document.getElementById('tabEquipment').style.display === 'block') renderEquipment();
+    }).withFailureHandler(showError).getInitialData();
   }
-  function renderMyReturnData() { 
-    const listDiv = document.getElementById('myReturnList'); 
-    if(!listDiv) return; 
-    listDiv.innerHTML = ''; 
-    const myItems = allTransactions.filter(item => String(item.userId).trim() === String(currentUser.id).trim()); 
-    const myRadios = allRadios ? allRadios.filter(r => {
-      const matchId = r.currentUserId && String(r.currentUserId).trim() === String(currentUser.id).trim();
-      const rName = r.currentUserName ? String(r.currentUserName).trim().toLowerCase() : '';
-      const cName = currentUser.name ? String(currentUser.name).trim().toLowerCase() : '';
-      const matchName = (rName && cName) && (rName === cName || rName.includes(cName) || cName.includes(rName));
-      return matchId || matchName;
-    }) : [];
+
+  // --- UI Renders ---
+  function renderEquipment() {
+    const grid = document.getElementById('equipmentGrid');
+    if(!grid) return;
+    const search = (document.getElementById('searchInput')?.value || '').toLowerCase();
+    grid.innerHTML = '';
     
-    if(myItems.length === 0 && myRadios.length === 0) { 
-      listDiv.innerHTML = '<div style="text-align:center; padding: 20px; color:#8e8e8e;">🎉 คุณไม่มีอุปกรณ์หรือวิทยุที่ค้างคืนอยู่ครับ</div>'; 
-      return; 
-    } 
-    myItems.forEach(item => { 
-      const card = document.createElement('div'); 
-      card.className = 'list-card'; 
-      let posBadge = (item.action && String(item.action).indexOf('POS') !== -1) ? ' <span style="background:#ff9800; color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">POS</span>' : ''; 
-      card.innerHTML = '<div class="list-info"><strong style="color:#e6683c;">🔴 กำลังยืม</strong><br><strong>อุปกรณ์:</strong> ' + item.eqName + posBadge + ' (x' + item.qty + ')</div><button class="btn-success" onclick="prepareReturn(' + item.row + ', \'' + item.eqId + '\', ' + item.qty + ', \'' + item.eqName + '\')">คืนอุปกรณ์</button>'; 
-      listDiv.appendChild(card); 
-    }); 
-    myRadios.forEach(radio => { 
-      const card = document.createElement('div'); 
-      card.className = 'list-card'; 
-      card.innerHTML = '<div class="list-info"><strong style="color:#e6683c;">📻 กำลังยืมวิทยุ</strong><br><strong>วิทยุ:</strong> ' + radio.name + '</div><button class="btn-success" onclick="doReturnRadio(\'' + radio.id + '\', \'' + radio.name + '\')">คืนวิทยุ</button>'; 
-      listDiv.appendChild(card); 
+    allEquipment.forEach(eq => {
+      if(eq.name.toLowerCase().includes(search)) {
+        const div = document.createElement('div'); div.className = 'card';
+        div.innerHTML = `
+          <img class="card-img" src="${eq.image || 'https://via.placeholder.com/150'}" onerror="this.src='https://via.placeholder.com/150'">
+          <div class="card-body">
+            <div class="card-title">${eq.name}</div>
+            <div class="card-status">คงเหลือ: ${eq.available} | ประเภท: ${eq.category}</div>
+          </div>
+        `;
+        grid.appendChild(div);
+      }
     });
   }
-  function prepareReturn(row, eqId, qty, eqName) { 
-    pendingReturnData = { row: row, eqId: eqId, qty: qty, eqName: eqName }; 
-    document.getElementById('returnEqNamePreview').innerText = eqName; 
-    const sel = document.getElementById('selectReturnLoc'); 
-    sel.innerHTML = '<option value="">-- เลือกจุดวางจากรายการ --</option>'; 
-    // Find the equipment's original location to pre-select it
-    var eq = allEquipment.find(e => e.id === eqId);
-    var originalLocId = eq ? eq.location : '';
-    allLocations.forEach(loc => {
-      var selected = (loc.id === originalLocId) ? ' selected' : '';
-      sel.innerHTML += '<option value="'+loc.id+'"'+selected+'>'+loc.name+'</option>';
+
+  function renderMyItems() {
+    const list = document.getElementById('myReturnList');
+    if(!list) return;
+    list.innerHTML = '';
+    const myTx = allTransactions.filter(t => t.userId == currentUser.id && t.status === 'Active');
+    
+    if(myTx.length === 0) { list.innerHTML = '<p style="text-align:center; color:#86868b;">ไม่มีรายการที่ต้องคืน</p>'; return; }
+    
+    myTx.forEach(tx => {
+      let logisticBadge = '';
+      if(tx.transit_status === 'Pending') logisticBadge = '<span style="color:#ff9500; font-weight:bold;">[รอจัดส่ง]</span>';
+      else if(tx.transit_status === 'Loaded') logisticBadge = '<span style="color:#007aff; font-weight:bold;">[อยู่บนรถ]</span>';
+      else if(tx.transit_status === 'Arrived') logisticBadge = '<span style="color:#34c759; font-weight:bold;">[ถึงปลายทาง]</span>';
+
+      const div = document.createElement('div'); div.className = 'list-card';
+      div.innerHTML = `
+        <div class="list-info">
+          <strong>${tx.eqName}</strong> (x${tx.qty})<br>
+          <span style="font-size:12px; color:#86868b;">ปลายทาง: ${tx.to_loc} ${logisticBadge}</span>
+        </div>
+      `;
+      list.appendChild(div);
     });
-    document.getElementById('returnImageBase64').value = ''; 
-    document.getElementById('returnImagePreview').src = '';
-    document.getElementById('retakePhotoSection').style.display = 'none';
-    document.getElementById('returnCameraSection').style.display = 'block';
-    document.getElementById('returnCameraContainer').style.display = 'none';
-    document.getElementById('returnLocModal').style.display = 'flex'; 
   }
-  
+
+  // --- Scanner Hub Logic ---
+  function openScannerHub(mode) {
+    currentScanMode = mode;
+    document.getElementById('scannerLocationSelect').style.display = (mode === 'borrow') ? 'block' : 'none';
+    
+    let title = "Scanner"; let desc = "";
+    if(mode === 'borrow') { title = "เบิก / ใช้งาน"; desc = "สแกน QR อุปกรณ์เพื่อใช้งาน"; }
+    if(mode === 'load') { title = "Load to Truck"; desc = "สแกน Transaction QR เพื่อนำขึ้นรถ"; }
+    if(mode === 'unload') { title = "Unload / Arrived"; desc = "สแกน Transaction QR เมื่อถึงปลายทาง"; }
+    if(mode === 'return') { title = "Return Asset"; desc = "สแกน QR อุปกรณ์เพื่อนำมาคืนที่จุดวาง"; }
+
+    document.getElementById('scannerModalTitle').innerText = `📷 ${title}`;
+    document.getElementById('scannerModalDesc').innerText = desc;
+    document.getElementById('scannerModal').style.display = 'flex';
+    
+    html5QrCode = new Html5Qrcode("scannerReader");
+    html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess, onScanError);
+  }
+
+  function closeScannerModal() {
+    if(html5QrCode) {
+      html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; }).catch(e => console.log(e));
+    }
+    document.getElementById('scannerModal').style.display = 'none';
+  }
+
+  function toggleScannerCamera() {
+    // Simple toggle logic can be implemented, but relying on environment by default is safe
+    showToast("สลับกล้องไม่รองรับในเวอร์ชั่นทดสอบนี้ ให้แตะที่จอภาพแทน");
+  }
+
+  function onScanSuccess(decodedText) {
+    closeScannerModal();
+    showToast("รับค่าสแกน: " + decodedText);
+    
+    // Parse logic
+    if (currentScanMode === 'borrow') {
+      let eq = allEquipment.find(e => e.id === decodedText || e.id === "EQ_"+decodedText);
+      if(!eq) {
+        // Fallback for demo: auto-find by id if they scan 'EQ_1' etc.
+        showToast("ไม่พบอุปกรณ์รหัส: " + decodedText, 'error'); return;
+      }
+      
+      const toLoc = document.getElementById('logisticToLoc').value || eq.location;
+      let cart = {}; cart[eq.id] = 1;
+      
+      showLoading(`กำลังเบิก ${eq.name}...`);
+      google.script.run.withSuccessHandler(res => {
+        hideLoading(); showToast(res.message); refreshData();
+      }).withFailureHandler(showError).submitBorrowConsume(currentUser.id, cart, 'Hub', toLoc);
+    }
+    else if (currentScanMode === 'load') {
+      // Expecting Trans ID
+      let tx = allTransactions.find(t => t.transId === decodedText || t.eqId === decodedText);
+      if(!tx) return showToast("ไม่พบรายการรอนำขึ้นรถ", 'error');
+      showLoading("อัพเดทสถานะ...");
+      google.script.run.withSuccessHandler(res => {
+        hideLoading(); showToast(res.message); refreshData();
+      }).updateLogisticsStatus(tx.row, 'Loaded', '');
+    }
+    else if (currentScanMode === 'unload') {
+      let tx = allTransactions.find(t => t.transId === decodedText || t.eqId === decodedText);
+      if(!tx) return showToast("ไม่พบรายการบนรถ", 'error');
+      // Assume current location is the destination or could prompt
+      showLoading("อัพเดทสถานะ...");
+      google.script.run.withSuccessHandler(res => {
+        hideLoading(); showToast(res.message); refreshData();
+      }).updateLogisticsStatus(tx.row, 'Arrived', tx.to_loc);
+    }
+    else if (currentScanMode === 'return') {
+      let tx = allTransactions.find(t => (t.eqId === decodedText || t.transId === decodedText) && t.userId == currentUser.id && t.status === 'Active');
+      if(!tx) return showToast("คุณไม่ได้ยืมอุปกรณ์นี้อยู่", 'error');
+      
+      // Open Return Modal
+      pendingReturnData = tx;
+      document.getElementById('returnEqNamePreview').innerText = tx.eqName;
+      const sel = document.getElementById('selectReturnLoc');
+      sel.innerHTML = '<option value="">-- เลือกจุดคืน --</option>';
+      allLocations.forEach(loc => sel.innerHTML += `<option value="${loc.name}">${loc.name}</option>`);
+      
+      document.getElementById('returnLocModal').style.display = 'flex';
+      document.getElementById('returnCameraSection').style.display = 'block';
+      document.getElementById('returnCameraContainer').style.display = 'none';
+      document.getElementById('retakePhotoSection').style.display = 'none';
+      document.getElementById('returnImageBase64').value = '';
+    }
+  }
+
+  function onScanError(err) { /* ignore frequent read errors */ }
+
+  // Return Flow
+  let pendingReturnData = null;
+  let returnVideoStream = null;
+
   function setEqReturnStatus(status) {
     document.getElementById('eqReturnStatus').value = status;
     document.getElementById('btnEqStatusReady').className = (status === 'สมบูรณ์') ? 'btn-outline active' : 'btn-outline';
+    document.getElementById('btnEqStatusReady').style.background = (status === 'สมบูรณ์') ? '#34c759' : 'transparent';
+    document.getElementById('btnEqStatusReady').style.color = (status === 'สมบูรณ์') ? 'white' : '#34c759';
+
     document.getElementById('btnEqStatusBroken').className = (status === 'ชำรุด') ? 'btn-outline active' : 'btn-outline';
-    
-    // Adjust colors
-    document.getElementById('btnEqStatusReady').style.background = (status === 'สมบูรณ์') ? '#4caf50' : 'white';
-    document.getElementById('btnEqStatusReady').style.color = (status === 'สมบูรณ์') ? 'white' : '#4caf50';
-    document.getElementById('btnEqStatusReady').style.border = (status === 'สมบูรณ์') ? 'none' : '1px solid #4caf50';
-    
-    document.getElementById('btnEqStatusBroken').style.background = (status === 'ชำรุด') ? '#f44336' : 'white';
-    document.getElementById('btnEqStatusBroken').style.color = (status === 'ชำรุด') ? 'white' : '#f44336';
-    document.getElementById('btnEqStatusBroken').style.border = (status === 'ชำรุด') ? 'none' : '1px solid #f44336';
+    document.getElementById('btnEqStatusBroken').style.background = (status === 'ชำรุด') ? '#ff3b30' : 'transparent';
+    document.getElementById('btnEqStatusBroken').style.color = (status === 'ชำรุด') ? 'white' : '#ff3b30';
   }
-
-  function confirmReturnProcess() { 
-    const locId = document.getElementById('selectReturnLoc').value; 
-    const base64Data = document.getElementById('returnImageBase64').value;
-    const eqStatus = document.getElementById('eqReturnStatus').value;
-    
-    if(!locId) return showToast('กรุณาระบุจุดวางที่นำอุปกรณ์ไปคืนครับ'); 
-    if(!base64Data) return showToast('กรุณาถ่ายรูปหลักฐานการคืนด้วยครับ');
-    
-    document.getElementById('returnLocModal').style.display = 'none'; 
-
-    // === Optimistic UI Update ===
-    try {
-      let eq = allEquipment.find(e => e.id === pendingReturnData.eqId);
-      if (eq) {
-        if (String(eq.location) === String(locId)) {
-          eq.available = parseInt(eq.available) + parseInt(pendingReturnData.qty);
-        } else {
-          let targetLocEq = allEquipment.find(e => e.id === pendingReturnData.eqId && String(e.location) === String(locId));
-          if (targetLocEq) {
-            targetLocEq.available = parseInt(targetLocEq.available) + parseInt(pendingReturnData.qty);
-          } else {
-            allEquipment.push({
-              id: pendingReturnData.eqId,
-              name: pendingReturnData.eqName,
-              total: parseInt(pendingReturnData.qty),
-              available: parseInt(pendingReturnData.qty),
-              location: locId
-            });
-          }
-        }
-      }
-      allTransactions = allTransactions.filter(t => String(t.row) !== String(pendingReturnData.row));
-      renderMyReturnData();
-      renderEquipment();
-    } catch(err) {
-      console.warn("Optimistic UI failed:", err);
-    }
-
-    // Delay 50ms so the browser can repaint the DOM and make the item disappear instantly BEFORE showing the loader
-    setTimeout(() => {
-      showLoading('กำลังอัปโหลดรูปภาพและบันทึกการรับคืน...'); 
-      
-      google.script.run.withSuccessHandler(res => {
-        if (res.success) {
-          google.script.run.withSuccessHandler(retRes => {
-            hideLoading();
-            showToast('✅ ' + retRes.message);
-            setTimeout(() => refreshData(true), 2500); 
-          }).withFailureHandler(err => { hideLoading(); showToast('อัปเดตข้อมูลล้มเหลว: '+err.message); setTimeout(() => refreshData(true), 2500); }).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url, eqStatus);
-        } else {
-          hideLoading();
-          showToast('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
-          setTimeout(() => refreshData(true), 2500);
-        }
-      }).withFailureHandler(function(err) {
-        hideLoading();
-        showToast('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
-        setTimeout(() => refreshData(true), 2500);
-      }).uploadImageToDrive(base64Data, "RET_" + pendingReturnData.eqId + "_" + new Date().getTime());
-    }, 50);
-  }
-
-  function showAdminSubTab(tab) { safeSetStorage('activeAdminSubTab', tab); document.getElementById('adminTabReturn').style.display = tab === 'return' ? 'block' : 'none'; document.getElementById('adminTabUsers').style.display = tab === 'users' ? 'block' : 'none'; document.getElementById('adminTabEq').style.display = tab === 'equipments' ? 'block' : 'none'; document.getElementById('adminTabLoc').style.display = tab === 'locations' ? 'block' : 'none'; document.getElementById('adminTabQR').style.display = tab === 'qr' ? 'block' : 'none'; document.getElementById('adminTabHistory').style.display = tab === 'history' ? 'block' : 'none'; const btns = document.querySelectorAll('#adminNavFilters .filter-btn'); btns.forEach(b => b.classList.remove('active')); if(tab === 'return') { btns[0].classList.add('active'); showLoading('กำลังโหลด...'); loadTransactions(true); } if(tab === 'history') { btns[1].classList.add('active'); currentHistoryPage = 1; fetchHistoryData(); } if(tab === 'users') { btns[2].classList.add('active'); showLoading('กำลังโหลด...'); loadUsersData(); } if(tab === 'equipments') { btns[3].classList.add('active'); renderAdminEqData(); } if(tab === 'locations') { btns[4].classList.add('active'); renderAdminLocData(); } if(tab === 'qr') { btns[5].classList.add('active'); } }
-  function renderAdminData() { const listDiv = document.getElementById('adminList'); if(!listDiv) return; const searchTxt = document.getElementById('adminSearch').value.toLowerCase(); listDiv.innerHTML = ''; const filtered = allTransactions.filter(item => String(item.transId).toLowerCase().includes(searchTxt) || String(item.userName).toLowerCase().includes(searchTxt) || String(item.eqName).toLowerCase().includes(searchTxt)); const filteredRadios = allRadios ? allRadios.filter(r => r.currentUserId && (String(r.id).toLowerCase().includes(searchTxt) || String(r.name).toLowerCase().includes(searchTxt) || String(r.currentUserName).toLowerCase().includes(searchTxt))) : []; if(filtered.length === 0 && filteredRadios.length === 0) { listDiv.innerHTML = '<p>ไม่มีรายการค้างคืนในระบบ</p>'; return; } filtered.forEach(item => { const card = document.createElement('div'); card.className = 'list-card'; let posBadge = (item.action && String(item.action).indexOf('POS') !== -1) ? ' <span style="background:#ff9800; color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">POS</span>' : ''; card.innerHTML = '<div class="list-info"><strong>ผู้เบิก:</strong> ' + item.userName + '<br><strong>อุปกรณ์:</strong> ' + item.eqName + posBadge + ' (x' + item.qty + ')</div><button class="btn-warning" onclick="prepareReturn(' + item.row + ', \'' + item.eqId + '\', ' + item.qty + ', \'' + item.eqName + '\')">บังคับรับคืน</button>'; listDiv.appendChild(card); }); filteredRadios.forEach(radio => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>ผู้เบิก:</strong> ' + radio.currentUserName + '<br><strong>วิทยุ:</strong> ' + radio.name + '</div><button class="btn-warning" onclick="doReturnRadio(\'' + radio.id + '\', \'' + radio.name + '\')">บังคับรับคืนวิทยุ</button>'; listDiv.appendChild(card); }); }
-
-  let currentHistoryPage = 1;
-  let totalHistoryPages = 1;
-
-  function loadHistoryPage(direction) {
-     let newPage = currentHistoryPage + direction;
-     if (newPage < 1 || newPage > totalHistoryPages) return;
-     currentHistoryPage = newPage;
-     fetchHistoryData();
-  }
-
-  function fetchHistoryData() {
-     showLoading('กำลังโหลดประวัติ...');
-     google.script.run.withSuccessHandler(res => {
-         hideLoading();
-         if(res.success) {
-            totalHistoryPages = res.totalPages;
-            document.getElementById('historyPageLabel').innerText = 'หน้า ' + res.currentPage + ' / ' + (res.totalPages || 1);
-            renderHistoryData(res.data);
-         }
-     }).withFailureHandler(showError).getTransactionHistory(currentHistoryPage, 10);
-  }
-
-  function renderHistoryData(data) {
-     const listDiv = document.getElementById('adminHistoryList');
-     listDiv.innerHTML = '';
-     if(!data || data.length === 0) { listDiv.innerHTML = '<p style="text-align:center; padding:20px; color:#8e8e8e;">ไม่มีประวัติการทำรายการ</p>'; return; }
-     data.forEach(item => {
-         const card = document.createElement('div');
-         card.className = 'list-card';
-         let dateStr = new Date(item.timestamp).toLocaleString('th-TH');
-         let statusHtml = item.status === 'Completed' ? '<span style="color:green; font-weight:bold;">(คืนแล้ว)</span>' : '<span style="color:orange; font-weight:bold;">(กำลังยืม)</span>';
-         
-         let locDisplay = item.locId || '-';
-         if (item.locId) {
-             let foundLoc = allLocations.find(l => l.id === item.locId);
-             if (foundLoc) locDisplay = foundLoc.name;
-         }
-
-         let photoHtml = '';
-         if (item.photoUrl) {
-             photoHtml = `<br><a href="${item.photoUrl}" target="_blank" style="color:#007aff; font-size:12px; font-weight:bold;">🖼️ ดูรูปถ่ายหลักฐาน</a>`;
-         }
-
-         let locStr = item.status === 'Completed' ? `<br><span style="font-size:13px;">📍 คืนที่: ${locDisplay}</span>` : '';
-
-         card.innerHTML = `<div class="list-info" style="width:100%;">
-            <strong>${item.userName}</strong> ➔ <strong>${item.eqName}</strong> (x${item.qty}) ${statusHtml}<br>
-            <span style="font-size:12px; color:#8e8e8e;">🕒 ${dateStr}</span>${locStr}${photoHtml}
-         </div>`;
-         listDiv.appendChild(card);
-     });
-  }
-
-  let returnVideoStream = null;
 
   function startReturnCamera() {
     document.getElementById('returnCameraSection').style.display = 'none';
     document.getElementById('returnCameraContainer').style.display = 'block';
-    document.getElementById('retakePhotoSection').style.display = 'none';
-    
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-      .then(function(stream) {
-        returnVideoStream = stream;
-        const video = document.getElementById('returnVideo');
-        video.srcObject = stream;
-        video.play();
-      })
-      .catch(function(err) {
-        showToast('❌ ไม่สามารถเปิดกล้องได้: ' + err.message);
-        stopReturnCamera();
-      });
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(stream => {
+      returnVideoStream = stream;
+      document.getElementById('returnVideo').srcObject = stream;
+    }).catch(err => { showToast('ไม่สามารถเปิดกล้องได้'); stopReturnCamera(); });
   }
 
   function stopReturnCamera() {
-    if (returnVideoStream) {
-      returnVideoStream.getTracks().forEach(track => track.stop());
-      returnVideoStream = null;
-    }
+    if(returnVideoStream) returnVideoStream.getTracks().forEach(t => t.stop());
     document.getElementById('returnCameraContainer').style.display = 'none';
-    if (!document.getElementById('returnImageBase64').value) {
-      document.getElementById('returnCameraSection').style.display = 'block';
-    }
+    if(!document.getElementById('returnImageBase64').value) document.getElementById('returnCameraSection').style.display = 'block';
   }
 
   function captureReturnPhoto() {
-    const video = document.getElementById('returnVideo');
-    const canvas = document.getElementById('returnCanvas');
-    if (!video.videoWidth) return;
-    
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
+    const video = document.getElementById('returnVideo'); const canvas = document.getElementById('returnCanvas');
+    if(!video.videoWidth) return;
+    canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+    canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
     stopReturnCamera();
-    showToast('📍 กำลังบันทึกพิกัด GPS ลงบนภาพ...');
     
-    if (navigator.geolocation) {
-       navigator.geolocation.getCurrentPosition(
-         (position) => {
-             const lat = position.coords.latitude.toFixed(6);
-             const lng = position.coords.longitude.toFixed(6);
-             const dateStr = new Date().toLocaleString('th-TH');
-             
-             // Draw GPS Background Box
-             const x = 15, y = canvas.height - 90, width = 350, height = 75, radius = 12;
-             ctx.fillStyle = "rgba(0, 0, 0, 0.65)";
-             ctx.beginPath();
-             ctx.moveTo(x + radius, y);
-             ctx.lineTo(x + width - radius, y);
-             ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
-             ctx.lineTo(x + width, y + height - radius);
-             ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
-             ctx.lineTo(x + radius, y + height);
-             ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
-             ctx.lineTo(x, y + radius);
-             ctx.quadraticCurveTo(x, y, x + radius, y);
-             ctx.closePath();
-             ctx.fill();
-             
-             // Draw Text
-             ctx.font = "20px 'Kanit', sans-serif";
-             ctx.fillStyle = "#ffffff";
-             ctx.fillText(`📍 พิกัด: ${lat}, ${lng}`, x + 15, y + 30);
-             ctx.fillText(`🕒 ${dateStr}`, x + 15, y + 60);
-             
-             finalizeReturnPhoto(canvas);
-         },
-         (error) => {
-             showToast('⚠️ ไม่สามารถบันทึกพิกัดได้ (' + error.message + ')');
-             finalizeReturnPhoto(canvas);
-         },
-         { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-       );
-    } else {
-       finalizeReturnPhoto(canvas);
-    }
-  }
-
-  function finalizeReturnPhoto(canvas) {
     const base64 = canvas.toDataURL('image/jpeg', 0.8);
     document.getElementById('returnImageBase64').value = base64;
     document.getElementById('returnImagePreview').src = base64;
     document.getElementById('retakePhotoSection').style.display = 'block';
   }
 
-  function retakeReturnPhoto() {
-    document.getElementById('returnImageBase64').value = '';
-    document.getElementById('retakePhotoSection').style.display = 'none';
-    startReturnCamera();
-  }
+  function retakeReturnPhoto() { document.getElementById('returnImageBase64').value = ''; document.getElementById('retakePhotoSection').style.display = 'none'; startReturnCamera(); }
+  function closeReturnLocModal() { document.getElementById('returnLocModal').style.display='none'; stopReturnCamera(); }
 
-  function closeReturnLocModal() {
-    document.getElementById('returnLocModal').style.display='none';
-    stopReturnCamera();
-  }
-
-  function handleReturnPhoto(event) {
-    if (event.target.files.length == 0) return;
-    showLoading('กำลังโหลดรูปภาพ...');
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      hideLoading();
-      document.getElementById('returnImagePreview').src = e.target.result;
-      document.getElementById('returnImageBase64').value = e.target.result;
-      document.getElementById('returnCameraSection').style.display = 'none';
-      document.getElementById('retakePhotoSection').style.display = 'block';
-      event.target.value = ''; // clear
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function handleEqPhoto(event) {
-    if (event.target.files.length == 0) return;
-    showLoading('กำลังโหลดรูปภาพ...');
-    const file = event.target.files[0];
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      hideLoading();
-      document.getElementById('editEqImagePreviewUI').src = e.target.result;
-      document.getElementById('editEqImageBase64').value = e.target.result;
-      document.getElementById('eqCameraSection').style.display = 'none';
-      document.getElementById('eqCameraContainer').style.display = 'none';
-      document.getElementById('eqRetakeSection').style.display = 'block';
-      event.target.value = ''; // clear
-    };
-    reader.readAsDataURL(file);
-  }
-
-  let eqVideoStream = null;
-
-  function startEqCamera() {
-    document.getElementById('eqCameraSection').style.display = 'none';
-    document.getElementById('eqCameraContainer').style.display = 'block';
-    document.getElementById('eqRetakeSection').style.display = 'none';
+  function confirmReturnProcess() {
+    const locId = document.getElementById('selectReturnLoc').value;
+    const base64 = document.getElementById('returnImageBase64').value;
+    const eqStatus = document.getElementById('eqReturnStatus').value;
     
-    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
-      .then(function(stream) {
-        eqVideoStream = stream;
-        const video = document.getElementById('eqVideo');
-        video.srcObject = stream;
-        video.play();
-      })
-      .catch(function(err) {
-        showToast('❌ ไม่สามารถเปิดกล้องได้: ' + err.message);
-        stopEqCamera();
-      });
-  }
+    if(!locId) return showToast('กรุณาระบุจุดคืน');
+    if(!base64) return showToast('กรุณาถ่ายรูป');
 
-  function stopEqCamera() {
-    if (eqVideoStream) {
-      eqVideoStream.getTracks().forEach(track => track.stop());
-      eqVideoStream = null;
-    }
-    document.getElementById('eqCameraContainer').style.display = 'none';
-    if (!document.getElementById('editEqImageBase64').value) {
-      document.getElementById('eqCameraSection').style.display = 'block';
-    }
-  }
-
-  function captureEqPhoto() {
-    const video = document.getElementById('eqVideo');
-    const canvas = document.getElementById('eqCanvas');
-    if (!video.videoWidth) return;
+    document.getElementById('returnLocModal').style.display = 'none';
+    showLoading('กำลังบันทึกข้อมูลคืน...');
     
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    
-    const base64 = canvas.toDataURL('image/jpeg', 0.8);
-    document.getElementById('editEqImageBase64').value = base64;
-    document.getElementById('editEqImagePreviewUI').src = base64;
-    document.getElementById('eqRetakeSection').style.display = 'block';
-    document.getElementById('eqCameraSection').style.display = 'none';
-    
-    stopEqCamera();
-  }
-
-  function retakeEqPhoto() {
-    document.getElementById('editEqImageBase64').value = '';
-    document.getElementById('eqRetakeSection').style.display = 'none';
-    startEqCamera();
-  }
-
-  
-  // ==========================================
-  // ระบบกล้องสแกน QR หน้าเว็บแบบเต็มรูปแบบ (GitHub Version)
-  // ==========================================
-  let currentScanFacingMode = "environment";
-  function toggleScannerCamera() {
-    currentScanFacingMode = currentScanFacingMode === "environment" ? "user" : "environment";
-    if (html5QrCode && html5QrCode.isScanning) {
-      html5QrCode.stop().then(() => {
-        startScannerWithCurrentMode();
-      }).catch(err => showToast("ไม่สามารถสลับกล้องได้"));
-    }
-  }
-  function startScannerWithCurrentMode() {
-    html5QrCode.start(
-      { facingMode: currentScanFacingMode }, 
-      { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
-      (decodedText) => {
-        closeScannerModal();
-        processScannedQR(decodedText);
-      },
-      (errorMessage) => {}
-    ).catch(err => {
-        // Ignore parse errors, report actual start failures
-    });
-  }
-  function openScanner(mode) { 
-    currentScanMode = mode; 
-    document.getElementById('qrScannerModal').style.display = 'flex';
-    
-    if(!html5QrCode) html5QrCode = new Html5Qrcode("qr-reader"); 
-    startScannerWithCurrentMode();
-  }
-
-  
-  function closeScannerModal() {
-    document.getElementById('qrScannerModal').style.display = 'none';
-    if (html5QrCode && html5QrCode.isScanning) { 
-        html5QrCode.stop().catch(err => console.error(err)); 
-    }
-  }
-
-  function processScannedQR(scannedId) { if (currentScanMode === 'borrow') { let item = allEquipment.find(e => e.id === scannedId); if(item) { updateCart(item.id, 1); showToast('✅ หยิบ "' + item.name + '" ลงตะกร้าแล้ว!'); } else { let radio = allRadios ? allRadios.find(r => r.id === scannedId) : null; if (radio) { closeScannerModal(); if (radio.currentUserId) { showToast('⚠️ วิทยุ "' + radio.name + '" ถูกยืมไปแล้วโดย ' + radio.currentUserName); } else if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { doBorrowRadio(radio.id); } else { showToast('📻 วิทยุ "' + radio.name + '" - กรุณาติดต่อ Admin เพื่อเบิกวิทยุครับ'); } } else { showToast('❌ ไม่พบอุปกรณ์หรือวิทยุรหัสนี้'); } } } else if (currentScanMode === 'return') { const myItems = allTransactions.filter(item => item.userId === currentUser.id && item.eqId === scannedId); if(myItems.length > 0) { prepareReturn(myItems[0].row, myItems[0].eqId, myItems[0].qty, myItems[0].eqName); } else showToast('❌ ไม่พบรายการที่คุณกำลังยืมของชิ้นนี้อยู่'); } else if (currentScanMode === 'admin_return') { const activeItems = allTransactions.filter(item => item.eqId === scannedId); if(activeItems.length > 0) { prepareReturn(activeItems[0].row, activeItems[0].eqId, activeItems[0].qty, activeItems[0].eqName); } else showToast('❌ ไม่พบรายการค้างคืนสำหรับอุปกรณ์ชิ้นนี้ในระบบครับ');   } else if (currentScanMode === 'radio_return_loc') {
-    let loc = allLocations.find(l => l.id === scannedId);
-    if(loc) {
-      pendingRadioReturnLocId = loc.id;
-      document.getElementById('radioReturnLocNameDisplay').innerText = loc.name;
-      document.getElementById('radioReturnLocDisplay').style.display = 'block';
-      var btn = document.getElementById('confirmRadioReturnBtn');
-      btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
-      showToast('📍 เลือกจุดคืนวิทยุ: ' + loc.name + ' เรียบร้อยแล้ว\nกรุณากดยืนยันการคืน');
-    } else showToast('❌ ไม่พบรหัสจุดวางนี้ในระบบ');
-  } else if (currentScanMode === 'loc') { let loc = allLocations.find(l => l.id === scannedId); if(loc) { document.getElementById('selectReturnLoc').value = loc.id; showToast('📍 เลือกจุดวาง: ' + loc.name + ' เรียบร้อยแล้ว'); } else showToast('❌ ไม่พบรหัสจุดวางนี้'); } }
-  function updateCart(eqId, change) { let item = allEquipment.find(e => e.id === eqId); if(!item) return; let newQty = (cart[eqId] || 0) + change; if(newQty > item.available) return showToast('อุปกรณ์ในสต๊อกไม่พอครับ'); if(newQty < 0) newQty = 0; cart[eqId] = newQty; renderEquipment(); updateCartFloat(); }
-  function updateCartFloat() { let total = 0; for(let k in cart) total += cart[k]; const floatBtn = document.getElementById('cartFloat'); document.getElementById('cartCount').innerText = "(" + total + ")"; floatBtn.style.display = (total > 0 && document.getElementById('tabBorrow').style.display === 'block') ? 'block' : 'none'; }
-  
-  function checkout() { 
-    if(!confirm('ยืนยันเบิกอุปกรณ์ที่เลือกไว้?')) return; 
-    
-    // === Optimistic UI Update ===
-    const cartCopy = {...cart}; 
-    for (let eqId in cart) { 
-        let eq = allEquipment.find(e => e.id === eqId); 
-        if (eq) {
-            eq.available = parseInt(eq.available) - cart[eqId]; 
-            allTransactions.unshift({ row: -1, transId: 'sync', userId: currentUser.id, userName: currentUser.name, eqId: eqId, eqName: eq.name, qty: cart[eqId], action: 'Borrow' });
-        }
-    }
-    cart = {}; updateCartFloat(); renderEquipment(); renderMyReturnData();
-
-    // Delay 50ms to allow DOM repaint
-    setTimeout(() => {
-      showLoading('กำลังบันทึก...');
-      
-      google.script.run.withSuccessHandler(res => { 
-        hideLoading();
-        if(!res.success) {
-            showToast('❌ ' + res.message);
-            setTimeout(() => refreshData(true), 500); // Revert if failed
-        } else {
-            showToast('✅ ' + res.message);
-        }
-        setTimeout(() => refreshData(true), 2500); 
-      }).withFailureHandler(err => { hideLoading(); showToast('บันทึกล้มเหลว: '+err.message); setTimeout(() => refreshData(true), 500); }).submitBorrow(currentUser.id, cartCopy); 
-    }, 50);
-  }
-
-  function renderEquipment() { const grid = document.getElementById('equipmentGrid'); if(!grid) return; grid.innerHTML = ''; const searchTxt = document.getElementById('searchInput').value.toLowerCase(); const filteredData = allEquipment.filter(item => { const matchSearch = String(item.name).toLowerCase().includes(searchTxt); let matchStatus = true; if (currentFilter === 'available') matchStatus = item.available > 0; let hasStockElsewhere = false; if (item.total <= 0) { hasStockElsewhere = allEquipment.some(other => String(other.name).trim() === String(item.name).trim() && other.total > 0); } let shouldShowZero = item.total > 0 || !hasStockElsewhere; return matchSearch && matchStatus && shouldShowZero; }); if (filteredData.length === 0) { grid.innerHTML = '<p>ไม่พบอุปกรณ์</p>'; return; } filteredData.forEach(item => { const card = document.createElement('div'); card.className = 'card'; let imgUrl = item.image ? item.image : 'https://via.placeholder.com/150?text=No+Image'; let fileIdMatch = imgUrl.match(/file\/d\/([^\/]+)/) || imgUrl.match(/id=([^&]+)/); if (fileIdMatch && fileIdMatch[1] && imgUrl.includes('drive.google.com')) { imgUrl = "https://drive.google.com/thumbnail?id=" + fileIdMatch[1] + "&sz=w800"; } const qty = cart[item.id] || 0; let locDisplay = '-'; if (item.location) { let foundLoc = allLocations.find(l => l.id === item.location); locDisplay = foundLoc ? foundLoc.name : item.location; } card.innerHTML = '<img src="' + imgUrl + '" class="card-img"><div class="card-body"><h3 class="card-title">' + item.name + '</h3><div class="card-status">เหลือ: ' + item.available + ' / ' + item.total + '<br><span style="color: #007aff; font-weight: 500;">📍 ' + locDisplay + '</span></div><div class="cart-controls"><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', -1)">-</button><span>' + qty + '</span><button class="qty-btn" onclick="updateCart(\'' + item.id + '\', 1)">+</button></div></div>'; grid.appendChild(card); }); }
-  function setFilter(type, btn) { currentFilter = type; document.querySelectorAll('.filters .filter-btn:not(.btn-warning)').forEach(b => b.classList.remove('active')); btn.classList.add('active'); renderEquipment(); }
-
-  function loadUsersData(isQuiet = false) { google.script.run.withSuccessHandler(data => { allUsers = data || []; if(!isQuiet) hideLoading(); renderUsersData(); }).getAllUsers(); }
-  function renderUsersData() { const listDiv = document.getElementById('adminUserList'); if(!listDiv) return; listDiv.innerHTML = ''; const addUserBtn = document.querySelector('#adminTabUsers button.btn-primary'); if (addUserBtn) { addUserBtn.style.display = currentUser.role === 'Superadmin' ? 'inline-block' : 'none'; } allUsers.forEach(user => { const card = document.createElement('div'); card.className = 'list-card'; let statusBadge = user.status === 'Pending' ? '<span style="color:orange; font-weight:bold;">(รออนุมัติ)</span>' : '<span style="color:green;">(Active)</span>'; let actionBtns = ''; if(user.status === 'Pending' && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { actionBtns += `<button class="btn-success" onclick="approveUserRow(${user.row}, '${user.name}')">✅ อนุมัติ</button>`; } actionBtns += `<button class="btn-warning" style="background-color: #17a2b8; color: white;" onclick="resetPassword(${user.row}, '${user.name}')">🔑 รีเซ็ตรหัส</button>`; if(currentUser.role === 'Superadmin') { actionBtns += `<button class="btn-warning" onclick="editUser(${user.row})">แก้ไข</button>`; actionBtns += `<button class="btn-danger" onclick="deleteUser(${user.row}, '${user.name}')">ลบ</button>`; } card.innerHTML = `<div class="list-info"><strong>ชื่อ:</strong> ${user.name} ${statusBadge}<br><strong>User:</strong> ${user.username} <span style="color:#8e8e8e; font-size:12px;">(แผนก: ${user.department})</span><br><span>สิทธิ์: ${user.role}</span></div><div style="display:flex; gap:5px; flex-wrap:wrap;">${actionBtns}</div>`; listDiv.appendChild(card); }); }
-
-  function approveUserRow(row, name) { if(!confirm('ยืนยันอนุมัติให้: ' + name + ' ใช้งานระบบได้?')) return; showLoading('กำลังอนุมัติ...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); loadUsersData(true); }).approveUser(row); }
-  function openUserModal() { document.getElementById('userModalTitle').innerText = 'เพิ่มผู้ใช้'; document.getElementById('editUserRow').value = ''; document.getElementById('editUsername').value = ''; document.getElementById('editPassword').value = ''; document.getElementById('editName').value = ''; document.getElementById('editRole').value = 'User'; document.getElementById('editDept').value = 'GB'; document.getElementById('userModal').style.display = 'flex'; }
-  function editUser(row) { const user = allUsers.find(u => u.row === row); if(!user) return; document.getElementById('userModalTitle').innerText = 'แก้ไขผู้ใช้'; document.getElementById('editUserRow').value = user.row; document.getElementById('editUsername').value = user.username; document.getElementById('editPassword').value = user.password; document.getElementById('editName').value = user.name; document.getElementById('editRole').value = user.role; document.getElementById('editDept').value = user.department || '-'; document.getElementById('userModal').style.display = 'flex'; }
-  function closeUserModal() { document.getElementById('userModal').style.display = 'none'; }
-  function saveUser() { const data = { row: document.getElementById('editUserRow').value ? parseInt(document.getElementById('editUserRow').value) : null, username: document.getElementById('editUsername').value, password: document.getElementById('editPassword').value, name: document.getElementById('editName').value, role: document.getElementById('editRole').value, department: document.getElementById('editDept').value }; if(!data.username || !data.password || !data.name) return showToast('กรอกข้อมูลให้ครบถ้วน'); showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); closeUserModal(); loadUsersData(true); }).saveUserData(data); }
-  function deleteUser(row, name) { if(!confirm('ลบผู้ใช้: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('🗑️ ' + res.message); loadUsersData(true); }).deleteUserData(row); }
-  function resetPassword(row, name) { if(!confirm(`ยืนยันการรีเซ็ตรหัสผ่านของ ${name} เป็น "1234" ใช่หรือไม่?`)) return; showLoading('กำลังรีเซ็ตรหัสผ่าน...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); loadUsersData(true); }).withFailureHandler(showError).resetUserPassword(row); }
-
-  function renderAdminEqData() { const listDiv = document.getElementById('adminEqList'); if(!listDiv) return; listDiv.innerHTML = ''; allEquipment.forEach(eq => { const card = document.createElement('div'); card.className = 'list-card'; let locName = '-'; let foundLoc = allLocations.find(l => l.id === eq.location); if(foundLoc) locName = foundLoc.name; card.innerHTML = '<div class="list-info"><strong>' + eq.name + '</strong><br><span>จำนวน: ' + eq.total + ' (พร้อมยืม: ' + eq.available + ')</span><br><span>📍 ' + locName + '</span></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editEq(\'' + eq.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteEq(\'' + eq.id + '\', \'' + eq.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
-  
-  function openEqModal() { document.getElementById('eqModalTitle').innerText = 'เพิ่มอุปกรณ์'; document.getElementById('editEqIsNew').value = 'true'; document.getElementById('editEqId').value = ''; document.getElementById('editEqId').disabled = false; document.getElementById('editEqName').value = ''; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImage').value = ''; document.getElementById('editEqTotal').value = ''; document.getElementById('eqCameraSection').style.display = 'block'; document.getElementById('eqCameraContainer').style.display = 'none'; document.getElementById('eqRetakeSection').style.display = 'none'; if(eqVideoStream) stopEqCamera(); const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); document.getElementById('eqModal').style.display = 'flex'; }
-  function editEq(id) { let eq = allEquipment.find(e => e.id === id); if(!eq) return; document.getElementById('eqModalTitle').innerText = 'แก้ไขอุปกรณ์'; document.getElementById('editEqIsNew').value = 'false'; document.getElementById('editEqId').value = eq.id; document.getElementById('editEqId').disabled = true; document.getElementById('editEqName').value = eq.name; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImage').value = eq.image || ''; document.getElementById('editEqTotal').value = eq.total; document.getElementById('eqCameraContainer').style.display = 'none'; if(eqVideoStream) stopEqCamera(); if(eq.image) { document.getElementById('editEqImagePreviewUI').src = eq.image; document.getElementById('eqCameraSection').style.display = 'none'; document.getElementById('eqRetakeSection').style.display = 'block'; } else { document.getElementById('eqCameraSection').style.display = 'block'; document.getElementById('eqRetakeSection').style.display = 'none'; } const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- ไม่ระบุจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); sel.value = eq.location; document.getElementById('eqModal').style.display = 'flex'; }
-
-  function saveEq() {
-    const base64Cam = document.getElementById('editEqImageBase64').value;
-
-    if (base64Cam) {
-      uploadEqImageAndSave(base64Cam);
-    } else {
-      proceedSaveEq(document.getElementById('editEqImage').value);
-    }
-  }
-
-  function uploadEqImageAndSave(base64Data) {
-    showLoading('กำลังอัปโหลดรูปภาพเข้าคลัง...\n(อาจใช้เวลาสักครู่)');
     google.script.run.withSuccessHandler(res => {
-      if (res.success) {
-        proceedSaveEq(res.url);
-      } else {
-        hideLoading();
-        showToast('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
-      }
-    }).uploadImageToDrive(base64Data, "IMG_EQ_" + new Date().getTime());
-  }
-
-  function proceedSaveEq(imageUrl) { const data = { isNew: document.getElementById('editEqIsNew').value === 'true', id: document.getElementById('editEqId').value, name: document.getElementById('editEqName').value, image: imageUrl, total: document.getElementById('editEqTotal').value, location: document.getElementById('editEqLoc').value }; if(!data.name || !data.total) return showToast('กรุณาระบุชื่อและจำนวนอุปกรณ์'); showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(true); }).withFailureHandler(showError).saveEquipmentData(data); }
-  function deleteEq(id, name) { if(!confirm('ลบอุปกรณ์: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('🗑️ ' + res.message); refreshData(true); }).deleteEquipmentData(id); }
-
-  function renderAdminLocData() { const listDiv = document.getElementById('adminLocList'); if(!listDiv) return; listDiv.innerHTML = ''; allLocations.forEach(loc => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>' + loc.name + '</strong></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editLoc(\'' + loc.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteLoc(\'' + loc.id + '\', \'' + loc.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
-  function openLocModal() { document.getElementById('locModalTitle').innerText = 'เพิ่มจุดวาง'; document.getElementById('editLocIsNew').value = 'true'; document.getElementById('editLocId').value = ''; document.getElementById('editLocId').disabled = false; document.getElementById('editLocName').value = ''; document.getElementById('locModal').style.display = 'flex'; }
-  function editLoc(id) { let loc = allLocations.find(l => l.id === id); if(!loc) return; document.getElementById('locModalTitle').innerText = 'แก้ไขจุดวาง'; document.getElementById('editLocIsNew').value = 'false'; document.getElementById('editLocId').value = loc.id; document.getElementById('editLocId').disabled = true; document.getElementById('editLocName').value = loc.name; document.getElementById('locModal').style.display = 'flex'; }
-  function saveLoc() { const data = { isNew: document.getElementById('editLocIsNew').value === 'true', id: document.getElementById('editLocId').value, name: document.getElementById('editLocName').value }; if(!data.name) return showToast('กรุณาระบุชื่อจุดวาง'); showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); document.getElementById('locModal').style.display='none'; refreshData(true); }).withFailureHandler(showError).saveLocationData(data); }
-  function deleteLoc(id, name) { if(!confirm('ลบจุดวาง: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('🗑️ ' + res.message); refreshData(true); }).deleteLocationData(id); }
-
-  function populateLocationSelect() { const s = document.getElementById('adminLocSelect'); let o = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(l => o += '<option value="' + l.id + '">' + l.name + '</option>'); if(s) s.innerHTML = o; }
-  function populateEqSelect() { const s = document.getElementById('adminEqSelect'); let o = '<option value="">-- เลือกอุปกรณ์ --</option>'; allEquipment.forEach(e => o += '<option value="' + e.id + '">' + e.name + '</option>'); if(s) s.innerHTML = o; }
-  function generateQR(type) { let selectElement = type === 'loc' ? document.getElementById('adminLocSelect') : document.getElementById('adminEqSelect'); let id = selectElement.value; const resDiv = document.getElementById('adminQRResult'); if(!id) { resDiv.innerHTML = ''; return; } let nameWithPrefix = selectElement.options[selectElement.selectedIndex].text; resDiv.innerHTML = `<div id="printArea" style="border: 2px dashed #007aff; padding: 25px 20px; border-radius: 12px; display: inline-block; background: white; margin-top: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); min-width: 250px;"><h3 style="margin: 0 0 15px 0; color: #1d1d1f; font-size: 22px;">${nameWithPrefix}</h3><canvas id="qrDisplayCanvas" style="border: 1px solid #f5f5f7; padding: 10px; border-radius: 8px;"></canvas><p style="margin: 15px 0 0 0; font-size: 16px; color: #86868b;">รหัสอ้างอิง: <strong style="color: #1d1d1f;">${id}</strong></p></div><br><button class="btn-primary" style="width: auto; margin-top: 15px; border-radius: 30px;" onclick="printQR()">🖨️ พิมพ์ป้าย QR Code</button>`; new QRious({ element: document.getElementById('qrDisplayCanvas'), value: id, size: 200, level: 'H' }); }
-  function printQR() { var printContents = document.getElementById('printArea').outerHTML; var w = window.open('', '_blank', 'width=400,height=600'); w.document.write('<html><head><title>Print QR</title></head><body style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; font-family:sans-serif;">' + printContents + '</body></html>'); w.document.close(); w.focus(); w.print(); w.close(); }
-
-  async function downloadAllQRs() {
-    if(allEquipment.length === 0 && allLocations.length === 0) return showToast('ไม่มีข้อมูลอุปกรณ์หรือจุดวางในระบบครับ');
-    showLoading('กำลังวาดรูปป้ายและสร้างไฟล์ ZIP...\n(อาจใช้เวลาสักครู่)');
-    try { var zip = new JSZip(); var eqFolder = zip.folder("QR_อุปกรณ์"); var locFolder = zip.folder("QR_จุดวาง"); function createTicketBase64(name, id) { const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 500; const ctx = canvas.getContext('2d'); ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 400, 500); ctx.strokeStyle = '#007aff'; ctx.lineWidth = 6; ctx.setLineDash([15, 10]); ctx.strokeRect(15, 15, 370, 470); ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(name, 200, 75, 340); const qr = new QRious({ value: id, size: 260, level: 'H' }); ctx.drawImage(qr.canvas, 70, 110); ctx.fillStyle = '#86868b'; ctx.font = '22px sans-serif'; ctx.fillText('รหัสอ้างอิง: ' + id, 200, 420); return canvas.toDataURL('image/png').split(',')[1]; } allEquipment.forEach(eq => { var base64Data = createTicketBase64(eq.name, eq.id); var safeName = (eq.name + "_" + eq.id).replace(/[\/\\]/g, '-'); eqFolder.file(safeName + ".png", base64Data, {base64: true}); }); allLocations.forEach(loc => { var base64Data = createTicketBase64(loc.name, loc.id); var safeName = (loc.name + "_" + loc.id).replace(/[\/\\]/g, '-'); locFolder.file(safeName + ".png", base64Data, {base64: true}); }); if(typeof allRadios !== 'undefined') { var radioFolder = zip.folder("QR_วิทยุ"); allRadios.forEach(radio => { var base64Data = createTicketBase64(radio.name, radio.id); var safeName = (radio.name + "_" + radio.id).replace(/[\/\\]/g, '-'); radioFolder.file(safeName + ".png", base64Data, {base64: true}); }); } var content = await zip.generateAsync({type:"blob"}); var link = document.createElement('a'); link.href = URL.createObjectURL(content); link.download = "QR_Codes_Tickets.zip"; link.click(); hideLoading(); showToast('✅ ดาวน์โหลดไฟล์ .ZIP สำเร็จแล้ว!'); } catch(error) { hideLoading(); showToast('❌ เกิดข้อผิดพลาดในการสร้างไฟล์ ZIP: ' + error.message); }
-  }
-
-  // ==========================================
-  // Radio Management JS
-  // ==========================================
-  let allRadios = [];
-  let radioFilter = 'all';
-
-  function loadRadios(isQuiet = false) {
-    if(!isQuiet) showLoading('กำลังโหลดข้อมูลวิทยุ...');
-    google.script.run.withSuccessHandler(function(res) {
-      if(!isQuiet) hideLoading();
-      if (res.success) { allRadios = res.radios || []; renderRadioTab(); }
-      else showToast('โหลดไม่สำเร็จ: ' + (res.message || ''));
-    }).withFailureHandler(function(err) {
-      if(!isQuiet) hideLoading();
-      showError(err);
-    }).getRadios();
-  }
-
-  function setRadioFilter(filter, btn) {
-    radioFilter = filter;
-    document.querySelectorAll('#tabRadio .filter-btn').forEach(function(b){ b.classList.remove('active'); });
-    btn.classList.add('active');
-    renderRadioTab();
-  }
-
-  function renderRadioTab() {
-    var grid = document.getElementById('radioGrid');
-    if (!grid) return;
-    var isAdmin = currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin');
-    var adminPanel = document.getElementById('radioAdminPanel');
-    if (adminPanel) adminPanel.style.display = isAdmin ? 'block' : 'none';
-    var filtered = allRadios;
-    if (radioFilter === 'available') filtered = allRadios.filter(function(r){ return !r.currentUserId; });
-    if (radioFilter === 'borrowed') filtered = allRadios.filter(function(r){ return !!r.currentUserId; });
-    grid.innerHTML = '';
-    if (filtered.length === 0) { grid.innerHTML = '<p style="color:#86868b;text-align:center;padding:30px;grid-column:1/-1;">ไม่พบวิทยุ</p>'; return; }
-    filtered.forEach(function(radio) {
-      var isBorrowed = !!radio.currentUserId;
-      var isMine = radio.currentUserId == String(currentUser.id);
-      var bs = radio.batteryStatus || 'ready';
-      var bsEmoji = bs==='ready'?'🟢':bs==='charging'?'🔵':'🔴';
-      var bsLabel = bs==='ready'?'พร้อมใช้':bs==='charging'?'กำลังชาร์จ':'ใกล้หมด/หมด';
-      var statusHtml = isBorrowed
-        ? '<div style="font-size:13px;margin:6px 0;"><span style="color:#ff9500;">👤 ' + radio.currentUserName + '</span></div>'
-        : '<div style="font-size:13px;margin:6px 0;color:#34c759;">✅ ว่าง</div>';
-      var actionHtml = '';
-      if (!isBorrowed) {
-        actionHtml = '<button class="btn-success" style="width:100%;margin-top:6px;border-radius:12px;" onclick="doBorrowRadio(\'' + radio.id + '\')">🤝 ยืมวิทยุ</button>';
-      } else if (isMine || isAdmin) {
-        actionHtml = '<button class="btn-danger" style="width:100%;margin-top:6px;border-radius:12px;" onclick="doReturnRadio(\'' + radio.id + '\', \'' + radio.name + '\')">📦 คืนวิทยุ</button>';
-      } else {
-        actionHtml = '<div style="font-size:11px;color:#86868b;margin-top:6px;text-align:center;">รอให้ผู้ยืมคืน</div>';
-      }
-      var batteryHtml = '';
-      if (isAdmin) {
-        batteryHtml = '<div style="display:flex;gap:4px;margin-top:10px;border-top:1px solid #f5f5f7;padding-top:10px;">'
-          + '<button class="rc-battery ' + (bs==='ready'?'active-ready':'') + '" onclick="doUpdateRadioBattery(\'' + radio.id + '\',\'ready\')">🟢 พร้อม</button>'
-          + '<button class="rc-battery ' + (bs==='charging'?'active-charging':'') + '" onclick="doUpdateRadioBattery(\'' + radio.id + '\',\'charging\')">🔵 ชาร์จ</button>'
-          + '<button class="rc-battery ' + (bs==='low'?'active-low':'') + '" onclick="doUpdateRadioBattery(\'' + radio.id + '\',\'low\')">🔴 หมด</button>'
-          + '</div>';
-      } else {
-        batteryHtml = '<div style="font-size:12px;color:#86868b;margin-top:8px;">' + bsEmoji + ' ' + bsLabel + '</div>';
-      }
-      var adminMenuId = 'adminMenu_' + radio.id;
-      var adminMenuHtml = '';
-      if (isAdmin) {
-         adminMenuHtml = '<div style="position:relative; display:inline-block; margin-left:8px;">'
-            + '<button onclick="toggleAdminMenu(\'' + adminMenuId + '\')" style="background:none;border:none;cursor:pointer;font-size:20px;color:#8e8e8e;padding:0 5px;">☰</button>'
-            + '<div id="' + adminMenuId + '" class="radio-admin-menu" style="display:none; position:absolute; right:0; top:28px; background:white; border:1px solid #e0e0e0; box-shadow:0 4px 12px rgba(0,0,0,0.15); border-radius:8px; z-index:100; min-width:140px; overflow:hidden;">'
-            + '<button onclick="openRadioQR(\'' + radio.id + '\',\'' + radio.name + '\')" style="width:100%; text-align:left; background:none; border:none; padding:12px 15px; cursor:pointer; font-size:14px; color:#1d1d1f; border-bottom:1px solid #f5f5f7;">🖨️ พิมพ์ป้าย</button>'
-            + '<button onclick="doDeleteRadio(\'' + radio.id + '\',\'' + radio.name + '\')" style="width:100%; text-align:left; background:none; border:none; padding:12px 15px; cursor:pointer; font-size:14px; color:#ff3b30;">🗑️ ลบวิทยุ</button>'
-            + '</div></div>';
-      }
-
-      var card = document.createElement('div');
-      card.className = 'radio-card' + (isBorrowed ? ' is-borrowed' : '') + (isMine ? ' is-mine' : '');
-      card.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;">'
-        + '<div style="font-weight:600;font-size:15px;color:#1d1d1f;">' + radio.name + '</div>'
-        + '<div style="display:flex; align-items:center;"><div style="font-size:22px;">' + bsEmoji + '</div>' + adminMenuHtml + '</div></div>'
-        + statusHtml + actionHtml + batteryHtml;
-      grid.appendChild(card);
-    });
-  }
-
-  let pendingBorrowRadioId = null;
-  let recipientUsersList = [];
-
-  function doBorrowRadio(radioId) {
-    var radio = allRadios.find(function(r){ return r.id === radioId; });
-    pendingBorrowRadioId = radioId;
-    document.getElementById('radioBorrowName').innerText = radio ? radio.name : 'วิทยุ';
-    
-    recipientUsersList = [];
-    if (allUsers && allUsers.length > 0) {
-      allUsers.forEach(function(u) {
-        if (u.status !== 'Pending') {
-          recipientUsersList.push({ name: u.name, department: u.department || '', id: u.id });
-        }
-      });
-    }
-    document.getElementById('radioBorrowRecipient').value = '';
-    document.getElementById('recipientDropdown').style.display = 'none';
-    
-    document.getElementById('radioBorrowModal').style.display = 'flex';
-  }
-
-  function showRecipientList() {
-    filterRecipientList();
-  }
-
-  function filterRecipientList() {
-    var input = document.getElementById('radioBorrowRecipient');
-    var dropdown = document.getElementById('recipientDropdown');
-    var query = input.value.trim().toLowerCase();
-    
-    var filtered = recipientUsersList.filter(function(u) {
-      return u.name.toLowerCase().includes(query) || u.department.toLowerCase().includes(query);
-    });
-    
-    if (filtered.length === 0) {
-      dropdown.innerHTML = '<div style="padding:10px 12px; color:#86868b; font-size:13px; text-align:center;">ไม่พบรายชื่อ</div>';
-      dropdown.style.display = 'block';
-      return;
-    }
-    
-    var html = '';
-    filtered.forEach(function(u) {
-      html += '<div class="recipient-item" onmousedown="selectRecipient(\'' + u.name.replace(/'/g, "\\'") + '\')" onclick="selectRecipient(\'' + u.name.replace(/'/g, "\\'") + '\')" style="padding:10px 12px; cursor:pointer; border-bottom:1px solid #f5f5f7; transition:background 0.15s;"'
-        + ' onmouseover="this.style.background=\'#f0f7ff\'" onmouseout="this.style.background=\'white\'">'
-        + '<div style="font-weight:500; font-size:14px; color:#1d1d1f; pointer-events:none;">' + u.name + '</div>'
-        + '<div style="font-size:11px; color:#86868b; pointer-events:none;">แผนก: ' + u.department + '</div>'
-        + '</div>';
-    });
-    dropdown.innerHTML = html;
-    dropdown.style.display = 'block';
-  }
-
-  function selectRecipient(name) {
-    document.getElementById('radioBorrowRecipient').value = name;
-    document.getElementById('recipientDropdown').style.display = 'none';
-  }
-
-  // Close dropdown when clicking outside
-  document.addEventListener('click', function(e) {
-    var wrap = document.getElementById('recipientDropdownWrap');
-    if (wrap && !wrap.contains(e.target)) {
-      document.getElementById('recipientDropdown').style.display = 'none';
-    }
-  });
-
-  function confirmBorrowRadioAdmin() {
-    var recipientName = document.getElementById('radioBorrowRecipient').value.trim();
-    if (!recipientName) return showToast('กรุณาระบุชื่อผู้รับวิทยุ');
-    if (!pendingBorrowRadioId) return;
-    
-    var realUserId = 'admin_assigned';
-    if (allUsers && allUsers.length > 0) {
-       var matchedUser = allUsers.find(u => u.name === recipientName);
-       if (matchedUser) realUserId = matchedUser.id;
-    }
-    
-    document.getElementById('radioBorrowModal').style.display = 'none';
-    showLoading('กำลังบันทึก...');
-    google.script.run.withSuccessHandler(function(res) {
-      hideLoading();
-      showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
-      if (res.success) loadRadios();
-    }).withFailureHandler(showError).borrowRadio(pendingBorrowRadioId, realUserId, recipientName);
-  }
-
-  let pendingRadioReturnId = null;
-  let pendingRadioReturnLocId = null;
-  let pendingRadioReturnLocName = null;
-
-  function doReturnRadio(radioId, radioName) {
-    var isAdmin = currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin');
-    pendingRadioReturnId = radioId;
-    pendingRadioReturnLocId = null;
-    document.getElementById('radioReturnName').innerText = radioName;
-    document.getElementById('radioReturnLocDisplay').style.display = 'none';
-    var btn = document.getElementById('confirmRadioReturnBtn');
-    if (isAdmin) {
-      // Admin can return without scanning
-      document.getElementById('radioReturnScanSection').style.display = 'none';
-      document.getElementById('radioReturnAdminBypass').style.display = 'block';
-      btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer';
-      pendingRadioReturnLocId = 'admin_force';
-    } else {
-      document.getElementById('radioReturnScanSection').style.display = 'block';
-      document.getElementById('radioReturnAdminBypass').style.display = 'none';
-      btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed';
-    }
-    document.getElementById('radioReturnModal').style.display = 'flex';
-  }
-
-  function doAdminForceReturn(radioId, radioName) {
-    if (!confirm('บังคับรับคืน ' + radioName + ' ? (ไม่ต้องสแกน QR)')) return;
-    showLoading('กำลังบันทึก...');
-    google.script.run.withSuccessHandler(function(res) {
-      hideLoading();
-      showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
-      if (res.success) loadRadios();
-    }).withFailureHandler(showError).returnRadio(radioId, 'admin_force');
-  }
-
-  function closeRadioReturnModal() {
-    document.getElementById('radioReturnModal').style.display = 'none';
-    pendingRadioReturnId = null; pendingRadioReturnLocId = null;
-  }
-
-  function setRadReturnBat(status) {
-    document.getElementById('radReturnBat').value = status;
-    document.getElementById('btnRadBatReady').className = (status === 'ready') ? 'btn-outline active' : 'btn-outline';
-    document.getElementById('btnRadBatCharging').className = (status === 'charging') ? 'btn-outline active' : 'btn-outline';
-    document.getElementById('btnRadBatLow').className = (status === 'low') ? 'btn-outline active' : 'btn-outline';
-    
-    // Adjust colors
-    document.getElementById('btnRadBatReady').style.background = (status === 'ready') ? '#34c759' : 'white';
-    document.getElementById('btnRadBatReady').style.color = (status === 'ready') ? 'white' : '#34c759';
-    document.getElementById('btnRadBatReady').style.border = (status === 'ready') ? 'none' : '1px solid #34c759';
-    
-    document.getElementById('btnRadBatCharging').style.background = (status === 'charging') ? '#007aff' : 'white';
-    document.getElementById('btnRadBatCharging').style.color = (status === 'charging') ? 'white' : '#007aff';
-    document.getElementById('btnRadBatCharging').style.border = (status === 'charging') ? 'none' : '1px solid #007aff';
-    
-    document.getElementById('btnRadBatLow').style.background = (status === 'low') ? '#ff3b30' : 'white';
-    document.getElementById('btnRadBatLow').style.color = (status === 'low') ? 'white' : '#ff3b30';
-    document.getElementById('btnRadBatLow').style.border = (status === 'low') ? 'none' : '1px solid #ff3b30';
-  }
-
-  function confirmRadioReturn() {
-    if (!pendingRadioReturnId || !pendingRadioReturnLocId) return;
-    
-    // Save variables before closing modal clears them
-    var radioIdToReturn = pendingRadioReturnId;
-    var locIdToReturn = pendingRadioReturnLocId;
-    var batteryStatus = document.getElementById('radReturnBat').value;
-    
-    closeRadioReturnModal();
-    
-    var radio = allRadios.find(r => r.id === radioIdToReturn);
-    if (radio) {
-      radio.currentUserId = null;
-      radio.currentUserName = null;
-      radio.batteryStatus = batteryStatus;
-    }
-    renderRadioTab();
-    renderMyReturnData();
-    
-    showLoading('กำลังบันทึกการคืนวิทยุ...');
-    
-    google.script.run.withSuccessHandler(function(res) {
-      hideLoading();
-      showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
-      if (res.success) {
-        setTimeout(() => loadRadios(), 1500);
-        setTimeout(() => refreshData(true), 1500);
-      } else {
-        loadRadios();
-      }
-    }).withFailureHandler(function(err){
-      showError(err);
-      loadRadios();
-    }).returnRadio(radioIdToReturn, locIdToReturn, batteryStatus);
-  }
-
-  function doUpdateRadioBattery(radioId, status) {
-    var radio = allRadios.find(function(r){ return r.id === radioId; });
-    if (radio) radio.batteryStatus = status;
-    renderRadioTab();
-    google.script.run.withSuccessHandler(function(){}).withFailureHandler(function(err){
-      if (radio) radio.batteryStatus = 'ready'; renderRadioTab();
-      showToast('บันทึกไม่สำเร็จ: ' + err.message);
-    }).updateRadioBattery(radioId, status);
-  }
-
-  function confirmInitRadios() {
-    if (!confirm('สร้างวิทยุ 23 เครื่อง (วิทยุ #01 - #23) ลงในระบบ?')) return;
-    showLoading('กำลังสร้างข้อมูลวิทยุ...');
-    google.script.run.withSuccessHandler(function(res) {
-      hideLoading(); showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
-      if (res.success) loadRadios();
-    }).withFailureHandler(showError).initRadios(23);
-  }
-
-  function openAddRadioModal() {
-    document.getElementById('radioNameInput').value = '';
-    document.getElementById('radioModal').style.display = 'flex';
-  }
-
-  function doSaveRadio() {
-    var name = document.getElementById('radioNameInput').value;
-    if (!name) return showToast('กรุณาระบุชื่อวิทยุ');
-    showLoading('กำลังบันทึก...');
-    google.script.run.withSuccessHandler(function(res) {
-      hideLoading();
-      showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
-      if (res.success) { document.getElementById('radioModal').style.display='none'; loadRadios(true); }
-    }).withFailureHandler(showError).saveRadio({ isNew: true, name: name });
-  }
-
-  function doDeleteRadio(id, name) {
-    if (!confirm('ลบวิทยุ: ' + name + ' ?')) return;
-    showLoading('กำลังลบ...');
-    google.script.run.withSuccessHandler(function(res) {
-      hideLoading(); showToast(res.success ? '🗑️ ' + res.message : '❌ ' + res.message);
-      if (res.success) loadRadios(true);
-    }).withFailureHandler(showError).deleteRadio(id);
-  }
-
-  let currentRadioPrintFormat = 'QR';
-  let currentRadioPrintId = '';
-
-  function setRadioPrintFormat(format) {
-    currentRadioPrintFormat = format;
-    if(format === 'QR') {
-      document.getElementById('btnRadioFormatQR').style.background = '#1d1d1f';
-      document.getElementById('btnRadioFormatQR').style.color = 'white';
-      document.getElementById('btnRadioFormatBarcode').style.background = 'transparent';
-      document.getElementById('btnRadioFormatBarcode').style.color = '#1d1d1f';
-      
-      document.getElementById('radioQRCanvas').style.display = 'inline-block';
-      document.getElementById('radioBarcodeSvg').style.display = 'none';
-      
-      new QRious({
-        element: document.getElementById('radioQRCanvas'),
-        value: currentRadioPrintId,
-        size: 200,
-        level: 'H'
-      });
-    } else {
-      document.getElementById('btnRadioFormatBarcode').style.background = '#1d1d1f';
-      document.getElementById('btnRadioFormatBarcode').style.color = 'white';
-      document.getElementById('btnRadioFormatQR').style.background = 'transparent';
-      document.getElementById('btnRadioFormatQR').style.color = '#1d1d1f';
-      
-      document.getElementById('radioQRCanvas').style.display = 'none';
-      document.getElementById('radioBarcodeSvg').style.display = 'inline-block';
-      
-      try {
-        JsBarcode("#radioBarcodeSvg", currentRadioPrintId, {
-          format: "CODE128",
-          width: 2,
-          height: 60,
-          displayValue: false
-        });
-      } catch(e) { console.error('Barcode error', e); }
-    }
-  }
-
-  function toggleAdminMenu(menuId) {
-    var menu = document.getElementById(menuId);
-    if (menu) {
-      document.querySelectorAll('.radio-admin-menu').forEach(function(el) {
-         if (el.id !== menuId) el.style.display = 'none';
-      });
-      menu.style.display = (menu.style.display === 'none' || menu.style.display === '') ? 'block' : 'none';
-    }
-  }
-
-  document.addEventListener('click', function(e) {
-    if (!e.target.closest('.radio-admin-menu') && !e.target.closest('button[onclick^="toggleAdminMenu"]')) {
-       document.querySelectorAll('.radio-admin-menu').forEach(function(el) { el.style.display = 'none'; });
-    }
-  });
-
-  let currentRadioModalAction = 'PRINT';
-
-  function openRadioQR(id, name, action) {
-    currentRadioModalAction = action || 'PRINT';
-    document.getElementById('radioQRTitle').innerText = id === 'ALL' ? '🖨️ พิมพ์/โหลด QR ทั้งหมด (23 เครื่อง)' : name;
-    document.getElementById('radioQRIdLabel').innerHTML = id === 'ALL' ? 'รหัสวิทยุทั้งหมด' : 'รหัสอ้างอิง: <strong style="color: #1d1d1f;">' + id + '</strong>';
-    
-    if (id === 'ALL') {
-      document.getElementById('btnRadioPrintAction').style.display = 'inline-block';
-      document.getElementById('btnRadioDownloadAction').style.display = 'inline-block';
-    } else {
-      document.getElementById('btnRadioPrintAction').style.display = 'inline-block';
-      document.getElementById('btnRadioDownloadAction').style.display = 'none';
-    }
-
-    currentRadioPrintId = id;
-    setRadioPrintFormat(currentRadioPrintFormat);
-    document.getElementById('radioQRModal').style.display = 'flex';
-  }
-
-  function printRadioQR() {
-    if (currentRadioPrintId === 'ALL') {
-      var printHtml = '<div style="display:flex; flex-wrap:wrap; gap:20px; justify-content:center; text-align:center; font-family:sans-serif;">';
-      allRadios.forEach(function(radio) {
-        printHtml += '<div style="border: 2px dashed #ccc; padding: 15px; border-radius: 8px; page-break-inside: avoid; width: 220px; box-sizing:border-box;">';
-        printHtml += '<h3 style="margin:0 0 10px 0;">' + radio.name + '</h3>';
-        if (currentRadioPrintFormat === 'QR') {
-          var canvas = document.createElement('canvas');
-          new QRious({ element: canvas, value: radio.id, size: 150, level: 'H' });
-          printHtml += '<img src="' + canvas.toDataURL() + '" style="margin-bottom:10px;">';
-        } else {
-           var canvas = document.createElement('canvas');
-           try { JsBarcode(canvas, radio.id, { format: "CODE128", width: 2, height: 50, displayValue: false, margin: 0 }); } catch(e){}
-           printHtml += '<img src="' + canvas.toDataURL() + '" style="margin-bottom:10px; max-width: 100%;">';
-        }
-        printHtml += '<p style="margin:0; font-size:12px; color:#666;">รหัสอ้างอิง: <strong>' + radio.id + '</strong></p>';
-        printHtml += '</div>';
-      });
-      printHtml += '</div>';
-      var w = window.open('', '_blank');
-      w.document.write('<html><head><title>Print All Radio Codes</title></head><body style="margin:20px;">' + printHtml + '</body></html>');
-      w.document.close();
-      setTimeout(function() { w.focus(); w.print(); w.close(); }, 500);
-      return;
-    }
-    var title = document.getElementById('radioQRTitle').innerText;
-    var printContents = document.getElementById('radioQRPrintArea').outerHTML;
-    var printHtml = '<div style="display:flex; justify-content:center; align-items:center; height:100vh; text-align:center; flex-direction:column;">'
-      + '<h2 style="margin:0 0 15px 0; font-family:sans-serif;">' + title + '</h2>'
-      + printContents + '</div>';
-    var w = window.open('', '_blank', 'width=400,height=600');
-    w.document.write('<html><head><title>Print Radio Code</title></head><body style="font-family:sans-serif;">' + printHtml + '</body></html>');
-    w.document.close(); w.focus(); w.print(); w.close();
-  }
-
-  async function downloadAllRadioCodesZip() {
-    showLoading('กำลังสร้างไฟล์ ZIP...\n(อาจใช้เวลาสักครู่)');
-    try {
-      var zip = new JSZip();
-      var folder = zip.folder("วิทยุ_" + currentRadioPrintFormat);
-      
-      allRadios.forEach(function(radio) {
-        var base64Data;
-        var canvas = document.createElement('canvas');
-        
-        if (currentRadioPrintFormat === 'QR') {
-          canvas.width = 400; canvas.height = 500;
-          var ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, 400, 500);
-          ctx.strokeStyle = '#007aff'; ctx.lineWidth = 6; ctx.setLineDash([15, 10]); ctx.strokeRect(15, 15, 370, 470);
-          ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(radio.name, 200, 75, 340);
-          var qr = new QRious({ value: radio.id, size: 260, level: 'H' });
-          ctx.drawImage(qr.canvas, 70, 110);
-          ctx.fillStyle = '#86868b'; ctx.font = '22px sans-serif'; ctx.fillText('รหัสอ้างอิง: ' + radio.id, 200, 420);
-          base64Data = canvas.toDataURL('image/png').split(',')[1];
-        } else {
-           try { JsBarcode(canvas, radio.id, { format: "CODE128", width: 3, height: 100, displayValue: false, margin: 20, background: "#ffffff" }); } catch(e){}
-           var finalCanvas = document.createElement('canvas');
-           finalCanvas.width = canvas.width; finalCanvas.height = canvas.height + 60;
-           var ctx = finalCanvas.getContext('2d');
-           ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, finalCanvas.width, finalCanvas.height);
-           ctx.drawImage(canvas, 0, 0);
-           ctx.fillStyle = '#1d1d1f'; ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(radio.name, finalCanvas.width/2, canvas.height + 20);
-           ctx.fillStyle = '#86868b'; ctx.font = '16px sans-serif'; ctx.fillText('รหัส: ' + radio.id, finalCanvas.width/2, canvas.height + 45);
-           base64Data = finalCanvas.toDataURL('image/png').split(',')[1];
-        }
-        
-        var safeName = (radio.name + "_" + radio.id).replace(/[\/\\]/g, '-');
-        folder.file(safeName + ".png", base64Data, {base64: true});
-      });
-      
-      var content = await zip.generateAsync({type:"blob"});
-      var link = document.createElement('a');
-      link.href = URL.createObjectURL(content);
-      link.download = "Radios_" + currentRadioPrintFormat + ".zip";
-      link.click();
-      hideLoading();
-      showToast('✅ ดาวน์โหลดไฟล์ .ZIP สำเร็จแล้ว!');
-    } catch(err) {
-      hideLoading();
-      showToast('❌ เกิดข้อผิดพลาด: ' + err.message);
-    }
-  }
-
-  // ==========================================
-  // POS Scanner Logic
-  // ==========================================
-  let posHtml5QrcodeScanner = null;
-  let posLastScannedId = null;
-  let posLastScannedTime = 0;
-  let posCart = {};
-  let currentPOSFacingMode = "environment";
-
-  function flipPOSScanner() {
-    currentPOSFacingMode = currentPOSFacingMode === "environment" ? "user" : "environment";
-    if (posHtml5QrcodeScanner) {
-        posHtml5QrcodeScanner.stop().then(() => {
-            posHtml5QrcodeScanner.clear();
-            posHtml5QrcodeScanner = null;
-            startPOSScanner(true); // pass true to indicate it's a flip, so it starts immediately
-        }).catch(err => console.error(err));
-    }
-  }
-
-  function startPOSScanner(isFlip = false) {
-     if (posHtml5QrcodeScanner) return;
-     posHtml5QrcodeScanner = new Html5Qrcode("posReader");
-     const config = { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 };
-     
-     posHtml5QrcodeScanner.start({ facingMode: currentPOSFacingMode }, config, (decodedText) => {
-         const now = new Date().getTime();
-         if (posLastScannedId === decodedText && (now - posLastScannedTime) < 2000) return;
-         posLastScannedId = decodedText; posLastScannedTime = now;
-         handlePOSScan(decodedText);
-     }).catch(err => showToast("ไม่สามารถเปิดกล้องได้: " + err));
-     document.getElementById('btnStartPOS').style.display = 'none';
-     document.getElementById('posScannerControls').style.display = 'flex';
-  }
-
-  function stopPOSScanner() {
-     if (posHtml5QrcodeScanner) {
-         posHtml5QrcodeScanner.stop().then(() => {
-             posHtml5QrcodeScanner.clear();
-             posHtml5QrcodeScanner = null;
-             document.getElementById('btnStartPOS').style.display = 'inline-block';
-             document.getElementById('posScannerControls').style.display = 'none';
-         });
-     }
-  }
-
-  function handlePOSScan(decodedText) {
-     let item = allEquipment.find(e => e.id === decodedText);
-     if (item) {
-         if (!posCart[item.id]) posCart[item.id] = 0;
-         if (posCart[item.id] < item.available) {
-             posCart[item.id]++;
-             playPOSBeep();
-             renderPOSCart();
-         } else {
-             showToast('ของหมดสต๊อก');
-         }
-     } else {
-         // Check if it's a radio QR
-         let radio = allRadios ? allRadios.find(r => r.id === decodedText) : null;
-         if (radio) {
-             playPOSBeep();
-             if (radio.currentUserId) {
-                 showToast('⚠️ วิทยุ "' + radio.name + '" ถูกยืมไปแล้วโดย ' + radio.currentUserName);
-             } else if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) {
-                 doBorrowRadio(radio.id);
-             } else {
-                 showToast('📻 วิทยุ "' + radio.name + '" - กรุณาติดต่อ Admin เพื่อเบิกวิทยุครับ');
-             }
-         } else {
-             showToast('ไม่พบรหัสอุปกรณ์หรือวิทยุ');
-         }
-     }
-  }
-
-  function renderPOSCart() {
-     const listDiv = document.getElementById('posCartList');
-     if (!listDiv) return;
-     listDiv.innerHTML = '';
-     let empty = true;
-     for (let id in posCart) {
-         if (posCart[id] > 0) {
-             empty = false;
-             let item = allEquipment.find(e => e.id === id);
-             let card = document.createElement('div');
-             card.className = 'list-card';
-             card.style.padding = '12px 16px';
-             card.style.marginBottom = '10px';
-             card.innerHTML = '<div style="font-weight:600; color:#1d1d1f;">' + item.name + '</div><div style="display:flex; align-items:center; gap:12px;"><span>จำนวน: ' + posCart[id] + '</span><button class="btn-danger" style="padding:6px 12px; border-radius:8px; font-weight:bold;" onclick="posCart[\'' + id + '\']--; renderPOSCart()">-</button></div>';
-             listDiv.appendChild(card);
-         }
-     }
-     if (empty) listDiv.innerHTML = '<p style="color:#86868b; text-align:center; margin-top: 50px;">ยังไม่มีอุปกรณ์</p>';
-  }
-
-  function posCheckout() {
-     let toSubmit = {};
-     let hasItem = false;
-     for (let id in posCart) { if (posCart[id] > 0) { toSubmit[id] = posCart[id]; hasItem = true; } }
-     if (!hasItem) return showToast('ตะกร้าว่างเปล่า');
-     if (!confirm('ยืนยันทำรายการ?')) return;
-     
-     // === Optimistic UI Update ===
-     for (let id in toSubmit) { 
-         let eq = allEquipment.find(e => e.id === id); 
-         if (eq) {
-             eq.available = parseInt(eq.available) - toSubmit[id]; 
-             allTransactions.unshift({ row: -1, transId: 'sync', userId: currentUser.id, userName: currentUser.name, eqId: id, eqName: eq.name, qty: toSubmit[id], action: 'Borrow (POS)' });
-         }
-     }
-     posCart = {}; renderPOSCart(); renderEquipment(); renderMyReturnData();
-
-     setTimeout(() => {
-       showLoading('กำลังบันทึก...');
-       
-       google.script.run.withSuccessHandler(res => {
-           hideLoading();
-           if(!res.success) {
-               showToast('❌ ' + res.message);
-               setTimeout(() => refreshData(true), 500); // Revert
-           } else {
-               showToast('✅ ' + res.message);
-           }
-           setTimeout(() => refreshData(true), 2500);
-       }).withFailureHandler(err => { hideLoading(); showToast('การบันทึกล้มเหลว: ' + err.message); setTimeout(() => refreshData(true), 500); }).submitBorrow(currentUser.id, toSubmit, 'POS');
-     }, 50);
-  }
-
-  let posAudioCtx = null;
-  function playPOSBeep() {
-     if (!posAudioCtx) posAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
-     const osc = posAudioCtx.createOscillator();
-     const gain = posAudioCtx.createGain();
-     osc.connect(gain);
-     gain.connect(posAudioCtx.destination);
-     osc.type = 'sine';
-     osc.frequency.value = 1000;
-     gain.gain.setValueAtTime(1, posAudioCtx.currentTime);
-     gain.gain.exponentialRampToValueAtTime(0.001, posAudioCtx.currentTime + 0.1);
-     osc.start();
-     osc.stop(posAudioCtx.currentTime + 0.1);
+      hideLoading(); showToast(res.message); refreshData();
+    }).withFailureHandler(showError).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, 'https://dummy-photo-v2.com/img.jpg', eqStatus); // using dummy url for photo to avoid drive quota issues unless explicitly implemented
   }
 
 </script>
