@@ -1951,13 +1951,13 @@
   }
 
   function proceedSaveEq(imageUrl) { const data = { isNew: document.getElementById('editEqIsNew').value === 'true', id: document.getElementById('editEqId').value, name: document.getElementById('editEqName').value, image: imageUrl, total: document.getElementById('editEqTotal').value, location: document.getElementById('editEqLoc').value }; if(!data.name || !data.total) return showToast('กรุณาระบุชื่อและจำนวนอุปกรณ์'); showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(true); }).withFailureHandler(showError).saveEquipmentData(data); }
-  function deleteEq(id, name) { if(!confirm('ลบอุปกรณ์: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('🗑️ ' + res.message); refreshData(true); }).deleteEquipmentData(id); }
+  function deleteEq(id, name) { if(!confirm('ลบอุปกรณ์: ' + name + ' ?')) return; allEquipment = allEquipment.filter(eq => String(eq.id) !== String(id)); renderAdminEqData(); showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('🗑️ ' + res.message); refreshData(true); }).deleteEquipmentData(id); }
 
   function renderAdminLocData() { const listDiv = document.getElementById('adminLocList'); if(!listDiv) return; listDiv.innerHTML = ''; allLocations.forEach(loc => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>' + loc.name + '</strong></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editLoc(\'' + loc.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteLoc(\'' + loc.id + '\', \'' + loc.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
   function openLocModal() { document.getElementById('locModalTitle').innerText = 'เพิ่มจุดวาง'; document.getElementById('editLocIsNew').value = 'true'; document.getElementById('editLocId').value = ''; document.getElementById('editLocId').disabled = false; document.getElementById('editLocName').value = ''; document.getElementById('locModal').style.display = 'flex'; }
   function editLoc(id) { let loc = allLocations.find(l => l.id === id); if(!loc) return; document.getElementById('locModalTitle').innerText = 'แก้ไขจุดวาง'; document.getElementById('editLocIsNew').value = 'false'; document.getElementById('editLocId').value = loc.id; document.getElementById('editLocId').disabled = true; document.getElementById('editLocName').value = loc.name; document.getElementById('locModal').style.display = 'flex'; }
   function saveLoc() { const data = { isNew: document.getElementById('editLocIsNew').value === 'true', id: document.getElementById('editLocId').value, name: document.getElementById('editLocName').value }; if(!data.name) return showToast('กรุณาระบุชื่อจุดวาง'); showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); document.getElementById('locModal').style.display='none'; refreshData(true); }).withFailureHandler(showError).saveLocationData(data); }
-  function deleteLoc(id, name) { if(!confirm('ลบจุดวาง: ' + name + ' ?')) return; showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('🗑️ ' + res.message); refreshData(true); }).deleteLocationData(id); }
+  function deleteLoc(id, name) { if(!confirm('ลบจุดวาง: ' + name + ' ?')) return; allLocations = allLocations.filter(loc => String(loc.id) !== String(id)); renderAdminLocData(); showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('🗑️ ' + res.message); refreshData(true); }).deleteLocationData(id); }
 
   function populateLocationSelect() { const s = document.getElementById('adminLocSelect'); let o = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(l => o += '<option value="' + l.id + '">' + l.name + '</option>'); if(s) s.innerHTML = o; }
   function populateEqSelect() { const s = document.getElementById('adminEqSelect'); let o = '<option value="">-- เลือกอุปกรณ์ --</option>'; allEquipment.forEach(e => o += '<option value="' + e.id + '">' + e.name + '</option>'); if(s) s.innerHTML = o; }
@@ -2273,6 +2273,8 @@
 
   function doDeleteRadio(id, name) {
     if (!confirm('ลบวิทยุ: ' + name + ' ?')) return;
+    allRadios = allRadios.filter(r => String(r.id) !== String(id));
+    renderRadioTab();
     showLoading('กำลังลบ...');
     google.script.run.withSuccessHandler(function(res) {
       hideLoading(); showToast(res.success ? '🗑️ ' + res.message : '❌ ' + res.message);
