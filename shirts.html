@@ -328,7 +328,6 @@
   </div>
   <div class="header-controls">
     <button class="btn" style="background:#2ea043;color:white;margin-right:8px" onclick="openModal()">➕ ลงบันทึกเบิกเสื้อ</button>
-    <a href="index.html" class="btn btn-outline" style="margin-right:8px">⬅️ กลับหน้าระบบอุปกรณ์</a>
     <span class="ctrl-label">📅 Backup:</span>
     <select id="backupSelect" onchange="loadSelectedBackup()">
       <option value="">— กำลังโหลด... —</option>
@@ -483,8 +482,10 @@
   //     ขั้นตอน deploy: Extensions → Apps Script → Deploy → New Deployment
   //     Type: Web App | Execute as: Me | Access: Anyone
   // ========================================================
-  const API_URL = 'YOUR_WEB_APP_URL_HERE';
-
+  // ตั้งค่า API
+  // ========================================================
+  const API_URL = 'https://script.google.com/macros/s/AKfycbzcpsuXWSH2w2ZBWtTpME0Nozb92aWNpRnr4w3JyqtBdsJBoFIAGA8LDVri96E10AEL/exec';
+  
   // ========================================================
   // STATE
   // ========================================================
