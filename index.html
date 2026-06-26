@@ -237,8 +237,71 @@
         </div>
       </div>
 
-      <div id="tabShirts" class="tab-content" style="display:none; height:80vh; padding:0;">
-        <iframe src="shirts.html" style="width:100%; height:100%; border:none; border-radius:12px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); background:#0d1117;"></iframe>
+      <div id="tabShirts" class="tab-content" style="display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:10px;">
+          <h3 style="margin:0;">🎽 ระบบเสื้อ KidDee</h3>
+          <div style="display:flex; gap:10px;">
+            <button class="btn-success" style="width:auto; border-radius:20px; padding:8px 16px;" onclick="openShirtBorrowModal()">➕ เบิกเสื้อ</button>
+            <button class="btn-warning" id="btnAdminShirtStock" style="display:none; width:auto; border-radius:20px; padding:8px 16px;" onclick="openShirtAdminModal()">⚙️ จัดการสต็อกเริ่มต้น</button>
+          </div>
+        </div>
+        
+        <div class="nav-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
+          <div class="glass-panel" style="padding:15px; text-align:center;">
+            <div style="font-size:24px; margin-bottom:5px;">📋</div>
+            <div style="font-size:22px; font-weight:700;" id="shirtStatTotal">—</div>
+            <div style="font-size:12px; color:#666;">รายการทั้งหมด</div>
+          </div>
+          <div class="glass-panel" style="padding:15px; text-align:center;">
+            <div style="font-size:24px; margin-bottom:5px;">👕</div>
+            <div style="font-size:22px; font-weight:700;" id="shirtStatTshirt">—</div>
+            <div style="font-size:12px; color:#666;">เสื้อยืด (ชิ้น)</div>
+          </div>
+          <div class="glass-panel" style="padding:15px; text-align:center;">
+            <div style="font-size:24px; margin-bottom:5px;">🧥</div>
+            <div style="font-size:22px; font-weight:700;" id="shirtStatJacket">—</div>
+            <div style="font-size:12px; color:#666;">Jacket (ชิ้น)</div>
+          </div>
+          <div class="glass-panel" style="padding:15px; text-align:center;">
+            <div style="font-size:24px; margin-bottom:5px;">📅</div>
+            <div style="font-size:16px; font-weight:700; margin-top:5px; margin-bottom:5px;" id="shirtStatLastDate">—</div>
+            <div style="font-size:12px; color:#666;">Backup ล่าสุด</div>
+          </div>
+        </div>
+
+        <h4 style="margin-bottom:10px;">สรุปแยกตามไซส์</h4>
+        <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:20px;" id="shirtSizeRow">
+        </div>
+
+        <div class="controls">
+          <input type="text" placeholder="🔍 ค้นหาชื่อ / กลุ่ม..." id="shirtSearchInput" onkeyup="renderShirtTable()">
+          <div class="filters">
+            <select id="shirtSizeFilter" onchange="renderShirtTable()" style="margin:0; width:auto; border-radius:20px; padding:8px 16px;">
+              <option value="">ไซส์ทั้งหมด</option>
+              <option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="2XL">2XL</option><option value="3XL">3XL</option><option value="4XL">4XL</option><option value="5XL">5XL</option><option value="6XL">6XL</option><option value="7XL">7XL</option><option value="8XL">8XL</option><option value="9XL">9XL</option><option value="10XL">10XL</option>
+            </select>
+            <select id="shirtTypeFilter" onchange="renderShirtTable()" style="margin:0; width:auto; border-radius:20px; padding:8px 16px;">
+              <option value="">ประเภททั้งหมด</option>
+              <option value="เสื้อยืด">เสื้อยืด</option>
+              <option value="Jacket">Jacket</option>
+              <option value="เสื้อยืด + Jacket">เสื้อยืด + Jacket</option>
+            </select>
+            <span style="font-size:13px; color:#666; margin-left:auto;" id="shirtRowCount">0 รายการ</span>
+          </div>
+        </div>
+
+        <div class="glass-panel" style="padding:0; overflow:hidden;">
+          <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:14px; text-align:left;">
+              <thead style="background:rgba(0,0,0,0.05); border-bottom:1px solid rgba(0,0,0,0.1);">
+                <tr id="shirtTableHeader"></tr>
+              </thead>
+              <tbody id="shirtTableBody">
+                <tr><td colspan="10" style="text-align:center; padding:30px; color:#888;">กำลังโหลด...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
       
       <div id="tabRadio" class="tab-content" style="display:none;">
@@ -347,6 +410,116 @@
     <div id="cartFloat" onclick="checkout()">🛒 ตะกร้า <span id="cartCount">(0)</span> ➔ ยืนยันเบิก</div>
 
     <!-- Modals -->
+    <!-- Shirt Borrow Modal -->
+    <div id="shirtBorrowModal" class="modal-bg">
+      <div class="modal-content">
+        <h3 style="margin-top:0;">➕ เบิกเสื้อ</h3>
+        <label>ชื่อผู้เบิก <span style="color:red">*</span></label>
+        <input type="text" id="shirtBorrowName" placeholder="เช่น นายสมชาย ใจดี">
+        
+        <label>กลุ่ม / หน่วยงาน <span style="color:red">*</span></label>
+        <select id="shirtBorrowGroup">
+          <option value="">-- เลือก --</option>
+          <option value="คกก.">คกก.</option>
+          <option value="ลูกค้า/GLO">ลูกค้า/GLO</option>
+          <option value="TOP NEWS">TOP NEWS</option>
+          <option value="ยังมีเรา">ยังมีเรา</option>
+          <option value="ทีมงานเพิ่มเติม">ทีมงานเพิ่มเติม</option>
+        </select>
+        
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <label>ไซส์เสื้อ <span style="color:red">*</span></label>
+            <select id="shirtBorrowSize">
+              <option value="">-- เลือก --</option>
+              <option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="2XL">2XL</option><option value="3XL">3XL</option><option value="4XL">4XL</option><option value="5XL">5XL</option><option value="6XL">6XL</option><option value="7XL">7XL</option><option value="8XL">8XL</option><option value="9XL">9XL</option><option value="10XL">10XL</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label>ประเภท <span style="color:red">*</span></label>
+            <select id="shirtBorrowType">
+              <option value="">-- เลือก --</option>
+              <option value="เสื้อยืด">เสื้อยืด</option>
+              <option value="Jacket">Jacket</option>
+              <option value="เสื้อยืด + Jacket">เสื้อยืด + Jacket</option>
+            </select>
+          </div>
+        </div>
+        
+        <label>จำนวน <span style="color:red">*</span></label>
+        <input type="number" id="shirtBorrowQty" value="1" min="1">
+        
+        <h3 style="margin-top:10px; margin-bottom: 5px;">📸 ถ่ายรูปหลักฐานการเบิก <span style="color:red">*</span></h3>
+        <div id="shirtCameraSection">
+          <div style="background: linear-gradient(135deg, #f0f8ff 0%, #f5f5f7 100%); border-radius: 16px; padding: 20px; text-align: center; border: 1px dashed #b0d4f1; margin-bottom: 15px;">
+            <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
+            <p style="margin: 0 0 12px 0; color: #86868b; font-size: 14px;">ถ่ายรูปผู้เบิกเป็นหลักฐาน</p>
+            <div style="display:flex; gap:10px;">
+              <button class="btn-primary" style="flex:1; margin-top:0; padding:12px; border-radius:25px; font-size:14px;" onclick="startShirtCamera()">📷 เปิดกล้อง</button>
+              <label class="btn-success" style="flex:1; margin-top:0; padding:12px; border-radius:25px; text-align:center; cursor:pointer; font-size:14px;">
+                🖼️ จากเครื่อง
+                <input type="file" accept="image/*" style="display:none;" onchange="handleShirtPhoto(event)">
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div id="shirtCameraContainer" style="display:none; text-align:center; margin-bottom:15px; border-radius:16px; overflow:hidden; border:1px solid #e5e5ea;">
+          <video id="shirtVideo" autoplay playsinline style="width:100%; max-height:280px; object-fit:cover; background:#000; display:block;"></video>
+          <div style="padding:12px; background: linear-gradient(135deg, #f5f5f7 0%, #e5e5ea 100%); display:flex; gap:10px;">
+            <button class="btn-success" style="flex:2; border-radius:25px; padding:14px; font-size:16px;" onclick="captureShirtPhoto()">📸 ถ่ายรูป</button>
+            <button class="btn-danger" style="flex:1; border-radius:25px; padding:14px;" onclick="stopShirtCamera()">ปิดกล้อง</button>
+          </div>
+        </div>
+        <canvas id="shirtCanvas" style="display:none;"></canvas>
+
+        <div id="shirtRetakeSection" style="display:none; text-align:center; margin-bottom:15px;">
+          <div style="position:relative; display:inline-block; width:100%;">
+            <img id="shirtImagePreviewUI" style="width:100%; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <div style="position:absolute; top:8px; right:8px; background:rgba(52,199,89,0.9); color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">✅ ถ่ายแล้ว</div>
+          </div>
+          <button class="btn-outline" style="margin-top:10px; padding:10px 20px; border-radius:25px; font-size:14px;" onclick="retakeShirtPhoto()">🔄 ถ่ายใหม่</button>
+        </div>
+        
+        <input type="hidden" id="shirtImageBase64">
+        
+        <label>หมายเหตุ</label>
+        <textarea id="shirtBorrowNote" style="width:100%; padding:14px; border:1px solid rgba(0,0,0,0.08); border-radius:14px; font-family:inherit; margin-bottom:15px; resize:vertical; min-height:60px;" placeholder="รายละเอียดเพิ่มเติม..."></textarea>
+        
+        <div style="display:flex; gap:10px;">
+          <button class="btn-success" style="flex:1;" id="btnSubmitShirt" onclick="submitShirtBorrow()">บันทึกข้อมูล</button>
+          <button class="btn-danger" style="flex:1;" onclick="if(shirtVideoStream) stopShirtCamera(); document.getElementById('shirtBorrowModal').style.display='none'">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Shirt Admin Stock Modal -->
+    <div id="shirtAdminModal" class="modal-bg">
+      <div class="modal-content" style="max-width: 600px;">
+        <h3 style="margin-top:0;">⚙️ จัดการสต็อกเริ่มต้น (เสื้อยืด & Jacket)</h3>
+        <p style="color:#666; font-size:14px;">กรอกจำนวนสต็อกเริ่มต้นของทุกไซส์ ข้อมูลนี้จะบันทึกลงในชีท "สต็อกเสื้อ"</p>
+        
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; text-align:center; margin-bottom:15px;">
+            <thead>
+              <tr style="background:#f5f5f7;">
+                <th style="padding:10px; border:1px solid #ddd;">ไซส์</th>
+                <th style="padding:10px; border:1px solid #ddd;">เสื้อยืด</th>
+                <th style="padding:10px; border:1px solid #ddd;">Jacket</th>
+              </tr>
+            </thead>
+            <tbody id="shirtAdminStockBody">
+              <tr><td colspan="3" style="padding:20px;">กำลังโหลดข้อมูล...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        
+        <div style="display:flex; gap:10px;">
+          <button class="btn-success" style="flex:1;" onclick="saveShirtInitialStock()">บันทึกสต็อกเริ่มต้น</button>
+          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('shirtAdminModal').style.display='none'">ปิด</button>
+        </div>
+      </div>
+    </div>
     <div id="returnLocModal" class="modal-bg">
       <div class="modal-content">
         <h3 style="margin-top:0;">📍 ระบุจุดวางที่นำไปคืน</h3>
@@ -606,6 +779,364 @@
 
     <div id="toastContainer"></div>
     <script>
+  // ==========================================
+  // Shirt System Functions
+  // ==========================================
+  const SHIRT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcpsuXWSH2w2ZBWtTpME0Nozb92aWNpRnr4w3JyqtBdsJBoFIAGA8LDVri96E10AEL/exec"; // REPLACE THIS URL WITH SHIRT SYSTEM DEPLOYMENT
+  
+  let shirtHeaders = [];
+  let shirtData = [];
+  let shirtVideoStream = null;
+
+  async function apiShirtPost(paramsObj) {
+    const res = await fetch(SHIRT_SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(paramsObj)
+    });
+    return await res.json();
+  }
+
+  async function apiShirtGet(action) {
+    const res = await fetch(SHIRT_SCRIPT_URL + "?action=" + action, { redirect: 'follow' });
+    return await res.json();
+  }
+
+  async function loadShirtsData(isQuiet = false) {
+    if(!isQuiet) showLoading('กำลังโหลดข้อมูลระบบเสื้อ...');
+    try {
+      const data = await apiShirtGet('all');
+      if (data && data.success) {
+         shirtHeaders = data.headers || [];
+         shirtData = data.data || [];
+         renderShirtStats();
+         renderShirtTable();
+      } else {
+         if(!isQuiet) showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลเสื้อ: ' + (data.error || ''), 'error');
+      }
+    } catch(err) {
+      if(!isQuiet) showError(err);
+    }
+    if(!isQuiet) hideLoading();
+  }
+
+  function renderShirtStats() {
+    document.getElementById('shirtStatTotal').innerText = shirtData.length.toLocaleString();
+    let shirts = 0, jackets = 0;
+    
+    // Find index of 'ประเภท' and 'จำนวน (ชิ้น)' in headers
+    let typeIdx = shirtHeaders.findIndex(h => String(h).includes('ประเภท'));
+    let qtyIdx = shirtHeaders.findIndex(h => String(h).includes('จำนวน'));
+    let sizeIdx = shirtHeaders.findIndex(h => String(h).includes('ไซส์'));
+    
+    let sizesCount = {};
+
+    shirtData.forEach(r => {
+      let qty = 1;
+      if (qtyIdx !== -1) qty = parseInt(r[qtyIdx]) || 1;
+      
+      if (typeIdx !== -1) {
+        let type = String(r[typeIdx]);
+        if (type.includes('เสื้อยืด')) shirts += qty;
+        if (type.includes('Jacket')) jackets += qty;
+      }
+      
+      if (sizeIdx !== -1) {
+        let size = String(r[sizeIdx]).trim();
+        if (size) sizesCount[size] = (sizesCount[size] || 0) + qty;
+      }
+    });
+
+    document.getElementById('shirtStatTshirt').innerText = shirts.toLocaleString();
+    document.getElementById('shirtStatJacket').innerText = jackets.toLocaleString();
+    
+    // Last backup date
+    if (shirtData.length > 0 && shirtData[0][0]) {
+       document.getElementById('shirtStatLastDate').innerText = String(shirtData[0][0]).split(' ')[0];
+    }
+
+    // Render sizes
+    const sizeOrder = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL','6XL','7XL','8XL','9XL','10XL'];
+    let sizeHtml = '';
+    sizeOrder.forEach(sz => {
+      if (sizesCount[sz]) {
+        sizeHtml += `<div class="glass-panel" style="padding:10px 15px; text-align:center; flex:1; min-width:60px;">
+          <div style="font-size:16px; font-weight:700; color:#007aff;">${sz}</div>
+          <div style="font-size:12px; color:#666;">${sizesCount[sz].toLocaleString()} ชิ้น</div>
+        </div>`;
+      }
+    });
+    if (!sizeHtml) sizeHtml = '<span style="color:#888; font-size:13px;">ยังไม่มีข้อมูลแยกตามไซส์</span>';
+    document.getElementById('shirtSizeRow').innerHTML = sizeHtml;
+  }
+
+  function renderShirtTable() {
+    const search = document.getElementById('shirtSearchInput').value.toLowerCase().trim();
+    const sizeFilter = document.getElementById('shirtSizeFilter').value;
+    const typeFilter = document.getElementById('shirtTypeFilter').value;
+    
+    let nameIdx = shirtHeaders.findIndex(h => String(h).includes('ชื่อ'));
+    let groupIdx = shirtHeaders.findIndex(h => String(h).includes('กลุ่ม'));
+    let sizeIdx = shirtHeaders.findIndex(h => String(h).includes('ไซส์'));
+    let typeIdx = shirtHeaders.findIndex(h => String(h).includes('ประเภท'));
+
+    let filtered = shirtData.filter(r => {
+      if (search) {
+        let n = nameIdx !== -1 ? String(r[nameIdx]).toLowerCase() : '';
+        let g = groupIdx !== -1 ? String(r[groupIdx]).toLowerCase() : '';
+        if (!n.includes(search) && !g.includes(search)) return false;
+      }
+      if (sizeFilter && sizeIdx !== -1 && String(r[sizeIdx]).trim() !== sizeFilter) return false;
+      if (typeFilter && typeIdx !== -1 && String(r[typeIdx]).trim() !== typeFilter) return false;
+      return true;
+    });
+
+    document.getElementById('shirtRowCount').innerText = `${filtered.length.toLocaleString()} รายการ`;
+
+    // Render headers
+    let thHtml = '';
+    shirtHeaders.forEach(h => { thHtml += `<th style="padding:12px; white-space:nowrap;">${h}</th>`; });
+    document.getElementById('shirtTableHeader').innerHTML = thHtml;
+
+    let tbody = document.getElementById('shirtTableBody');
+    if (filtered.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="${shirtHeaders.length}" style="text-align:center; padding:30px; color:#888;">ไม่พบรายการที่ตรงกับเงื่อนไข</td></tr>`;
+      return;
+    }
+
+    let trHtml = '';
+    filtered.forEach(row => {
+      trHtml += '<tr style="border-bottom:1px solid rgba(0,0,0,0.05); transition:background 0.2s;" onmouseover="this.style.background=\'rgba(0,0,0,0.02)\'" onmouseout="this.style.background=\'transparent\'">';
+      row.forEach((cell, i) => {
+        let val = String(cell).trim();
+        if (!val) val = '<span style="color:#aaa;">—</span>';
+        else if (shirtHeaders[i] && String(shirtHeaders[i]).includes('ไซส์')) {
+           val = `<span style="background:rgba(0,122,255,0.1); color:#007aff; padding:3px 8px; border-radius:6px; font-weight:600; font-size:12px;">${val}</span>`;
+        }
+        else if (shirtHeaders[i] && String(shirtHeaders[i]).includes('ประเภท')) {
+           let cls = val.includes('+') ? 'background:rgba(255,149,0,0.1); color:#ff9500;' : 
+                     (val.includes('Jacket') ? 'background:rgba(88,86,214,0.1); color:#5856d6;' : 'background:rgba(52,199,89,0.1); color:#34c759;');
+           val = `<span style="padding:3px 8px; border-radius:6px; font-weight:600; font-size:12px; ${cls}">${val}</span>`;
+        }
+        else if (shirtHeaders[i] && String(shirtHeaders[i]).includes('หลักฐาน') && val.startsWith('http')) {
+           val = `<a href="${val}" target="_blank" style="color:#007aff; text-decoration:none; display:inline-flex; align-items:center; gap:4px;">🔗 ดูหลักฐาน</a>`;
+        }
+        trHtml += `<td style="padding:12px; max-width:280px; overflow:hidden; text-overflow:ellipsis;">${val}</td>`;
+      });
+      trHtml += '</tr>';
+    });
+    tbody.innerHTML = trHtml;
+  }
+
+  // Camera logic for Shirt Borrow
+  function startShirtCamera() {
+    const video = document.getElementById('shirtVideo');
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(stream => {
+        shirtVideoStream = stream;
+        video.srcObject = stream;
+        video.play();
+        document.getElementById('shirtCameraSection').style.display = 'none';
+        document.getElementById('shirtCameraContainer').style.display = 'block';
+      })
+      .catch(err => {
+        showToast("ไม่สามารถเปิดกล้องได้: " + err.message);
+      });
+    } else {
+      showToast("เบราว์เซอร์ไม่รองรับการใช้งานกล้อง");
+    }
+  }
+
+  function stopShirtCamera() {
+    if (shirtVideoStream) {
+      shirtVideoStream.getTracks().forEach(track => track.stop());
+      shirtVideoStream = null;
+    }
+    document.getElementById('shirtCameraContainer').style.display = 'none';
+    if (!document.getElementById('shirtImageBase64').value) {
+      document.getElementById('shirtCameraSection').style.display = 'block';
+    }
+  }
+
+  function captureShirtPhoto() {
+    const video = document.getElementById('shirtVideo');
+    const canvas = document.getElementById('shirtCanvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    // Add Timestamp overlay
+    const nowStr = new Date().toLocaleString('th-TH');
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.roundRect(10, canvas.height - 40, canvas.width - 20, 30, 8);
+    ctx.fill();
+    ctx.fillStyle = "white";
+    ctx.font = "bold 16px sans-serif";
+    ctx.fillText("🕒 " + nowStr, 20, canvas.height - 20);
+    
+    finalizeShirtPhoto(canvas);
+  }
+
+  function handleShirtPhoto(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.getElementById('shirtCanvas');
+        let maxWidth = 1200;
+        let scale = Math.min(1, maxWidth / img.width);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        finalizeShirtPhoto(canvas);
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  function finalizeShirtPhoto(canvas) {
+    const base64 = canvas.toDataURL('image/jpeg', 0.8);
+    document.getElementById('shirtImageBase64').value = base64;
+    document.getElementById('shirtImagePreviewUI').src = base64;
+    
+    stopShirtCamera();
+    document.getElementById('shirtCameraSection').style.display = 'none';
+    document.getElementById('shirtRetakeSection').style.display = 'block';
+  }
+
+  function retakeShirtPhoto() {
+    document.getElementById('shirtImageBase64').value = '';
+    document.getElementById('shirtRetakeSection').style.display = 'none';
+    startShirtCamera();
+  }
+
+  function openShirtBorrowModal() {
+    document.getElementById('shirtBorrowModal').style.display = 'flex';
+    document.getElementById('shirtBorrowName').value = currentUser ? currentUser.name : '';
+    document.getElementById('shirtBorrowGroup').value = '';
+    document.getElementById('shirtBorrowSize').value = '';
+    document.getElementById('shirtBorrowType').value = '';
+    document.getElementById('shirtBorrowQty').value = '1';
+    document.getElementById('shirtBorrowNote').value = '';
+    
+    document.getElementById('shirtImageBase64').value = '';
+    document.getElementById('shirtRetakeSection').style.display = 'none';
+    document.getElementById('shirtCameraSection').style.display = 'block';
+  }
+
+  async function submitShirtBorrow() {
+    const btn = document.getElementById('btnSubmitShirt');
+    const name = document.getElementById('shirtBorrowName').value.trim();
+    const group = document.getElementById('shirtBorrowGroup').value;
+    const size = document.getElementById('shirtBorrowSize').value;
+    const type = document.getElementById('shirtBorrowType').value;
+    const qty = parseInt(document.getElementById('shirtBorrowQty').value);
+    const note = document.getElementById('shirtBorrowNote').value.trim();
+    const base64Data = document.getElementById('shirtImageBase64').value;
+    
+    if (!name || !group || !size || !type) return showToast('กรุณากรอกข้อมูลและเลือกให้ครบถ้วน');
+    if (!qty || qty < 1) return showToast('กรุณาระบุจำนวนที่ถูกต้อง');
+    if (!base64Data) return showToast('กรุณาถ่ายรูปหรืออัพโหลดหลักฐานด้วยครับ');
+    
+    btn.disabled = true;
+    document.getElementById('shirtBorrowModal').style.display = 'none';
+    showLoading('กำลังอัพโหลดรูปและบันทึกข้อมูล...');
+    
+    try {
+      // 1. Upload image via Shirt API
+      const filename = "SHIRT_" + Date.now();
+      const uploadRes = await apiShirtPost({ action: 'uploadImageToDrive', base64Data: base64Data, filename: filename });
+      
+      if (!uploadRes.success) throw new Error(uploadRes.error || "Upload failed");
+      const evidenceUrl = uploadRes.url;
+      
+      // 2. Save record
+      const payload = {
+        action: 'add',
+        name: name,
+        group: group,
+        size: size,
+        type: type,
+        qty: qty,
+        evidence: evidenceUrl,
+        note: note,
+        recordedBy: currentUser ? currentUser.name : 'ระบบ'
+      };
+      
+      const saveRes = await apiShirtPost(payload);
+      if (!saveRes.success) throw new Error(saveRes.error || "Save failed");
+      
+      showToast('✅ บันทึกข้อมูลการเบิกเสื้อเรียบร้อย');
+      loadShirtsData(); // Reload data silently
+      
+    } catch(err) {
+      showError(err);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  async function openShirtAdminModal() {
+    document.getElementById('shirtAdminModal').style.display = 'flex';
+    document.getElementById('shirtAdminStockBody').innerHTML = '<tr><td colspan="3" style="padding:20px;">กำลังโหลดข้อมูล...</td></tr>';
+    
+    try {
+      const res = await apiShirtPost({ action: 'getInitialStock' });
+      if (res.success && res.stockData) {
+        let html = '';
+        res.stockData.forEach(item => {
+           html += `<tr>
+             <td style="padding:10px; border:1px solid #ddd; font-weight:bold;">${item.size}</td>
+             <td style="padding:10px; border:1px solid #ddd;"><input type="number" id="as_tshirt_${item.size}" value="${item.tshirt}" style="width:80px; text-align:center; padding:5px; border:1px solid #ccc; border-radius:6px;"></td>
+             <td style="padding:10px; border:1px solid #ddd;"><input type="number" id="as_jacket_${item.size}" value="${item.jacket}" style="width:80px; text-align:center; padding:5px; border:1px solid #ccc; border-radius:6px;"></td>
+           </tr>`;
+        });
+        document.getElementById('shirtAdminStockBody').innerHTML = html;
+      } else {
+        document.getElementById('shirtAdminStockBody').innerHTML = '<tr><td colspan="3" style="padding:20px; color:red;">เกิดข้อผิดพลาดในการโหลด</td></tr>';
+      }
+    } catch(err) {
+      document.getElementById('shirtAdminStockBody').innerHTML = `<tr><td colspan="3" style="padding:20px; color:red;">${err.message}</td></tr>`;
+    }
+  }
+
+  async function saveShirtInitialStock() {
+    showLoading('กำลังบันทึกสต็อกเริ่มต้น...');
+    const sizes = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL','6XL','7XL','8XL','9XL','10XL'];
+    let stockData = [];
+    sizes.forEach(sz => {
+      let tsEl = document.getElementById('as_tshirt_'+sz);
+      let jkEl = document.getElementById('as_jacket_'+sz);
+      if(tsEl && jkEl) {
+        stockData.push({
+          size: sz,
+          tshirt: parseInt(tsEl.value) || 0,
+          jacket: parseInt(jkEl.value) || 0
+        });
+      }
+    });
+    
+    try {
+      const res = await apiShirtPost({ action: 'setInitialStock', stockData: stockData });
+      hideLoading();
+      if(res.success) {
+        showToast('✅ บันทึกสต็อกเริ่มต้นเรียบร้อย');
+        document.getElementById('shirtAdminModal').style.display = 'none';
+      } else {
+        showToast('เกิดข้อผิดพลาด: ' + (res.error || 'Unknown'), 'error');
+      }
+    } catch(err) {
+      showError(err);
+    }
+  }
+
+    <script>
 
   // ==========================================
   // GitHub Pages API Adapter
@@ -753,7 +1284,12 @@
     else if (currentUser) { switchTab('tabBorrow', null, true); }
   });
 
-  function refreshDataQuietly(isAuto = false) { refreshData(true, isAuto); }
+  function refreshDataQuietly(isAuto = false) { 
+    refreshData(true, isAuto); 
+    if (document.getElementById('tabShirts').style.display === 'block') {
+      loadShirtsData(true);
+    }
+  }
   function safeSetStorage(key, val) { try { localStorage.setItem(key, val); } catch(e){} }
   function safeRemoveStorage(key) { try { localStorage.removeItem(key); } catch(e){} }
   
@@ -768,6 +1304,7 @@
     document.getElementById('welcomeText').innerText = roleText + currentUser.name;
     document.getElementById('navAdmin').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'block' : 'none';
     document.getElementById('navRadio').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'block' : 'none';
+    document.getElementById('btnAdminShirtStock').style.display = (currentUser.role === 'Admin' || currentUser.role === 'Superadmin') ? 'inline-block' : 'none';
     document.getElementById('myProfileUsername').value = currentUser.username || '';
     document.getElementById('myProfilePassword').value = currentUser.password || ''; document.getElementById('myProfileName').value = currentUser.name || ''; document.getElementById('myProfileDept').value = currentUser.department || '-';
     // Restore saved tab from localStorage or URL hash instead of always defaulting to tabBorrow
@@ -776,7 +1313,7 @@
     if (savedTab === 'tabBorrow') { var hash = window.location.hash.replace('#',''); if(hash && document.getElementById(hash)) savedTab = hash; }
     if (savedTab === 'tabAdmin' && currentUser && currentUser.role !== 'Admin' && currentUser.role !== 'Superadmin') savedTab = 'tabBorrow';
     // Pre-show the saved tab so finishRenderData() won't reset it
-    ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin'].forEach(function(id) { var el = document.getElementById(id); if(el) el.style.display = (id === savedTab) ? 'block' : 'none'; });
+    ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin','tabShirts'].forEach(function(id) { var el = document.getElementById(id); if(el) el.style.display = (id === savedTab) ? 'block' : 'none'; });
     document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.remove('active'); var oc = el.getAttribute('onclick') || ''; if(oc.indexOf(savedTab) !== -1) el.classList.add('active'); });
     var cf = document.getElementById('cartFloat'); if(cf) cf.style.display = (savedTab === 'tabBorrow') ? 'block' : 'none';
     refreshData();
@@ -846,7 +1383,7 @@
     document.getElementById('mainNav').style.display = 'none'; 
     
     // Hide ALL tabs properly
-    ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin'].forEach(id => {
+    ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin','tabShirts'].forEach(id => {
        const el = document.getElementById(id);
        if(el) el.style.display = 'none';
     });
@@ -865,7 +1402,7 @@
     if (tabName !== 'tabPOS' && typeof posHtml5QrcodeScanner !== 'undefined' && posHtml5QrcodeScanner) {
         stopPOSScanner();
     }
-    ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin'].forEach(id => {
+    ['tabBorrow','tabReturn','tabRadio','tabPOS','tabProfile','tabAdmin','tabShirts'].forEach(id => {
         const el = document.getElementById(id);
         if(el) el.style.display = 'none';
     });
@@ -887,6 +1424,8 @@
         var ast2 = 'return'; try { var sst2 = localStorage.getItem('activeAdminSubTab'); if(sst2) ast2 = sst2; } catch(e){} showAdminSubTab(ast2);
     } else if (tabName === 'tabPOS') {
         renderPOSCart();
+    } else if (tabName === 'tabShirts') {
+        loadShirtsData();
     }
     if (!isHistoryBack) {
       try {
