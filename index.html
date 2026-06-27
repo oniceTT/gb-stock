@@ -1993,7 +1993,7 @@
     }
   }
 
-  function processScannedQR(scannedId) { if (currentScanMode === 'borrow') { let item = allEquipment.find(e => e.id === scannedId); if(item) { updateCart(item.id, 1); showToast('✅ หยิบ "' + item.name + '" ลงตะกร้าแล้ว!'); } else { let radio = allRadios ? allRadios.find(r => r.id === scannedId) : null; if (radio) { closeScannerModal(); if (radio.currentUserId) { showToast('⚠️ วิทยุ "' + radio.name + '" ถูกยืมไปแล้วโดย ' + radio.currentUserName); } else if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { doBorrowRadio(radio.id); } else { showToast('📻 วิทยุ "' + radio.name + '" - กรุณาติดต่อ Admin เพื่อเบิกวิทยุครับ'); } } else { showToast('❌ ไม่พบอุปกรณ์หรือวิทยุรหัสนี้'); } } } else if (currentScanMode === 'return') { const myItems = allTransactions.filter(item => item.userId === currentUser.id && item.eqId === scannedId); if(myItems.length > 0) { prepareReturn(myItems[0].row, myItems[0].eqId, myItems[0].qty, myItems[0].eqName); } else showToast('❌ ไม่พบรายการที่คุณกำลังยืมของชิ้นนี้อยู่'); } else if (currentScanMode === 'admin_return') { const activeItems = allTransactions.filter(item => item.eqId === scannedId); if(activeItems.length > 0) { prepareReturn(activeItems[0].row, activeItems[0].eqId, activeItems[0].qty, activeItems[0].eqName); } else showToast('❌ ไม่พบรายการค้างคืนสำหรับอุปกรณ์ชิ้นนี้ในระบบครับ');   } else if (currentScanMode === 'radio_return_loc') {
+  function processScannedQR(scannedId) { if (currentScanMode === 'borrow') { let item = allEquipment.find(e => e.id === scannedId); if(item) { closeScannerModal(); updateCart(item.id, 1); showToast('✅ หยิบ "' + item.name + '" ลงตะกร้าแล้ว!'); } else { let radio = allRadios ? allRadios.find(r => r.id === scannedId) : null; if (radio) { closeScannerModal(); if (radio.currentUserId) { showToast('⚠️ วิทยุ "' + radio.name + '" ถูกยืมไปแล้วโดย ' + radio.currentUserName); } else if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) { doBorrowRadio(radio.id); } else if (currentUser) { if (confirm('ยืนยันเบิกวิทยุ: ' + radio.name + ' ?')) { showLoading('กำลังบันทึก...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) loadRadios(); }).withFailureHandler(showError).borrowRadio(radio.id, currentUser.id, currentUser.name); } } else { showToast('❌ กรุณาเข้าสู่ระบบก่อน'); } } else { showToast('❌ ไม่พบอุปกรณ์หรือวิทยุรหัสนี้'); } } } else if (currentScanMode === 'return') { const myItems = allTransactions.filter(item => item.userId === currentUser.id && item.eqId === scannedId); if(myItems.length > 0) { prepareReturn(myItems[0].row, myItems[0].eqId, myItems[0].qty, myItems[0].eqName); } else showToast('❌ ไม่พบรายการที่คุณกำลังยืมของชิ้นนี้อยู่'); } else if (currentScanMode === 'admin_return') { const activeItems = allTransactions.filter(item => item.eqId === scannedId); if(activeItems.length > 0) { prepareReturn(activeItems[0].row, activeItems[0].eqId, activeItems[0].qty, activeItems[0].eqName); } else showToast('❌ ไม่พบรายการค้างคืนสำหรับอุปกรณ์ชิ้นนี้ในระบบครับ');   } else if (currentScanMode === 'radio_return_loc') {
     let loc = allLocations.find(l => l.id === scannedId);
     if(loc) {
       pendingRadioReturnLocId = loc.id;
@@ -2004,7 +2004,7 @@
       showToast('📍 เลือกจุดคืนวิทยุ: ' + loc.name + ' เรียบร้อยแล้ว\nกรุณากดยืนยันการคืน');
     } else showToast('❌ ไม่พบรหัสจุดวางนี้ในระบบ');
   } else if (currentScanMode === 'loc') { let loc = allLocations.find(l => l.id === scannedId); if(loc) { document.getElementById('selectReturnLoc').value = loc.id; showToast('📍 เลือกจุดวาง: ' + loc.name + ' เรียบร้อยแล้ว'); } else showToast('❌ ไม่พบรหัสจุดวางนี้'); } }
-  function updateCart(eqId, change) { let item = allEquipment.find(e => e.id === eqId); if(!item) return; let newQty = (cart[eqId] || 0) + change; if(newQty > item.available) return showToast('อุปกรณ์ในสต๊อกไม่พอครับ'); if(newQty < 0) newQty = 0; cart[eqId] = newQty; renderEquipment(); updateCartFloat(); }
+  function updateCart(eqId, change) { let idx = allEquipment.findIndex(e => e.id === eqId); if(idx === -1) return; let item = allEquipment[idx]; let newQty = (cart[eqId] || 0) + change; if(newQty > item.available) return showToast('อุปกรณ์ในสต๊อกไม่พอครับ'); if(newQty < 0) newQty = 0; cart[eqId] = newQty; if (change > 0) { allEquipment.splice(idx, 1); allEquipment.unshift(item); } renderEquipment(); updateCartFloat(); }
   function updateCartFloat() { let total = 0; for(let k in cart) total += cart[k]; const floatBtn = document.getElementById('cartFloat'); document.getElementById('cartCount').innerText = "(" + total + ")"; floatBtn.style.display = (total > 0 && document.getElementById('tabBorrow').style.display === 'block') ? 'block' : 'none'; }
   
   function checkout() { 
@@ -2668,11 +2668,18 @@
   }
 
   function handlePOSScan(decodedText) {
-     let item = allEquipment.find(e => e.id === decodedText);
-     if (item) {
+     let idx = allEquipment.findIndex(e => e.id === decodedText);
+     if (idx !== -1) {
+         let item = allEquipment[idx];
          if (!posCart[item.id]) posCart[item.id] = 0;
          if (posCart[item.id] < item.available) {
-             posCart[item.id]++;
+             let currentQty = posCart[item.id] + 1;
+             delete posCart[item.id];
+             posCart[item.id] = currentQty;
+             
+             allEquipment.splice(idx, 1);
+             allEquipment.unshift(item);
+             
              playPOSBeep();
              renderPOSCart();
          } else {
@@ -2687,8 +2694,15 @@
                  showToast('⚠️ วิทยุ "' + radio.name + '" ถูกยืมไปแล้วโดย ' + radio.currentUserName);
              } else if (currentUser && (currentUser.role === 'Admin' || currentUser.role === 'Superadmin')) {
                  doBorrowRadio(radio.id);
-             } else {
-                 showToast('📻 วิทยุ "' + radio.name + '" - กรุณาติดต่อ Admin เพื่อเบิกวิทยุครับ');
+             } else if (currentUser) {
+                 if (confirm('ยืนยันเบิกวิทยุ: ' + radio.name + ' ?')) {
+                     showLoading('กำลังบันทึก...');
+                     google.script.run.withSuccessHandler(res => {
+                         hideLoading();
+                         showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
+                         if(res.success) loadRadios();
+                     }).withFailureHandler(showError).borrowRadio(radio.id, currentUser.id, currentUser.name);
+                 }
              }
          } else {
              showToast('ไม่พบรหัสอุปกรณ์หรือวิทยุ');
@@ -2701,7 +2715,9 @@
      if (!listDiv) return;
      listDiv.innerHTML = '';
      let empty = true;
-     for (let id in posCart) {
+     let keys = Object.keys(posCart).reverse();
+     for (let i = 0; i < keys.length; i++) {
+         let id = keys[i];
          if (posCart[id] > 0) {
              empty = false;
              let item = allEquipment.find(e => e.id === id);
