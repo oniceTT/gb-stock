@@ -276,6 +276,9 @@
         <div class="controls">
           <input type="text" placeholder="🔍 ค้นหาชื่อ / กลุ่ม..." id="shirtSearchInput" onkeyup="renderShirtTable()">
           <div class="filters">
+            <select id="shirtGroupFilter" onchange="renderShirtTable()" style="margin:0; width:auto; border-radius:20px; padding:8px 16px;">
+              <option value="">กลุ่มทั้งหมด</option>
+            </select>
             <select id="shirtSizeFilter" onchange="renderShirtTable()" style="margin:0; width:auto; border-radius:20px; padding:8px 16px;">
               <option value="">ไซส์ทั้งหมด</option>
               <option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="2XL">2XL</option><option value="3XL">3XL</option><option value="4XL">4XL</option><option value="5XL">5XL</option><option value="6XL">6XL</option><option value="7XL">7XL</option><option value="8XL">8XL</option><option value="9XL">9XL</option><option value="10XL">10XL</option>
@@ -842,39 +845,70 @@
   }
 
   function renderShirtStats() {
+    let borrowedTshirtsCount = {};
+    let borrowedJacketsCount = {};
     let borrowedShirts = 0, borrowedJackets = 0;
     
     let typeIdx = shirtHeaders.findIndex(h => String(h).includes('ประเภท'));
     let qtyIdx = shirtHeaders.findIndex(h => String(h).includes('จำนวน'));
     let sizeIdx = shirtHeaders.findIndex(h => String(h).includes('ไซส์'));
+    let groupIdxStats = shirtHeaders.findIndex(h => String(h).includes('กลุ่ม'));
     
     let borrowedSizesCount = {};
+    let groupSet = new Set();
 
     shirtData.forEach(r => {
       let qty = 1;
       if (qtyIdx !== -1) qty = parseInt(r[qtyIdx]) || 1;
       
+      let isTshirt = false, isJacket = false;
       if (typeIdx !== -1) {
         let type = String(r[typeIdx]);
-        if (type.includes('เสื้อยืด')) borrowedShirts += qty;
-        if (type.includes('Jacket')) borrowedJackets += qty;
+        if (type.includes('เสื้อยืด')) { borrowedShirts += qty; isTshirt = true; }
+        if (type.includes('Jacket')) { borrowedJackets += qty; isJacket = true; }
       }
       
       if (sizeIdx !== -1) {
         let size = String(r[sizeIdx]).trim();
-        if (size) borrowedSizesCount[size] = (borrowedSizesCount[size] || 0) + qty;
+        if (size) {
+            borrowedSizesCount[size] = (borrowedSizesCount[size] || 0) + qty;
+            if (isTshirt) borrowedTshirtsCount[size] = (borrowedTshirtsCount[size] || 0) + qty;
+            if (isJacket) borrowedJacketsCount[size] = (borrowedJacketsCount[size] || 0) + qty;
+        }
+      }
+
+      if (groupIdxStats !== -1) {
+        let g = String(r[groupIdxStats]).trim();
+        if (g && g !== '-') groupSet.add(g);
       }
     });
+
+    let groupSelect = document.getElementById('shirtGroupFilter');
+    if (groupSelect) {
+      let currentVal = groupSelect.value;
+      let optionsHtml = '<option value="">กลุ่ม/หน่วยงานทั้งหมด</option>';
+      Array.from(groupSet).sort().forEach(g => {
+        optionsHtml += `<option value="${g}">${g}</option>`;
+      });
+      groupSelect.innerHTML = optionsHtml;
+      groupSelect.value = currentVal;
+    }
 
     let totalInitialShirts = 0;
     let totalInitialJackets = 0;
     let initialSizesCount = {};
+    let initialTshirtCount = {};
+    let initialJacketCount = {};
 
     if (typeof shirtStockData !== 'undefined') {
        shirtStockData.forEach(item => {
-           totalInitialShirts += parseInt(item.tshirt) || 0;
-           totalInitialJackets += parseInt(item.jacket) || 0;
-           initialSizesCount[item.size] = (parseInt(item.tshirt) || 0) + (parseInt(item.jacket) || 0);
+           let t = parseInt(item.tshirt) || 0;
+           let j = parseInt(item.jacket) || 0;
+           totalInitialShirts += t;
+           totalInitialJackets += j;
+           initialSizesCount[item.size] = t + j;
+           initialTshirtCount[item.size] = t;
+           initialJacketCount[item.size] = j;
        });
     }
 
@@ -883,46 +917,71 @@
     let totalRemaining = remainingShirts + remainingJackets;
 
     let elTotal = document.getElementById('shirtStatTotal');
-    if (elTotal) {
-        elTotal.innerText = totalRemaining.toLocaleString();
-        elTotal.nextElementSibling.innerText = "คงเหลือทั้งหมด (ชิ้น)";
-    }
+    if (elTotal) { elTotal.innerText = totalRemaining.toLocaleString(); elTotal.nextElementSibling.innerText = "คงเหลือทั้งหมด (ชิ้น)"; }
     let elTshirt = document.getElementById('shirtStatTshirt');
-    if (elTshirt) {
-        elTshirt.innerText = remainingShirts.toLocaleString();
-        elTshirt.nextElementSibling.innerText = "เสื้อยืดคงเหลือ (ชิ้น)";
-    }
+    if (elTshirt) { elTshirt.innerText = remainingShirts.toLocaleString(); elTshirt.nextElementSibling.innerText = "เสื้อยืดคงเหลือ (ชิ้น)"; }
     let elJacket = document.getElementById('shirtStatJacket');
-    if (elJacket) {
-        elJacket.innerText = remainingJackets.toLocaleString();
-        elJacket.nextElementSibling.innerText = "Jacket คงเหลือ (ชิ้น)";
-    }
+    if (elJacket) { elJacket.innerText = remainingJackets.toLocaleString(); elJacket.nextElementSibling.innerText = "Jacket คงเหลือ (ชิ้น)"; }
     
-    // Last backup date
     if (shirtData.length > 0 && shirtData[0][0]) {
-       document.getElementById('shirtStatLastDate').innerText = String(shirtData[0][0]).split(' ')[0];
+       let lastDateEl = document.getElementById('shirtStatLastDate');
+       if (lastDateEl) lastDateEl.innerText = String(shirtData[0][0]).split(' ')[0];
     }
 
-    // Render sizes
     const sizeOrder = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL','6XL','7XL','8XL','9XL','10XL'];
     let sizeHtml = '';
-    sizeOrder.forEach(sz => {
-      let initial = initialSizesCount[sz] || 0;
-      if (initial > 0) {
-        let borrowed = borrowedSizesCount[sz] || 0;
-        let remaining = initial - borrowed;
-        sizeHtml += `<div class="glass-panel" style="padding:10px 15px; text-align:center; flex:1; min-width:60px;">
-          <div style="font-size:16px; font-weight:700; color:#007aff;">${sz}</div>
-          <div style="font-size:12px; color:#666;">${remaining.toLocaleString()} คงเหลือ</div>
-        </div>`;
-      }
-    });
+    
+    let renderCategory = (title, initMap, borrowMap, prefix) => {
+        let html = '';
+        let items = [];
+        sizeOrder.forEach(sz => {
+           let initial = initMap[sz] || 0;
+           if (initial > 0) {
+              let remaining = initial - (borrowMap[sz] || 0);
+              items.push({ sz, remaining });
+           }
+        });
+        if (items.length > 0) {
+            html += `<div style="width:100%; margin-bottom:5px; font-weight:600; color:#555; text-align:left;">${title}</div>`;
+            html += `<div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:15px; width:100%;" id="${prefix}Row">`;
+            items.forEach((item, index) => {
+                let hiddenStyle = index >= 6 ? 'display:none;' : '';
+                let extraClass = index >= 6 ? `${prefix}-extra` : '';
+                html += `<div class="glass-panel ${extraClass}" style="padding:10px 15px; text-align:center; flex:1; min-width:60px; ${hiddenStyle}">
+                  <div style="font-size:16px; font-weight:700; color:#007aff;">${item.sz}</div>
+                  <div style="font-size:12px; color:#666;">${item.remaining.toLocaleString()} คงเหลือ</div>
+                </div>`;
+            });
+            if (items.length > 6) {
+                html += `<div class="glass-panel" style="padding:10px 15px; text-align:center; cursor:pointer; flex:1; min-width:60px; background:rgba(0,122,255,0.05);" onclick="toggleSizes('${prefix}')" id="${prefix}Btn">
+                  <div style="font-size:14px; font-weight:700; color:#007aff; margin-top:4px;">ดูเพิ่มเติม ▼</div>
+                </div>`;
+            }
+            html += `</div>`;
+        }
+        return html;
+    };
+
+    sizeHtml += renderCategory('👕 เสื้อยืด (T-Shirt)', initialTshirtCount, borrowedTshirtsCount, 'tshirtStats');
+    sizeHtml += renderCategory('🧥 แจ็คเก็ต (Jacket)', initialJacketCount, borrowedJacketsCount, 'jacketStats');
+
     if (!sizeHtml) sizeHtml = '<span style="color:#888; font-size:13px;">ไม่มีข้อมูลสต็อกเริ่มต้น หรือสต็อกเป็นศูนย์</span>';
-    document.getElementById('shirtSizeRow').innerHTML = sizeHtml;
+    let sizeRowEl = document.getElementById('shirtSizeRow');
+    if (sizeRowEl) sizeRowEl.innerHTML = sizeHtml;
   }
 
+  function toggleSizes(prefix) {
+      let elements = document.querySelectorAll(` + '`' + `.${prefix}-extra` + '`' + `);
+      let btn = document.getElementById(prefix + 'Btn');
+      if (elements.length > 0) {
+          let isHidden = elements[0].style.display === 'none';
+          elements.forEach(el => { el.style.display = isHidden ? 'block' : 'none'; });
+          if (btn) btn.innerHTML = `<div style="font-size:14px; font-weight:700; color:#007aff; margin-top:4px;">${isHidden ? 'ย่อลง ▲' : 'ดูเพิ่มเติม ▼'}</div>`;
+      }
+  }
   function renderShirtTable() {
     const search = document.getElementById('shirtSearchInput').value.toLowerCase().trim();
+    const groupFilter = document.getElementById('shirtGroupFilter') ? document.getElementById('shirtGroupFilter').value : '';
     const sizeFilter = document.getElementById('shirtSizeFilter').value;
     const typeFilter = document.getElementById('shirtTypeFilter').value;
     
@@ -937,6 +996,7 @@
         let g = groupIdx !== -1 ? String(r[groupIdx]).toLowerCase() : '';
         if (!n.includes(search) && !g.includes(search)) return false;
       }
+      if (groupFilter && groupIdx !== -1 && String(r[groupIdx]).trim() !== groupFilter) return false;
       if (sizeFilter && sizeIdx !== -1 && String(r[sizeIdx]).trim() !== sizeFilter) return false;
       if (typeFilter && typeIdx !== -1 && String(r[typeIdx]).trim() !== typeFilter) return false;
       return true;
