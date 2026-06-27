@@ -563,55 +563,29 @@
         <input type="hidden" id="editEqIsNew" value="true">
         <input type="hidden" id="editEqId">
 
-        
-        <label style="font-weight:600; margin-bottom:5px; display:block;">📸 รูปภาพอุปกรณ์</label>
-        
-        <!-- Camera open button -->
-        <div id="eqCameraSection">
-          <div style="background: linear-gradient(135deg, #f0f8ff 0%, #f5f5f7 100%); border-radius: 16px; padding: 20px; text-align: center; border: 1px dashed #b0d4f1; margin-bottom: 15px;">
-            <div style="font-size: 40px; margin-bottom: 8px;">📷</div>
-            <p style="margin: 0 0 12px 0; color: #86868b; font-size: 14px;">ถ่ายรูปอุปกรณ์หรือเลือกจากเครื่อง</p>
-            <div style="display:flex; gap:10px;">
-              <button class="btn-primary" style="flex:1; margin-top:0; padding:12px; border-radius:25px; background: linear-gradient(135deg, #007aff 0%, #5856d6 100%); font-size:14px; box-shadow: 0 4px 12px rgba(0,122,255,0.3);" onclick="startEqCamera()">📷 เปิดกล้อง</button>
-              <label class="btn-success" style="flex:1; margin-top:0; padding:12px; border-radius:25px; font-weight:600; background: linear-gradient(135deg, #5ac8fa 0%, #17a2b8 100%); text-align:center; cursor:pointer; font-size:14px; box-shadow: 0 4px 12px rgba(90,200,250,0.3); display:flex; align-items:center; justify-content:center;">
-                🖼️ จากเครื่อง
-                <input type="file" accept="image/*" style="display:none;" onchange="handleEqPhoto(event)">
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <!-- Live camera preview -->
-        <div id="eqCameraContainer" style="display:none; text-align:center; margin-bottom:15px; border-radius:16px; overflow:hidden; border:1px solid #e5e5ea; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-          <video id="eqVideo" autoplay playsinline style="width:100%; max-height:280px; object-fit:cover; background:#000; display:block;"></video>
-          <div style="padding:12px; background: linear-gradient(135deg, #f5f5f7 0%, #e5e5ea 100%); display:flex; gap:10px;">
-            <button class="btn-success" style="flex:2; border-radius:25px; padding:14px; font-size:16px; background: linear-gradient(135deg, #34c759 0%, #30d158 100%); box-shadow: 0 4px 10px rgba(52,199,89,0.3);" onclick="captureEqPhoto()">📸 ถ่ายรูป</button>
-            <button class="btn-danger" style="flex:1; border-radius:25px; padding:14px; background: linear-gradient(135deg, #ff3b30 0%, #ff453a 100%);" onclick="stopEqCamera()">ปิดกล้อง</button>
-          </div>
-        </div>
-        <canvas id="eqCanvas" style="display:none;"></canvas>
-
-        <!-- Photo preview with retake -->
-        <div id="eqRetakeSection" style="display:none; text-align:center; margin-bottom:15px;">
-          <div style="position:relative; display:inline-block; width:100%;">
-            <img id="editEqImagePreviewUI" style="width:100%; border-radius:12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
-            <div style="position:absolute; top:8px; right:8px; background:rgba(52,199,89,0.9); color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;">✅ ถ่ายแล้ว</div>
-          </div>
-          <button class="btn-outline" style="margin-top:10px; padding:10px 20px; border-radius:25px; font-weight:600; border:2px solid #007aff; color:#007aff; background:transparent; font-size:14px;" onclick="retakeEqPhoto()">🔄 ถ่ายใหม่</button>
-        </div>
-
-        <input type="hidden" id="editEqImage"> 
-        <input type="hidden" id="editEqImageBase64">
-
         <div id="eqItemsContainer">
           <!-- Dynamic items will be added here -->
         </div>
         <button type="button" id="btnAddEqItem" class="btn-primary" style="margin-bottom:15px; width:100%; border-radius:20px; font-weight:600; background: linear-gradient(135deg, #34c759 0%, #30d158 100%);" onclick="addEqItem()">+ เพิ่มรายการอุปกรณ์</button>
-        <label>จุดวาง</label><select id="editEqLoc"></select>
         <div style="display:flex; gap:10px; margin-top:15px;">
           <button class="btn-success" style="flex:1;" onclick="saveEq()">บันทึก</button>
-          <button class="btn-danger" style="flex:1;" onclick="if(eqVideoStream) stopEqCamera(); deleteTempImageAsync('eq'); document.getElementById('eqModal').style.display='none'">ยกเลิก</button>
+          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('eqModal').style.display='none'">ยกเลิก</button>
         </div>
+      </div>
+    </div>
+
+    <!-- eqCameraModal: Global Camera Overlay for Items -->
+    <div id="eqCameraModal" class="modal-bg" style="z-index:9999;">
+      <div class="modal-content">
+        <h3 style="margin-top:0;">ถ่ายรูปอุปกรณ์</h3>
+        <div id="eqCameraContainer" style="text-align:center; margin-bottom:15px; border-radius:16px; overflow:hidden; border:1px solid #e5e5ea; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+          <video id="eqVideo" autoplay playsinline style="width:100%; max-height:280px; object-fit:cover; background:#000; display:block;"></video>
+          <div style="padding:12px; background: linear-gradient(135deg, #f5f5f7 0%, #e5e5ea 100%); display:flex; gap:10px;">
+            <button class="btn-success" style="flex:2; border-radius:25px; padding:14px; font-size:16px; background: linear-gradient(135deg, #34c759 0%, #30d158 100%); box-shadow: 0 4px 10px rgba(52,199,89,0.3);" onclick="captureEqPhoto()">📸 ถ่ายรูป</button>
+            <button class="btn-danger" style="flex:1; border-radius:25px; padding:14px; background: linear-gradient(135deg, #ff3b30 0%, #ff453a 100%);" onclick="stopEqCamera()">ยกเลิก</button>
+          </div>
+        </div>
+        <canvas id="eqCanvas" style="display:none;"></canvas>
       </div>
     </div>
 
@@ -1851,31 +1825,81 @@
     reader.readAsDataURL(file);
   }
 
-  function handleEqPhoto(event) {
+  window.currentItemForCamera = null;
+
+  async function uploadItemImageAsync(itemDiv) {
+    let base64Input = itemDiv.querySelector('.item-img-base64');
+    let base64Data = base64Input.value;
+    if(!base64Data) return;
+    
+    let previewWrapper = itemDiv.querySelector('div > div:first-child');
+    let statusDiv = previewWrapper.querySelector('.upload-status');
+    if(!statusDiv) {
+       statusDiv = document.createElement('div');
+       statusDiv.className = 'upload-status';
+       statusDiv.style = "position:absolute; bottom:2px; left:2px; right:2px; background:rgba(0,0,0,0.7); color:white; padding:2px; text-align:center; border-radius:4px; font-size:10px; font-weight:bold;";
+       previewWrapper.appendChild(statusDiv);
+    }
+    statusDiv.innerHTML = '⏳ อัพโหลด';
+    statusDiv.style.background = 'rgba(0,0,0,0.7)';
+    
+    const filename = "EQ_" + Date.now();
+    let url = '';
+    
+    try {
+        const res = await new Promise((resolve, reject) => {
+            google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).uploadImageToDrive(base64Data, filename);
+        });
+        if(res && res.success) url = res.url;
+        
+        if(url) {
+            statusDiv.innerHTML = '✅ เรียบร้อย';
+            statusDiv.style.background = 'rgba(52,199,89,0.9)';
+            itemDiv.querySelector('.item-img-url').value = url;
+        } else {
+            statusDiv.innerHTML = '❌ ล้มเหลว';
+            statusDiv.style.background = 'rgba(255,59,48,0.9)';
+        }
+    } catch(err) {
+        statusDiv.innerHTML = '❌ ผิดพลาด';
+        statusDiv.style.background = 'rgba(255,59,48,0.9)';
+        console.error(err);
+    }
+  }
+
+  function handleItemPhoto(event, inputEl) {
     if (event.target.files.length == 0) return;
+    const itemDiv = inputEl.closest('.eq-item');
     showLoading('กำลังโหลดรูปภาพ...');
     const file = event.target.files[0];
     const reader = new FileReader();
     reader.onload = function(e) {
       hideLoading();
-      document.getElementById('editEqImagePreviewUI').src = e.target.result;
-      document.getElementById('editEqImageBase64').value = e.target.result;
-      document.getElementById('eqCameraSection').style.display = 'none';
-      document.getElementById('eqCameraContainer').style.display = 'none';
-      document.getElementById('eqRetakeSection').style.display = 'block';
+      itemDiv.querySelector('.item-img-base64').value = e.target.result;
+      itemDiv.querySelector('.item-img-preview').src = e.target.result;
+      itemDiv.querySelector('.item-img-preview').style.display = 'block';
+      itemDiv.querySelector('.no-img-icon').style.display = 'none';
       event.target.value = ''; // clear
-      uploadImageAsync('eq');
+      
+      let oldUrl = itemDiv.querySelector('.item-img-url').value;
+      if (oldUrl) {
+         google.script.run.deleteImageFromDrive(oldUrl);
+         itemDiv.querySelector('.item-img-url').value = '';
+      }
+      uploadItemImageAsync(itemDiv);
     };
     reader.readAsDataURL(file);
+  }
+
+  function openItemCamera(btn) {
+    window.currentItemForCamera = btn.closest('.eq-item');
+    document.getElementById('eqCameraModal').style.display = 'flex';
+    startEqCamera();
   }
 
   let eqVideoStream = null;
 
   function startEqCamera() {
-    document.getElementById('eqCameraSection').style.display = 'none';
-    document.getElementById('eqCameraContainer').style.display = 'block';
-    document.getElementById('eqRetakeSection').style.display = 'none';
-    
     navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
       .then(function(stream) {
         eqVideoStream = stream;
@@ -1894,10 +1918,7 @@
       eqVideoStream.getTracks().forEach(track => track.stop());
       eqVideoStream = null;
     }
-    document.getElementById('eqCameraContainer').style.display = 'none';
-    if (!document.getElementById('editEqImageBase64').value) {
-      document.getElementById('eqCameraSection').style.display = 'block';
-    }
+    document.getElementById('eqCameraModal').style.display = 'none';
   }
 
   function captureEqPhoto() {
@@ -1911,20 +1932,23 @@
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
     
     const base64 = canvas.toDataURL('image/jpeg', 0.8);
-    document.getElementById('editEqImageBase64').value = base64;
-    document.getElementById('editEqImagePreviewUI').src = base64;
-    document.getElementById('eqRetakeSection').style.display = 'block';
-    document.getElementById('eqCameraSection').style.display = 'none';
+    
+    if (window.currentItemForCamera) {
+      let itemDiv = window.currentItemForCamera;
+      itemDiv.querySelector('.item-img-base64').value = base64;
+      itemDiv.querySelector('.item-img-preview').src = base64;
+      itemDiv.querySelector('.item-img-preview').style.display = 'block';
+      itemDiv.querySelector('.no-img-icon').style.display = 'none';
+      
+      let oldUrl = itemDiv.querySelector('.item-img-url').value;
+      if (oldUrl) {
+         google.script.run.deleteImageFromDrive(oldUrl);
+         itemDiv.querySelector('.item-img-url').value = '';
+      }
+      uploadItemImageAsync(itemDiv);
+    }
     
     stopEqCamera();
-    uploadImageAsync('eq');
-  }
-
-  function retakeEqPhoto() {
-    deleteTempImageAsync('eq');
-    document.getElementById('editEqImageBase64').value = '';
-    document.getElementById('eqRetakeSection').style.display = 'none';
-    startEqCamera();
   }
 
   
@@ -2032,50 +2056,54 @@
   
   function addEqItem() {
     const container = document.getElementById('eqItemsContainer');
+    let locOptions = '<option value="">-- เลือกจุดวาง --</option>';
+    if (typeof allLocations !== 'undefined') {
+       allLocations.forEach(loc => locOptions += '<option value="'+loc.id+'">'+loc.name+'</option>');
+    }
     const itemHtml = `
       <div class="eq-item" style="position:relative; border:1px solid #e5e5ea; border-radius:12px; padding:15px; margin-bottom:15px; background: #fff;">
+        <button type="button" class="btn-danger btn-remove-eq" style="position:absolute; top:10px; right:10px; padding:4px 8px; width:auto; font-size:12px;" onclick="this.parentElement.remove()">❌ ลบ</button>
+        
+        <div style="display:flex; gap:10px; margin-bottom:15px;">
+           <div style="width: 80px; height: 80px; background:#f5f5f7; border-radius:8px; overflow:hidden; flex-shrink:0; position:relative; border: 1px dashed #c7c7cc; display:flex; align-items:center; justify-content:center;">
+              <span style="font-size:24px; color:#c7c7cc;" class="no-img-icon">📷</span>
+              <img class="item-img-preview" style="width:100%; height:100%; object-fit:cover; display:none;">
+           </div>
+           <div style="flex:1; display:flex; flex-direction:column; justify-content:center; gap:8px;">
+              <button type="button" class="btn-primary" style="padding:6px; font-size:12px; margin:0;" onclick="openItemCamera(this)">📸 ถ่ายรูป</button>
+              <label class="btn-success" style="padding:6px; font-size:12px; margin:0; text-align:center; cursor:pointer;">
+                🖼️ จากเครื่อง
+                <input type="file" accept="image/*" style="display:none;" onchange="handleItemPhoto(event, this)">
+              </label>
+           </div>
+        </div>
+        
+        <input type="hidden" class="item-img-base64">
+        <input type="hidden" class="item-img-url">
+        
         <label>ชื่ออุปกรณ์ <span style="color:red">*</span></label>
         <input type="text" class="edit-eq-name" placeholder="เช่น กล้อง DSLR" style="margin-bottom: 10px;">
         <label style="display:flex; align-items:center; gap:8px; margin-bottom:10px; cursor:pointer;">
           <input type="checkbox" class="edit-eq-consumable" style="width:20px; height:20px; margin:0;">
-          <span style="font-weight:500;">นี่คือวัสดุสิ้นเปลือง (ไม่ต้องรับคืน)</span>
+          <span style="font-weight:500;">วัสดุสิ้นเปลือง</span>
         </label>
         <label>จำนวนทั้งหมด <span style="color:red">*</span></label>
         <input type="number" class="edit-eq-total" placeholder="จำนวน" min="1">
-        <button type="button" class="btn-danger btn-remove-eq" style="position:absolute; top:10px; right:10px; padding:4px 8px; width:auto; font-size:12px;" onclick="this.parentElement.remove()">❌ ลบ</button>
+        <label>จุดวาง</label>
+        <select class="edit-eq-loc">${locOptions}</select>
       </div>
     `;
     container.insertAdjacentHTML('beforeend', itemHtml);
   }
 
-  function openEqModal() { document.getElementById('eqModalTitle').innerText = 'เพิ่มอุปกรณ์'; document.getElementById('editEqIsNew').value = 'true'; document.getElementById('editEqId').value = ''; document.getElementById('editEqId').disabled = false; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImage').value = ''; document.getElementById('eqItemsContainer').innerHTML = ''; addEqItem(); document.querySelector('.eq-item .btn-remove-eq').style.display = 'none'; document.getElementById('btnAddEqItem').style.display = 'block'; document.getElementById('eqCameraSection').style.display = 'block'; document.getElementById('eqCameraContainer').style.display = 'none'; document.getElementById('eqRetakeSection').style.display = 'none'; if(eqVideoStream) stopEqCamera(); const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); document.getElementById('eqModal').style.display = 'flex'; }
-  function editEq(id) { let eq = allEquipment.find(e => e.id === id); if(!eq) return; document.getElementById('eqModalTitle').innerText = 'แก้ไขอุปกรณ์'; document.getElementById('editEqIsNew').value = 'false'; document.getElementById('editEqId').value = eq.id; document.getElementById('editEqId').disabled = true; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImage').value = eq.image || ''; document.getElementById('eqItemsContainer').innerHTML = ''; addEqItem(); document.querySelector('.eq-item .btn-remove-eq').style.display = 'none'; document.getElementById('btnAddEqItem').style.display = 'none'; const el = document.querySelector('.eq-item'); let eqName = eq.name; if(eqName.startsWith('[สิ้นเปลือง] ')) { eqName = eqName.replace('[สิ้นเปลือง] ', ''); let cb = el.querySelector('.edit-eq-consumable'); if(cb) cb.checked = true; } el.querySelector('.edit-eq-name').value = eqName; el.querySelector('.edit-eq-total').value = eq.total; document.getElementById('eqCameraContainer').style.display = 'none'; if(eqVideoStream) stopEqCamera(); if(eq.image) { document.getElementById('editEqImagePreviewUI').src = eq.image; document.getElementById('eqCameraSection').style.display = 'none'; document.getElementById('eqRetakeSection').style.display = 'block'; } else { document.getElementById('eqCameraSection').style.display = 'block'; document.getElementById('eqRetakeSection').style.display = 'none'; } const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- ไม่ระบุจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); sel.value = eq.location; document.getElementById('eqModal').style.display = 'flex'; }
+  function openEqModal() { document.getElementById('eqModalTitle').innerText = 'เพิ่มอุปกรณ์'; document.getElementById('editEqIsNew').value = 'true'; document.getElementById('editEqId').value = ''; document.getElementById('editEqId').disabled = false; document.getElementById('eqItemsContainer').innerHTML = ''; addEqItem(); document.querySelector('.eq-item .btn-remove-eq').style.display = 'none'; document.getElementById('btnAddEqItem').style.display = 'block'; document.getElementById('eqModal').style.display = 'flex'; }
+  function editEq(id) { let eq = allEquipment.find(e => e.id === id); if(!eq) return; document.getElementById('eqModalTitle').innerText = 'แก้ไขอุปกรณ์'; document.getElementById('editEqIsNew').value = 'false'; document.getElementById('editEqId').value = eq.id; document.getElementById('editEqId').disabled = true; document.getElementById('eqItemsContainer').innerHTML = ''; addEqItem(); document.querySelector('.eq-item .btn-remove-eq').style.display = 'none'; document.getElementById('btnAddEqItem').style.display = 'none'; const el = document.querySelector('.eq-item'); let eqName = eq.name; if(eqName.startsWith('[สิ้นเปลือง] ')) { eqName = eqName.replace('[สิ้นเปลือง] ', ''); let cb = el.querySelector('.edit-eq-consumable'); if(cb) cb.checked = true; } el.querySelector('.edit-eq-name').value = eqName; el.querySelector('.edit-eq-total').value = eq.total; el.querySelector('.edit-eq-loc').value = eq.location || ''; if(eq.image) { el.querySelector('.item-img-preview').src = eq.image; el.querySelector('.item-img-preview').style.display = 'block'; el.querySelector('.no-img-icon').style.display = 'none'; el.querySelector('.item-img-url').value = eq.image; } document.getElementById('eqModal').style.display = 'flex'; }
 
   function saveEq() {
-    const base64Cam = document.getElementById('editEqImageBase64').value;
-
-    if (window.tempUploadedEqUrl) {
-      proceedSaveEq(window.tempUploadedEqUrl);
-    } else if (base64Cam) {
-      uploadEqImageAndSave(base64Cam);
-    } else {
-      proceedSaveEq(document.getElementById('editEqImage').value);
-    }
+    proceedSaveEq();
   }
 
-  function uploadEqImageAndSave(base64Data) {
-    showLoading('กำลังอัปโหลดรูปภาพเข้าคลัง...\n(อาจใช้เวลาสักครู่)');
-    google.script.run.withSuccessHandler(res => {
-      if (res.success) {
-        proceedSaveEq(res.url);
-      } else {
-        hideLoading();
-        showToast('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
-      }
-    }).uploadImageToDrive(base64Data, "IMG_EQ_" + new Date().getTime());
-  }
-
-  function proceedSaveEq(imageUrl) { const isNew = document.getElementById('editEqIsNew').value === 'true'; let items = []; const itemEls = document.querySelectorAll('.eq-item'); for(const el of itemEls) { let name = el.querySelector('.edit-eq-name').value.trim(); const cb = el.querySelector('.edit-eq-consumable'); if(cb && cb.checked) name = '[สิ้นเปลือง] ' + name; const total = parseInt(el.querySelector('.edit-eq-total').value) || 0; if(!name || name==='[สิ้นเปลือง]' || total < 1) return showToast('กรุณาระบุชื่อและจำนวนอุปกรณ์ให้ครบถ้วน'); items.push({name, total}); } if(items.length === 0) return showToast('กรุณาเพิ่มอุปกรณ์อย่างน้อย 1 รายการ'); const data = { isNew: isNew, id: document.getElementById('editEqId').value, image: imageUrl, location: document.getElementById('editEqLoc').value, items: items }; showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(true); }).withFailureHandler(showError).saveEquipmentData(data); }
+  function proceedSaveEq() { const isNew = document.getElementById('editEqIsNew').value === 'true'; let items = []; const itemEls = document.querySelectorAll('.eq-item'); for(const el of itemEls) { let name = el.querySelector('.edit-eq-name').value.trim(); const cb = el.querySelector('.edit-eq-consumable'); if(cb && cb.checked) name = '[สิ้นเปลือง] ' + name; const total = parseInt(el.querySelector('.edit-eq-total').value) || 0; const loc = el.querySelector('.edit-eq-loc').value; const imgUrl = el.querySelector('.item-img-url').value; if(!name || name==='[สิ้นเปลือง]' || total < 1) return showToast('กรุณาระบุชื่อและจำนวนอุปกรณ์ให้ครบถ้วน'); items.push({name: name, total: total, location: loc, image: imgUrl}); } if(items.length === 0) return showToast('กรุณาเพิ่มอุปกรณ์อย่างน้อย 1 รายการ'); const data = { isNew: isNew, id: document.getElementById('editEqId').value, items: items }; showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(true); }).withFailureHandler(showError).saveEquipmentData(data); }
   function deleteEq(id, name) { if(!confirm('ลบอุปกรณ์: ' + name + ' ?')) return; allEquipment = allEquipment.filter(eq => String(eq.id) !== String(id)); renderAdminEqData(); showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('🗑️ ' + res.message); refreshData(true); }).deleteEquipmentData(id); }
 
   function renderAdminLocData() { const listDiv = document.getElementById('adminLocList'); if(!listDiv) return; listDiv.innerHTML = ''; allLocations.forEach(loc => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>' + loc.name + '</strong></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editLoc(\'' + loc.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteLoc(\'' + loc.id + '\', \'' + loc.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
