@@ -811,6 +811,7 @@
   const SHIRT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcpsuXWSH2w2ZBWtTpME0Nozb92aWNpRnr4w3JyqtBdsJBoFIAGA8LDVri96E10AEL/exec"; // REPLACE THIS URL WITH SHIRT SYSTEM DEPLOYMENT
   
   let shirtHeaders = [];
+  let shirtStockData = [];
   let shirtData = [];
   let shirtVideoStream = null;
 
@@ -831,14 +832,20 @@
   async function loadShirtsData(isQuiet = false) {
     if(!isQuiet) showLoading('กำลังโหลดข้อมูลระบบเสื้อ...');
     try {
-      const data = await apiShirtGet('all');
+      const [data, stockRes] = await Promise.all([
+        apiShirtGet('all'),
+        apiShirtPost({ action: 'getInitialStock' })
+      ]);
       if (data && data.success) {
          shirtHeaders = data.headers || [];
          shirtData = data.data || [];
+         if (stockRes && stockRes.success) {
+             shirtStockData = stockRes.stockData || [];
+         }
          renderShirtStats();
          renderShirtTable();
       } else {
-         if(!isQuiet) showToast('เกิดข้อผิดพลาดในการโหลดข้อมูลเสื้อ: ' + (data.error || ''), 'error');
+         if(!isQuiet) showToast('ไม่สามารถโหลดข้อมูลระบบเสื้อได้: ' + (data.error || ''), 'error');
       }
     } catch(err) {
       if(!isQuiet) showError(err);
@@ -847,15 +854,13 @@
   }
 
   function renderShirtStats() {
-    document.getElementById('shirtStatTotal').innerText = shirtData.length.toLocaleString();
-    let shirts = 0, jackets = 0;
+    let borrowedShirts = 0, borrowedJackets = 0;
     
-    // Find index of 'ประเภท' and 'จำนวน (ชิ้น)' in headers
     let typeIdx = shirtHeaders.findIndex(h => String(h).includes('ประเภท'));
     let qtyIdx = shirtHeaders.findIndex(h => String(h).includes('จำนวน'));
     let sizeIdx = shirtHeaders.findIndex(h => String(h).includes('ไซส์'));
     
-    let sizesCount = {};
+    let borrowedSizesCount = {};
 
     shirtData.forEach(r => {
       let qty = 1;
@@ -863,18 +868,47 @@
       
       if (typeIdx !== -1) {
         let type = String(r[typeIdx]);
-        if (type.includes('เสื้อยืด')) shirts += qty;
-        if (type.includes('Jacket')) jackets += qty;
+        if (type.includes('เสื้อยืด')) borrowedShirts += qty;
+        if (type.includes('Jacket')) borrowedJackets += qty;
       }
       
       if (sizeIdx !== -1) {
         let size = String(r[sizeIdx]).trim();
-        if (size) sizesCount[size] = (sizesCount[size] || 0) + qty;
+        if (size) borrowedSizesCount[size] = (borrowedSizesCount[size] || 0) + qty;
       }
     });
 
-    document.getElementById('shirtStatTshirt').innerText = shirts.toLocaleString();
-    document.getElementById('shirtStatJacket').innerText = jackets.toLocaleString();
+    let totalInitialShirts = 0;
+    let totalInitialJackets = 0;
+    let initialSizesCount = {};
+
+    if (typeof shirtStockData !== 'undefined') {
+       shirtStockData.forEach(item => {
+           totalInitialShirts += parseInt(item.tshirt) || 0;
+           totalInitialJackets += parseInt(item.jacket) || 0;
+           initialSizesCount[item.size] = (parseInt(item.tshirt) || 0) + (parseInt(item.jacket) || 0);
+       });
+    }
+
+    let remainingShirts = totalInitialShirts - borrowedShirts;
+    let remainingJackets = totalInitialJackets - borrowedJackets;
+    let totalRemaining = remainingShirts + remainingJackets;
+
+    let elTotal = document.getElementById('shirtStatTotal');
+    if (elTotal) {
+        elTotal.innerText = totalRemaining.toLocaleString();
+        elTotal.nextElementSibling.innerText = "คงเหลือทั้งหมด (ชิ้น)";
+    }
+    let elTshirt = document.getElementById('shirtStatTshirt');
+    if (elTshirt) {
+        elTshirt.innerText = remainingShirts.toLocaleString();
+        elTshirt.nextElementSibling.innerText = "เสื้อยืดคงเหลือ (ชิ้น)";
+    }
+    let elJacket = document.getElementById('shirtStatJacket');
+    if (elJacket) {
+        elJacket.innerText = remainingJackets.toLocaleString();
+        elJacket.nextElementSibling.innerText = "Jacket คงเหลือ (ชิ้น)";
+    }
     
     // Last backup date
     if (shirtData.length > 0 && shirtData[0][0]) {
@@ -885,14 +919,17 @@
     const sizeOrder = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL','6XL','7XL','8XL','9XL','10XL'];
     let sizeHtml = '';
     sizeOrder.forEach(sz => {
-      if (sizesCount[sz]) {
+      let initial = initialSizesCount[sz] || 0;
+      if (initial > 0) {
+        let borrowed = borrowedSizesCount[sz] || 0;
+        let remaining = initial - borrowed;
         sizeHtml += `<div class="glass-panel" style="padding:10px 15px; text-align:center; flex:1; min-width:60px;">
           <div style="font-size:16px; font-weight:700; color:#007aff;">${sz}</div>
-          <div style="font-size:12px; color:#666;">${sizesCount[sz].toLocaleString()} ชิ้น</div>
+          <div style="font-size:12px; color:#666;">${remaining.toLocaleString()} คงเหลือ</div>
         </div>`;
       }
     });
-    if (!sizeHtml) sizeHtml = '<span style="color:#888; font-size:13px;">ยังไม่มีข้อมูลแยกตามไซส์</span>';
+    if (!sizeHtml) sizeHtml = '<span style="color:#888; font-size:13px;">ไม่มีข้อมูลสต็อกเริ่มต้น หรือสต็อกเป็นศูนย์</span>';
     document.getElementById('shirtSizeRow').innerHTML = sizeHtml;
   }
 
