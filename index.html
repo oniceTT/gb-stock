@@ -971,7 +971,7 @@
   }
 
   function toggleSizes(prefix) {
-      let elements = document.querySelectorAll(` + '`' + `.${prefix}-extra` + '`' + `);
+      let elements = document.querySelectorAll(`.${prefix}-extra`);
       let btn = document.getElementById(prefix + 'Btn');
       if (elements.length > 0) {
           let isHidden = elements[0].style.display === 'none';
