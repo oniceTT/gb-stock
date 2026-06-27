@@ -414,18 +414,6 @@
     <div id="shirtBorrowModal" class="modal-bg">
       <div class="modal-content">
         <h3 style="margin-top:0;">➕ เบิกเสื้อ</h3>
-        <label>ชื่อผู้เบิก <span style="color:red">*</span></label>
-        <input type="text" id="shirtBorrowName" placeholder="เช่น นายสมชาย ใจดี">
-        
-        <label>กลุ่ม / หน่วยงาน <span style="color:red">*</span></label>
-        <select id="shirtBorrowGroup">
-          <option value="">-- เลือก --</option>
-          <option value="คกก.">คกก.</option>
-          <option value="ลูกค้า/GLO">ลูกค้า/GLO</option>
-          <option value="TOP NEWS">TOP NEWS</option>
-          <option value="ยังมีเรา">ยังมีเรา</option>
-          <option value="ทีมงานเพิ่มเติม">ทีมงานเพิ่มเติม</option>
-        </select>
         
         <div id="shirtBorrowItemsContainer">
           <!-- Dynamic items will be added here -->
@@ -1083,9 +1071,34 @@
 
   function addShirtBorrowItem() {
     const container = document.getElementById('shirtBorrowItemsContainer');
+    
+    // ดึงค่าจากรายการก่อนหน้า (ถ้ามี)
+    let defaultName = '';
+    let defaultGroup = '';
+    const existingItems = container.querySelectorAll('.shirt-borrow-item');
+    if (existingItems.length > 0) {
+      const lastItem = existingItems[existingItems.length - 1];
+      defaultName = lastItem.querySelector('.shirt-borrow-name').value;
+      defaultGroup = lastItem.querySelector('.shirt-borrow-group').value;
+    } else {
+      defaultName = (typeof currentUser !== 'undefined' && currentUser) ? currentUser.name : '';
+    }
+
+    const groupOptions = ['คกก.','ลูกค้า/GLO','TOP NEWS','ยังมีเรา','ทีมงานเพิ่มเติม'];
+    let groupOptionsHtml = '<option value="">-- เลือก --</option>';
+    groupOptions.forEach(g => {
+      groupOptionsHtml += `<option value="${g}" ${defaultGroup === g ? 'selected' : ''}>${g}</option>`;
+    });
+
     const itemHtml = `
       <div class="shirt-borrow-item" style="position:relative; border:1px solid #e5e5ea; border-radius:12px; padding:15px; margin-bottom:15px; background: #fff;">
-        <div style="display:flex; gap:10px;">
+        <label>ชื่อผู้เบิก <span style="color:red">*</span></label>
+        <input type="text" class="shirt-borrow-name" placeholder="เช่น นายสมชาย ใจดี" value="${defaultName}">
+        <label>กลุ่ม / หน่วยงาน <span style="color:red">*</span></label>
+        <select class="shirt-borrow-group">
+          ${groupOptionsHtml}
+        </select>
+        <div style="display:flex; gap:10px; margin-top:10px;">
           <div style="flex:1;">
             <label>ไซส์เสื้อ <span style="color:red">*</span></label>
             <select class="shirt-borrow-size">
@@ -1113,8 +1126,6 @@
 
   function openShirtBorrowModal() {
     document.getElementById('shirtBorrowModal').style.display = 'flex';
-    document.getElementById('shirtBorrowName').value = currentUser ? currentUser.name : '';
-    document.getElementById('shirtBorrowGroup').value = '';
     
     document.getElementById('shirtBorrowItemsContainer').innerHTML = '';
     addShirtBorrowItem();
@@ -1130,23 +1141,20 @@
 
   async function submitShirtBorrow() {
     const btn = document.getElementById('btnSubmitShirt');
-    const name = document.getElementById('shirtBorrowName').value.trim();
-    const group = document.getElementById('shirtBorrowGroup').value;
     const note = document.getElementById('shirtBorrowNote').value.trim();
-    // const base64Data = document.getElementById('shirtImageBase64').value;
-    
-    if (!name || !group) return showToast('กรุณากรอกข้อมูลและเลือกให้ครบถ้วน');
-    // if (!base64Data) return showToast('กรุณาถ่ายรูปหรืออัพโหลดหลักฐานด้วยครับ');
     
     const items = [];
     const itemElements = document.querySelectorAll('.shirt-borrow-item');
     for (const el of itemElements) {
+      const itemName = el.querySelector('.shirt-borrow-name').value.trim();
+      const itemGroup = el.querySelector('.shirt-borrow-group').value;
       const size = el.querySelector('.shirt-borrow-size').value;
       const type = el.querySelector('.shirt-borrow-type').value;
       const qty = parseInt(el.querySelector('.shirt-borrow-qty').value);
+      if (!itemName || !itemGroup) return showToast('กรุณากรอกชื่อและเลือกหน่วยงานให้ครบทุกรายการ');
       if (!size || !type) return showToast('กรุณาเลือกไซส์และประเภทให้ครบถ้วน');
       if (!qty || qty < 1) return showToast('กรุณาระบุจำนวนที่ถูกต้อง');
-      items.push({ size, type, qty });
+      items.push({ name: itemName, group: itemGroup, size, type, qty });
     }
     
     if (items.length === 0) return showToast('กรุณาเพิ่มรายการเสื้อ');
@@ -1161,8 +1169,8 @@
       // 2. Save records
       const payload = {
         action: 'addMultiple',
-        name: name,
-        group: group,
+        name: items[0].name,
+        group: items[0].group,
         items: items,
         evidence: evidenceUrl,
         note: note,
