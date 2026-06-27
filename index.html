@@ -1296,8 +1296,8 @@
     const toast = document.createElement('div');
     toast.className = 'toast-msg toast-' + type;
     
-    // Add OK button and flex layout
-    toast.innerHTML = `<span style="flex-grow: 1;">${message}</span><button onclick="this.parentElement.remove()" style="background: rgba(255,255,255,0.25); border: none; color: white; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 15px; flex-shrink: 0;">ตกลง</button>`;
+    // Remove OK button, just show message
+    toast.innerHTML = message;
     
     container.appendChild(toast);
     
@@ -1964,17 +1964,38 @@
       }).catch(err => showToast("ไม่สามารถสลับกล้องได้"));
     }
   }
+  function getBestCameraConfig(facingMode) {
+      if (facingMode !== 'environment') return Promise.resolve({ facingMode: facingMode });
+      return Html5Qrcode.getCameras().then(devices => {
+          if (devices && devices.length > 0) {
+              let backCameras = devices.filter(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('rear'));
+              if (backCameras.length === 0) backCameras = devices;
+              let mainBack = backCameras.find(d => {
+                  let l = d.label.toLowerCase();
+                  return !l.includes('wide') && !l.includes('ultra') && !l.includes('tele');
+              });
+              if (mainBack) return { deviceId: { exact: mainBack.id } };
+              return { deviceId: { exact: backCameras[0].id } };
+          }
+          return { facingMode: 'environment' };
+      }).catch(err => {
+          return { facingMode: 'environment' };
+      });
+  }
+
   function startScannerWithCurrentMode() {
-    html5QrCode.start(
-      { facingMode: currentScanFacingMode }, 
-      { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
-      (decodedText) => {
-        closeScannerModal();
-        processScannedQR(decodedText);
-      },
-      (errorMessage) => {}
-    ).catch(err => {
-        // Ignore parse errors, report actual start failures
+    getBestCameraConfig(currentScanFacingMode).then(cameraConfig => {
+        html5QrCode.start(
+          cameraConfig, 
+          { fps: 10, qrbox: { width: 250, height: 250 }, aspectRatio: 1.0 },
+          (decodedText) => {
+            closeScannerModal();
+            processScannedQR(decodedText);
+          },
+          (errorMessage) => {}
+        ).catch(err => {
+            // Ignore parse errors, report actual start failures
+        });
     });
   }
   function openScanner(mode) { 
