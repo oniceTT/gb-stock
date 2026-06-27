@@ -427,27 +427,10 @@
           <option value="ทีมงานเพิ่มเติม">ทีมงานเพิ่มเติม</option>
         </select>
         
-        <div style="display:flex; gap:10px;">
-          <div style="flex:1;">
-            <label>ไซส์เสื้อ <span style="color:red">*</span></label>
-            <select id="shirtBorrowSize">
-              <option value="">-- เลือก --</option>
-              <option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="2XL">2XL</option><option value="3XL">3XL</option><option value="4XL">4XL</option><option value="5XL">5XL</option><option value="6XL">6XL</option><option value="7XL">7XL</option><option value="8XL">8XL</option><option value="9XL">9XL</option><option value="10XL">10XL</option>
-            </select>
-          </div>
-          <div style="flex:1;">
-            <label>ประเภท <span style="color:red">*</span></label>
-            <select id="shirtBorrowType">
-              <option value="">-- เลือก --</option>
-              <option value="เสื้อยืด">เสื้อยืด</option>
-              <option value="Jacket">Jacket</option>
-              <option value="เสื้อยืด + Jacket">เสื้อยืด + Jacket</option>
-            </select>
-          </div>
+        <div id="shirtBorrowItemsContainer">
+          <!-- Dynamic items will be added here -->
         </div>
-        
-        <label>จำนวน <span style="color:red">*</span></label>
-        <input type="number" id="shirtBorrowQty" value="1" min="1">
+        <button type="button" class="btn-primary" style="margin-bottom:15px; background: linear-gradient(135deg, #34c759 0%, #30d158 100%); width: 100%; border-radius: 20px; font-weight: 600;" onclick="addShirtBorrowItem()">+ เพิ่มรายการเสื้อ</button>
         
         <h3 style="margin-top:10px; margin-bottom: 5px;">📸 ถ่ายรูปหลักฐานการเบิก <span style="color:red">*</span></h3>
         <div id="shirtCameraSection">
@@ -579,7 +562,7 @@
         <h3 id="eqModalTitle" style="margin-top:0;">เพิ่มอุปกรณ์</h3>
         <input type="hidden" id="editEqIsNew" value="true">
         <input type="hidden" id="editEqId">
-        <label>ชื่ออุปกรณ์</label><input type="text" id="editEqName" placeholder="เช่น กล้อง DSLR">
+
         
         <label style="font-weight:600; margin-bottom:5px; display:block;">📸 รูปภาพอุปกรณ์</label>
         
@@ -620,7 +603,10 @@
         <input type="hidden" id="editEqImage"> 
         <input type="hidden" id="editEqImageBase64">
 
-        <label>จำนวนทั้งหมด</label><input type="number" id="editEqTotal" placeholder="จำนวน" min="1">
+        <div id="eqItemsContainer">
+          <!-- Dynamic items will be added here -->
+        </div>
+        <button type="button" id="btnAddEqItem" class="btn-primary" style="margin-bottom:15px; width:100%; border-radius:20px; font-weight:600; background: linear-gradient(135deg, #34c759 0%, #30d158 100%);" onclick="addEqItem()">+ เพิ่มรายการอุปกรณ์</button>
         <label>จุดวาง</label><select id="editEqLoc"></select>
         <div style="display:flex; gap:10px; margin-top:15px;">
           <button class="btn-success" style="flex:1;" onclick="saveEq()">บันทึก</button>
@@ -756,8 +742,8 @@
     <div id="radioModal" class="modal-bg">
       <div class="modal-content">
         <h3 style="margin-top:0;">📻 เพิ่ม/แก้ไขวิทยุ</h3>
-        <label>ชื่อวิทยุ</label>
-        <input type="text" id="radioNameInput" placeholder="เช่น วิทยุ #01">
+        <div id="radioItemsContainer"></div>
+        <button type="button" id="btnAddRadioItem" class="btn-primary" style="margin-bottom:15px; width:100%; border-radius:20px; font-weight:600; background: linear-gradient(135deg, #34c759 0%, #30d158 100%);" onclick="addRadioItem()">+ เพิ่มรายการวิทยุ</button>
         <div style="display:flex; gap:10px; margin-top:15px;">
           <button class="btn-success" style="flex:1;" onclick="doSaveRadio()">บันทึก</button>
           <button class="btn-danger" style="flex:1;" onclick="document.getElementById('radioModal').style.display='none'">ยกเลิก</button>
@@ -1016,13 +1002,46 @@
     startShirtCamera();
   }
 
+  function addShirtBorrowItem() {
+    const container = document.getElementById('shirtBorrowItemsContainer');
+    const itemHtml = `
+      <div class="shirt-borrow-item" style="position:relative; border:1px solid #e5e5ea; border-radius:12px; padding:15px; margin-bottom:15px; background: #fff;">
+        <div style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <label>ไซส์เสื้อ <span style="color:red">*</span></label>
+            <select class="shirt-borrow-size">
+              <option value="">-- เลือก --</option>
+              <option value="XS">XS</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="2XL">2XL</option><option value="3XL">3XL</option><option value="4XL">4XL</option><option value="5XL">5XL</option><option value="6XL">6XL</option><option value="7XL">7XL</option><option value="8XL">8XL</option><option value="9XL">9XL</option><option value="10XL">10XL</option>
+            </select>
+          </div>
+          <div style="flex:1;">
+            <label>ประเภท <span style="color:red">*</span></label>
+            <select class="shirt-borrow-type">
+              <option value="">-- เลือก --</option>
+              <option value="เสื้อยืด">เสื้อยืด</option>
+              <option value="Jacket">Jacket</option>
+              <option value="เสื้อยืด + Jacket">เสื้อยืด + Jacket</option>
+            </select>
+          </div>
+        </div>
+        <label>จำนวน <span style="color:red">*</span></label>
+        <input type="number" class="shirt-borrow-qty" value="1" min="1">
+        <button type="button" class="btn-danger" style="position:absolute; top:10px; right:10px; padding:4px 8px; width:auto; font-size:12px;" onclick="this.parentElement.remove()">❌ ลบ</button>
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', itemHtml);
+  }
+
   function openShirtBorrowModal() {
     document.getElementById('shirtBorrowModal').style.display = 'flex';
     document.getElementById('shirtBorrowName').value = currentUser ? currentUser.name : '';
     document.getElementById('shirtBorrowGroup').value = '';
-    document.getElementById('shirtBorrowSize').value = '';
-    document.getElementById('shirtBorrowType').value = '';
-    document.getElementById('shirtBorrowQty').value = '1';
+    
+    document.getElementById('shirtBorrowItemsContainer').innerHTML = '';
+    addShirtBorrowItem();
+    // Hide the delete button for the first item
+    document.querySelector('.shirt-borrow-item .btn-danger').style.display = 'none';
+    
     document.getElementById('shirtBorrowNote').value = '';
     
     document.getElementById('shirtImageBase64').value = '';
@@ -1034,15 +1053,24 @@
     const btn = document.getElementById('btnSubmitShirt');
     const name = document.getElementById('shirtBorrowName').value.trim();
     const group = document.getElementById('shirtBorrowGroup').value;
-    const size = document.getElementById('shirtBorrowSize').value;
-    const type = document.getElementById('shirtBorrowType').value;
-    const qty = parseInt(document.getElementById('shirtBorrowQty').value);
     const note = document.getElementById('shirtBorrowNote').value.trim();
     const base64Data = document.getElementById('shirtImageBase64').value;
     
-    if (!name || !group || !size || !type) return showToast('กรุณากรอกข้อมูลและเลือกให้ครบถ้วน');
-    if (!qty || qty < 1) return showToast('กรุณาระบุจำนวนที่ถูกต้อง');
+    if (!name || !group) return showToast('กรุณากรอกข้อมูลและเลือกให้ครบถ้วน');
     if (!base64Data) return showToast('กรุณาถ่ายรูปหรืออัพโหลดหลักฐานด้วยครับ');
+    
+    const items = [];
+    const itemElements = document.querySelectorAll('.shirt-borrow-item');
+    for (const el of itemElements) {
+      const size = el.querySelector('.shirt-borrow-size').value;
+      const type = el.querySelector('.shirt-borrow-type').value;
+      const qty = parseInt(el.querySelector('.shirt-borrow-qty').value);
+      if (!size || !type) return showToast('กรุณาเลือกไซส์และประเภทให้ครบถ้วน');
+      if (!qty || qty < 1) return showToast('กรุณาระบุจำนวนที่ถูกต้อง');
+      items.push({ size, type, qty });
+    }
+    
+    if (items.length === 0) return showToast('กรุณาเพิ่มรายการเสื้อ');
     
     btn.disabled = true;
     document.getElementById('shirtBorrowModal').style.display = 'none';
@@ -1056,14 +1084,12 @@
       if (!uploadRes.success) throw new Error(uploadRes.error || "Upload failed");
       const evidenceUrl = uploadRes.url;
       
-      // 2. Save record
+      // 2. Save records
       const payload = {
-        action: 'add',
+        action: 'addMultiple',
         name: name,
         group: group,
-        size: size,
-        type: type,
-        qty: qty,
+        items: items,
         evidence: evidenceUrl,
         note: note,
         recordedBy: currentUser ? currentUser.name : 'ระบบ'
@@ -1925,8 +1951,22 @@
 
   function renderAdminEqData() { const listDiv = document.getElementById('adminEqList'); if(!listDiv) return; listDiv.innerHTML = ''; allEquipment.forEach(eq => { const card = document.createElement('div'); card.className = 'list-card'; let locName = '-'; let foundLoc = allLocations.find(l => l.id === eq.location); if(foundLoc) locName = foundLoc.name; card.innerHTML = '<div class="list-info"><strong>' + eq.name + '</strong><br><span>จำนวน: ' + eq.total + ' (พร้อมยืม: ' + eq.available + ')</span><br><span>📍 ' + locName + '</span></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editEq(\'' + eq.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteEq(\'' + eq.id + '\', \'' + eq.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
   
-  function openEqModal() { document.getElementById('eqModalTitle').innerText = 'เพิ่มอุปกรณ์'; document.getElementById('editEqIsNew').value = 'true'; document.getElementById('editEqId').value = ''; document.getElementById('editEqId').disabled = false; document.getElementById('editEqName').value = ''; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImage').value = ''; document.getElementById('editEqTotal').value = ''; document.getElementById('eqCameraSection').style.display = 'block'; document.getElementById('eqCameraContainer').style.display = 'none'; document.getElementById('eqRetakeSection').style.display = 'none'; if(eqVideoStream) stopEqCamera(); const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); document.getElementById('eqModal').style.display = 'flex'; }
-  function editEq(id) { let eq = allEquipment.find(e => e.id === id); if(!eq) return; document.getElementById('eqModalTitle').innerText = 'แก้ไขอุปกรณ์'; document.getElementById('editEqIsNew').value = 'false'; document.getElementById('editEqId').value = eq.id; document.getElementById('editEqId').disabled = true; document.getElementById('editEqName').value = eq.name; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImage').value = eq.image || ''; document.getElementById('editEqTotal').value = eq.total; document.getElementById('eqCameraContainer').style.display = 'none'; if(eqVideoStream) stopEqCamera(); if(eq.image) { document.getElementById('editEqImagePreviewUI').src = eq.image; document.getElementById('eqCameraSection').style.display = 'none'; document.getElementById('eqRetakeSection').style.display = 'block'; } else { document.getElementById('eqCameraSection').style.display = 'block'; document.getElementById('eqRetakeSection').style.display = 'none'; } const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- ไม่ระบุจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); sel.value = eq.location; document.getElementById('eqModal').style.display = 'flex'; }
+  function addEqItem() {
+    const container = document.getElementById('eqItemsContainer');
+    const itemHtml = `
+      <div class="eq-item" style="position:relative; border:1px solid #e5e5ea; border-radius:12px; padding:15px; margin-bottom:15px; background: #fff;">
+        <label>ชื่ออุปกรณ์ <span style="color:red">*</span></label>
+        <input type="text" class="edit-eq-name" placeholder="เช่น กล้อง DSLR" style="margin-bottom: 10px;">
+        <label>จำนวนทั้งหมด <span style="color:red">*</span></label>
+        <input type="number" class="edit-eq-total" placeholder="จำนวน" min="1">
+        <button type="button" class="btn-danger btn-remove-eq" style="position:absolute; top:10px; right:10px; padding:4px 8px; width:auto; font-size:12px;" onclick="this.parentElement.remove()">❌ ลบ</button>
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', itemHtml);
+  }
+
+  function openEqModal() { document.getElementById('eqModalTitle').innerText = 'เพิ่มอุปกรณ์'; document.getElementById('editEqIsNew').value = 'true'; document.getElementById('editEqId').value = ''; document.getElementById('editEqId').disabled = false; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImage').value = ''; document.getElementById('eqItemsContainer').innerHTML = ''; addEqItem(); document.querySelector('.eq-item .btn-remove-eq').style.display = 'none'; document.getElementById('btnAddEqItem').style.display = 'block'; document.getElementById('eqCameraSection').style.display = 'block'; document.getElementById('eqCameraContainer').style.display = 'none'; document.getElementById('eqRetakeSection').style.display = 'none'; if(eqVideoStream) stopEqCamera(); const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); document.getElementById('eqModal').style.display = 'flex'; }
+  function editEq(id) { let eq = allEquipment.find(e => e.id === id); if(!eq) return; document.getElementById('eqModalTitle').innerText = 'แก้ไขอุปกรณ์'; document.getElementById('editEqIsNew').value = 'false'; document.getElementById('editEqId').value = eq.id; document.getElementById('editEqId').disabled = true; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImage').value = eq.image || ''; document.getElementById('eqItemsContainer').innerHTML = ''; addEqItem(); document.querySelector('.eq-item .btn-remove-eq').style.display = 'none'; document.getElementById('btnAddEqItem').style.display = 'none'; const el = document.querySelector('.eq-item'); el.querySelector('.edit-eq-name').value = eq.name; el.querySelector('.edit-eq-total').value = eq.total; document.getElementById('eqCameraContainer').style.display = 'none'; if(eqVideoStream) stopEqCamera(); if(eq.image) { document.getElementById('editEqImagePreviewUI').src = eq.image; document.getElementById('eqCameraSection').style.display = 'none'; document.getElementById('eqRetakeSection').style.display = 'block'; } else { document.getElementById('eqCameraSection').style.display = 'block'; document.getElementById('eqRetakeSection').style.display = 'none'; } const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- ไม่ระบุจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); sel.value = eq.location; document.getElementById('eqModal').style.display = 'flex'; }
 
   function saveEq() {
     const base64Cam = document.getElementById('editEqImageBase64').value;
@@ -1950,7 +1990,7 @@
     }).uploadImageToDrive(base64Data, "IMG_EQ_" + new Date().getTime());
   }
 
-  function proceedSaveEq(imageUrl) { const data = { isNew: document.getElementById('editEqIsNew').value === 'true', id: document.getElementById('editEqId').value, name: document.getElementById('editEqName').value, image: imageUrl, total: document.getElementById('editEqTotal').value, location: document.getElementById('editEqLoc').value }; if(!data.name || !data.total) return showToast('กรุณาระบุชื่อและจำนวนอุปกรณ์'); showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(true); }).withFailureHandler(showError).saveEquipmentData(data); }
+  function proceedSaveEq(imageUrl) { const isNew = document.getElementById('editEqIsNew').value === 'true'; let items = []; const itemEls = document.querySelectorAll('.eq-item'); for(const el of itemEls) { const name = el.querySelector('.edit-eq-name').value.trim(); const total = parseInt(el.querySelector('.edit-eq-total').value) || 0; if(!name || total < 1) return showToast('กรุณาระบุชื่อและจำนวนอุปกรณ์ให้ครบถ้วน'); items.push({name, total}); } if(items.length === 0) return showToast('กรุณาเพิ่มอุปกรณ์อย่างน้อย 1 รายการ'); const data = { isNew: isNew, id: document.getElementById('editEqId').value, image: imageUrl, location: document.getElementById('editEqLoc').value, items: items }; showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(true); }).withFailureHandler(showError).saveEquipmentData(data); }
   function deleteEq(id, name) { if(!confirm('ลบอุปกรณ์: ' + name + ' ?')) return; allEquipment = allEquipment.filter(eq => String(eq.id) !== String(id)); renderAdminEqData(); showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('🗑️ ' + res.message); refreshData(true); }).deleteEquipmentData(id); }
 
   function renderAdminLocData() { const listDiv = document.getElementById('adminLocList'); if(!listDiv) return; listDiv.innerHTML = ''; allLocations.forEach(loc => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>' + loc.name + '</strong></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editLoc(\'' + loc.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteLoc(\'' + loc.id + '\', \'' + loc.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
@@ -2255,20 +2295,46 @@
     }).withFailureHandler(showError).initRadios(23);
   }
 
+  function addRadioItem() {
+    const container = document.getElementById('radioItemsContainer');
+    const itemHtml = `
+      <div class="radio-item" style="position:relative; margin-bottom:10px;">
+        <label>ชื่อวิทยุ <span style="color:red">*</span></label>
+        <input type="text" class="edit-radio-name" placeholder="เช่น วิทยุ #01" style="margin-bottom:0;">
+        <button type="button" class="btn-danger btn-remove-radio" style="position:absolute; top:25px; right:5px; padding:4px 8px; width:auto; font-size:12px;" onclick="this.parentElement.remove()">❌</button>
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', itemHtml);
+  }
+
   function openAddRadioModal() {
-    document.getElementById('radioNameInput').value = '';
+    document.getElementById('radioItemsContainer').innerHTML = '';
+    addRadioItem();
+    document.querySelector('.radio-item .btn-remove-radio').style.display = 'none';
+    document.getElementById('btnAddRadioItem').style.display = 'block';
     document.getElementById('radioModal').style.display = 'flex';
   }
 
   function doSaveRadio() {
-    var name = document.getElementById('radioNameInput').value;
-    if (!name) return showToast('กรุณาระบุชื่อวิทยุ');
+    const itemEls = document.querySelectorAll('.radio-item');
+    let items = [];
+    for (const el of itemEls) {
+      const name = el.querySelector('.edit-radio-name').value.trim();
+      if (!name) return showToast('กรุณาระบุชื่อวิทยุให้ครบถ้วน');
+      items.push({ name });
+    }
+    
+    if (items.length === 0) return showToast('กรุณาเพิ่มวิทยุอย่างน้อย 1 รายการ');
+    
     showLoading('กำลังบันทึก...');
     google.script.run.withSuccessHandler(function(res) {
       hideLoading();
       showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
-      if (res.success) { document.getElementById('radioModal').style.display='none'; loadRadios(true); }
-    }).withFailureHandler(showError).saveRadio({ isNew: true, name: name });
+      if (res.success) { 
+        document.getElementById('radioModal').style.display = 'none'; 
+        loadRadios(true); 
+      }
+    }).withFailureHandler(showError).saveRadio({ isNew: true, items: items });
   }
 
   function doDeleteRadio(id, name) {
