@@ -471,7 +471,7 @@
         
         <div style="display:flex; gap:10px;">
           <button class="btn-success" style="flex:1;" id="btnSubmitShirt" onclick="submitShirtBorrow()">บันทึกข้อมูล</button>
-          <button class="btn-danger" style="flex:1;" onclick="if(shirtVideoStream) stopShirtCamera(); document.getElementById('shirtBorrowModal').style.display='none'">ยกเลิก</button>
+          <button class="btn-danger" style="flex:1;" onclick="if(shirtVideoStream) stopShirtCamera(); deleteTempImageAsync('shirt'); document.getElementById('shirtBorrowModal').style.display='none'">ยกเลิก</button>
         </div>
       </div>
     </div>
@@ -610,7 +610,7 @@
         <label>จุดวาง</label><select id="editEqLoc"></select>
         <div style="display:flex; gap:10px; margin-top:15px;">
           <button class="btn-success" style="flex:1;" onclick="saveEq()">บันทึก</button>
-          <button class="btn-danger" style="flex:1;" onclick="if(eqVideoStream) stopEqCamera(); document.getElementById('eqModal').style.display='none'">ยกเลิก</button>
+          <button class="btn-danger" style="flex:1;" onclick="if(eqVideoStream) stopEqCamera(); deleteTempImageAsync('eq'); document.getElementById('eqModal').style.display='none'">ยกเลิก</button>
         </div>
       </div>
     </div>
@@ -768,6 +768,72 @@
   // ==========================================
   // Shirt System Functions
   // ==========================================
+  window.tempUploadedShirtUrl = '';
+  window.tempUploadedEqUrl = '';
+  window.tempUploadedReturnUrl = '';
+
+  async function uploadImageAsync(type) {
+    let base64Input = document.getElementById(type === 'eq' ? 'editEqImageBase64' : (type + 'ImageBase64'));
+    let base64Data = base64Input.value;
+    if(!base64Data) return;
+    
+    let previewArea = document.getElementById(type === 'eq' ? 'eqRetakeSection' : (type === 'return' ? 'retakePhotoSection' : (type + 'RetakeSection')));
+    let statusDiv = document.getElementById(type + 'UploadStatus');
+    if(!statusDiv) {
+       statusDiv = document.createElement('div');
+       statusDiv.id = type + 'UploadStatus';
+       statusDiv.style = "position:absolute; bottom:8px; left:8px; background:rgba(0,0,0,0.7); color:white; padding:4px 10px; border-radius:20px; font-size:12px; font-weight:600;";
+       let imgWrapper = previewArea.querySelector('div');
+       if(imgWrapper) imgWrapper.appendChild(statusDiv);
+    }
+    statusDiv.innerHTML = '⏳ กำลังอัพโหลด...';
+    statusDiv.style.background = 'rgba(0,0,0,0.7)';
+    
+    const filename = type.toUpperCase() + "_" + Date.now();
+    let url = '';
+    
+    try {
+        if (type === 'shirt') {
+            const res = await apiShirtPost({ action: 'uploadImageToDrive', base64Data: base64Data, filename: filename });
+            if(res.success) url = res.url;
+        } else {
+            const res = await new Promise((resolve, reject) => {
+                google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).uploadImageToDrive(base64Data, filename);
+            });
+            if(res && res.success) url = res.url;
+        }
+        
+        if(url) {
+            statusDiv.innerHTML = '✅ อัพโหลดแล้ว';
+            statusDiv.style.background = 'rgba(52,199,89,0.9)';
+            if(type === 'shirt') window.tempUploadedShirtUrl = url;
+            else if(type === 'eq') window.tempUploadedEqUrl = url;
+            else if(type === 'return') window.tempUploadedReturnUrl = url;
+        } else {
+            statusDiv.innerHTML = '❌ ล้มเหลว';
+            statusDiv.style.background = 'rgba(255,59,48,0.9)';
+        }
+    } catch(err) {
+        statusDiv.innerHTML = '❌ ผิดพลาด';
+        statusDiv.style.background = 'rgba(255,59,48,0.9)';
+        console.error(err);
+    }
+  }
+
+  async function deleteTempImageAsync(type) {
+    let url = '';
+    if(type === 'shirt') { url = window.tempUploadedShirtUrl; window.tempUploadedShirtUrl = ''; }
+    else if(type === 'eq') { url = window.tempUploadedEqUrl; window.tempUploadedEqUrl = ''; }
+    else if(type === 'return') { url = window.tempUploadedReturnUrl; window.tempUploadedReturnUrl = ''; }
+    
+    let statusDiv = document.getElementById(type + 'UploadStatus');
+    if(statusDiv) statusDiv.remove();
+
+    if(url && type !== 'shirt') {
+         google.script.run.deleteImageFromDrive(url);
+    }
+  }
+
   const SHIRT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzcpsuXWSH2w2ZBWtTpME0Nozb92aWNpRnr4w3JyqtBdsJBoFIAGA8LDVri96E10AEL/exec"; // REPLACE THIS URL WITH SHIRT SYSTEM DEPLOYMENT
   
   let shirtHeaders = [];
@@ -994,9 +1060,11 @@
     stopShirtCamera();
     document.getElementById('shirtCameraSection').style.display = 'none';
     document.getElementById('shirtRetakeSection').style.display = 'block';
+    uploadImageAsync('shirt');
   }
 
   function retakeShirtPhoto() {
+    deleteTempImageAsync('shirt');
     document.getElementById('shirtImageBase64').value = '';
     document.getElementById('shirtRetakeSection').style.display = 'none';
     startShirtCamera();
@@ -1054,10 +1122,10 @@
     const name = document.getElementById('shirtBorrowName').value.trim();
     const group = document.getElementById('shirtBorrowGroup').value;
     const note = document.getElementById('shirtBorrowNote').value.trim();
-    const base64Data = document.getElementById('shirtImageBase64').value;
+    // const base64Data = document.getElementById('shirtImageBase64').value;
     
     if (!name || !group) return showToast('กรุณากรอกข้อมูลและเลือกให้ครบถ้วน');
-    if (!base64Data) return showToast('กรุณาถ่ายรูปหรืออัพโหลดหลักฐานด้วยครับ');
+    // if (!base64Data) return showToast('กรุณาถ่ายรูปหรืออัพโหลดหลักฐานด้วยครับ');
     
     const items = [];
     const itemElements = document.querySelectorAll('.shirt-borrow-item');
@@ -1077,12 +1145,7 @@
     showLoading('กำลังอัพโหลดรูปและบันทึกข้อมูล...');
     
     try {
-      // 1. Upload image via Shirt API
-      const filename = "SHIRT_" + Date.now();
-      const uploadRes = await apiShirtPost({ action: 'uploadImageToDrive', base64Data: base64Data, filename: filename });
-      
-      if (!uploadRes.success) throw new Error(uploadRes.error || "Upload failed");
-      const evidenceUrl = uploadRes.url;
+      let evidenceUrl = window.tempUploadedShirtUrl || '';
       
       // 2. Save records
       const payload = {
@@ -1210,6 +1273,7 @@
     else if (actionName === 'updateMyProfile') { payload.userId = args[0]; payload.name = args[1]; payload.password = args[2]; payload.department = args[3]; } 
     else if (actionName === 'processReturn') { payload.row = args[0]; payload.eqId = args[1]; payload.qty = args[2]; payload.locId = args[3]; payload.photoUrl = args[4]; payload.eqStatus = args[5]; } 
     else if (actionName === 'uploadImageToDrive') { payload.base64Data = args[0]; payload.filename = args[1]; } 
+    else if (actionName === 'deleteImageFromDrive') { payload.url = args[0]; }
     else if (actionName === 'submitBorrow') { payload.userId = args[0]; payload.cart = args[1]; payload.source = args[2]; } 
     else if (actionName === 'approveUser') { payload.row = args[0]; } 
     else if (actionName === 'saveUserData') { payload.data = args[0]; } 
@@ -1577,25 +1641,33 @@
 
     // Delay 50ms so the browser can repaint the DOM and make the item disappear instantly BEFORE showing the loader
     setTimeout(() => {
-      showLoading('กำลังอัปโหลดรูปภาพและบันทึกการรับคืน...'); 
+      showLoading('กำลังบันทึกการรับคืน...'); 
       
-      google.script.run.withSuccessHandler(res => {
-        if (res.success) {
-          google.script.run.withSuccessHandler(retRes => {
-            hideLoading();
-            showToast('✅ ' + retRes.message);
-            setTimeout(() => refreshData(true), 2500); 
-          }).withFailureHandler(err => { hideLoading(); showToast('อัปเดตข้อมูลล้มเหลว: '+err.message); setTimeout(() => refreshData(true), 2500); }).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, res.url, eqStatus);
-        } else {
+      let doSave = function(url) {
+        google.script.run.withSuccessHandler(retRes => {
           hideLoading();
-          showToast('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
-          setTimeout(() => refreshData(true), 2500);
-        }
-      }).withFailureHandler(function(err) {
-        hideLoading();
-        showToast('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
-        setTimeout(() => refreshData(true), 2500);
-      }).uploadImageToDrive(base64Data, "RET_" + pendingReturnData.eqId + "_" + new Date().getTime());
+          showToast('✅ ' + retRes.message);
+          setTimeout(() => refreshData(true), 2500); 
+        }).withFailureHandler(err => { hideLoading(); showToast('อัปเดตข้อมูลล้มเหลว: '+err.message); setTimeout(() => refreshData(true), 2500); }).processReturn(pendingReturnData.row, pendingReturnData.eqId, pendingReturnData.qty, locId, url, eqStatus);
+      };
+
+      if (window.tempUploadedReturnUrl) {
+         doSave(window.tempUploadedReturnUrl);
+      } else {
+         google.script.run.withSuccessHandler(res => {
+           if (res.success) {
+             doSave(res.url);
+           } else {
+             hideLoading();
+             showToast('อัปโหลดรูปไม่สำเร็จ: ' + res.message);
+             setTimeout(() => refreshData(true), 2500);
+           }
+         }).withFailureHandler(function(err) {
+           hideLoading();
+           showToast('อัปโหลดรูปไม่สำเร็จ: ' + err.message);
+           setTimeout(() => refreshData(true), 2500);
+         }).uploadImageToDrive(base64Data, "RET_" + pendingReturnData.eqId + "_" + new Date().getTime());
+      }
     }, 50);
   }
 
@@ -1746,15 +1818,18 @@
     document.getElementById('returnImageBase64').value = base64;
     document.getElementById('returnImagePreview').src = base64;
     document.getElementById('retakePhotoSection').style.display = 'block';
+    uploadImageAsync('return');
   }
 
   function retakeReturnPhoto() {
+    deleteTempImageAsync('return');
     document.getElementById('returnImageBase64').value = '';
     document.getElementById('retakePhotoSection').style.display = 'none';
     startReturnCamera();
   }
 
   function closeReturnLocModal() {
+    deleteTempImageAsync('return');
     document.getElementById('returnLocModal').style.display='none';
     stopReturnCamera();
   }
@@ -1771,6 +1846,7 @@
       document.getElementById('returnCameraSection').style.display = 'none';
       document.getElementById('retakePhotoSection').style.display = 'block';
       event.target.value = ''; // clear
+      uploadImageAsync('return');
     };
     reader.readAsDataURL(file);
   }
@@ -1788,6 +1864,7 @@
       document.getElementById('eqCameraContainer').style.display = 'none';
       document.getElementById('eqRetakeSection').style.display = 'block';
       event.target.value = ''; // clear
+      uploadImageAsync('eq');
     };
     reader.readAsDataURL(file);
   }
@@ -1840,9 +1917,11 @@
     document.getElementById('eqCameraSection').style.display = 'none';
     
     stopEqCamera();
+    uploadImageAsync('eq');
   }
 
   function retakeEqPhoto() {
+    deleteTempImageAsync('eq');
     document.getElementById('editEqImageBase64').value = '';
     document.getElementById('eqRetakeSection').style.display = 'none';
     startEqCamera();
@@ -1957,6 +2036,10 @@
       <div class="eq-item" style="position:relative; border:1px solid #e5e5ea; border-radius:12px; padding:15px; margin-bottom:15px; background: #fff;">
         <label>ชื่ออุปกรณ์ <span style="color:red">*</span></label>
         <input type="text" class="edit-eq-name" placeholder="เช่น กล้อง DSLR" style="margin-bottom: 10px;">
+        <label style="display:flex; align-items:center; gap:8px; margin-bottom:10px; cursor:pointer;">
+          <input type="checkbox" class="edit-eq-consumable" style="width:20px; height:20px; margin:0;">
+          <span style="font-weight:500;">นี่คือวัสดุสิ้นเปลือง (ไม่ต้องรับคืน)</span>
+        </label>
         <label>จำนวนทั้งหมด <span style="color:red">*</span></label>
         <input type="number" class="edit-eq-total" placeholder="จำนวน" min="1">
         <button type="button" class="btn-danger btn-remove-eq" style="position:absolute; top:10px; right:10px; padding:4px 8px; width:auto; font-size:12px;" onclick="this.parentElement.remove()">❌ ลบ</button>
@@ -1966,12 +2049,14 @@
   }
 
   function openEqModal() { document.getElementById('eqModalTitle').innerText = 'เพิ่มอุปกรณ์'; document.getElementById('editEqIsNew').value = 'true'; document.getElementById('editEqId').value = ''; document.getElementById('editEqId').disabled = false; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImage').value = ''; document.getElementById('eqItemsContainer').innerHTML = ''; addEqItem(); document.querySelector('.eq-item .btn-remove-eq').style.display = 'none'; document.getElementById('btnAddEqItem').style.display = 'block'; document.getElementById('eqCameraSection').style.display = 'block'; document.getElementById('eqCameraContainer').style.display = 'none'; document.getElementById('eqRetakeSection').style.display = 'none'; if(eqVideoStream) stopEqCamera(); const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- เลือกจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); document.getElementById('eqModal').style.display = 'flex'; }
-  function editEq(id) { let eq = allEquipment.find(e => e.id === id); if(!eq) return; document.getElementById('eqModalTitle').innerText = 'แก้ไขอุปกรณ์'; document.getElementById('editEqIsNew').value = 'false'; document.getElementById('editEqId').value = eq.id; document.getElementById('editEqId').disabled = true; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImage').value = eq.image || ''; document.getElementById('eqItemsContainer').innerHTML = ''; addEqItem(); document.querySelector('.eq-item .btn-remove-eq').style.display = 'none'; document.getElementById('btnAddEqItem').style.display = 'none'; const el = document.querySelector('.eq-item'); el.querySelector('.edit-eq-name').value = eq.name; el.querySelector('.edit-eq-total').value = eq.total; document.getElementById('eqCameraContainer').style.display = 'none'; if(eqVideoStream) stopEqCamera(); if(eq.image) { document.getElementById('editEqImagePreviewUI').src = eq.image; document.getElementById('eqCameraSection').style.display = 'none'; document.getElementById('eqRetakeSection').style.display = 'block'; } else { document.getElementById('eqCameraSection').style.display = 'block'; document.getElementById('eqRetakeSection').style.display = 'none'; } const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- ไม่ระบุจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); sel.value = eq.location; document.getElementById('eqModal').style.display = 'flex'; }
+  function editEq(id) { let eq = allEquipment.find(e => e.id === id); if(!eq) return; document.getElementById('eqModalTitle').innerText = 'แก้ไขอุปกรณ์'; document.getElementById('editEqIsNew').value = 'false'; document.getElementById('editEqId').value = eq.id; document.getElementById('editEqId').disabled = true; document.getElementById('editEqImageBase64').value = ''; document.getElementById('editEqImage').value = eq.image || ''; document.getElementById('eqItemsContainer').innerHTML = ''; addEqItem(); document.querySelector('.eq-item .btn-remove-eq').style.display = 'none'; document.getElementById('btnAddEqItem').style.display = 'none'; const el = document.querySelector('.eq-item'); let eqName = eq.name; if(eqName.startsWith('[สิ้นเปลือง] ')) { eqName = eqName.replace('[สิ้นเปลือง] ', ''); let cb = el.querySelector('.edit-eq-consumable'); if(cb) cb.checked = true; } el.querySelector('.edit-eq-name').value = eqName; el.querySelector('.edit-eq-total').value = eq.total; document.getElementById('eqCameraContainer').style.display = 'none'; if(eqVideoStream) stopEqCamera(); if(eq.image) { document.getElementById('editEqImagePreviewUI').src = eq.image; document.getElementById('eqCameraSection').style.display = 'none'; document.getElementById('eqRetakeSection').style.display = 'block'; } else { document.getElementById('eqCameraSection').style.display = 'block'; document.getElementById('eqRetakeSection').style.display = 'none'; } const sel = document.getElementById('editEqLoc'); sel.innerHTML = '<option value="">-- ไม่ระบุจุดวาง --</option>'; allLocations.forEach(loc => sel.innerHTML += '<option value="'+loc.id+'">'+loc.name+'</option>'); sel.value = eq.location; document.getElementById('eqModal').style.display = 'flex'; }
 
   function saveEq() {
     const base64Cam = document.getElementById('editEqImageBase64').value;
 
-    if (base64Cam) {
+    if (window.tempUploadedEqUrl) {
+      proceedSaveEq(window.tempUploadedEqUrl);
+    } else if (base64Cam) {
       uploadEqImageAndSave(base64Cam);
     } else {
       proceedSaveEq(document.getElementById('editEqImage').value);
@@ -1990,7 +2075,7 @@
     }).uploadImageToDrive(base64Data, "IMG_EQ_" + new Date().getTime());
   }
 
-  function proceedSaveEq(imageUrl) { const isNew = document.getElementById('editEqIsNew').value === 'true'; let items = []; const itemEls = document.querySelectorAll('.eq-item'); for(const el of itemEls) { const name = el.querySelector('.edit-eq-name').value.trim(); const total = parseInt(el.querySelector('.edit-eq-total').value) || 0; if(!name || total < 1) return showToast('กรุณาระบุชื่อและจำนวนอุปกรณ์ให้ครบถ้วน'); items.push({name, total}); } if(items.length === 0) return showToast('กรุณาเพิ่มอุปกรณ์อย่างน้อย 1 รายการ'); const data = { isNew: isNew, id: document.getElementById('editEqId').value, image: imageUrl, location: document.getElementById('editEqLoc').value, items: items }; showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(true); }).withFailureHandler(showError).saveEquipmentData(data); }
+  function proceedSaveEq(imageUrl) { const isNew = document.getElementById('editEqIsNew').value === 'true'; let items = []; const itemEls = document.querySelectorAll('.eq-item'); for(const el of itemEls) { let name = el.querySelector('.edit-eq-name').value.trim(); const cb = el.querySelector('.edit-eq-consumable'); if(cb && cb.checked) name = '[สิ้นเปลือง] ' + name; const total = parseInt(el.querySelector('.edit-eq-total').value) || 0; if(!name || name==='[สิ้นเปลือง]' || total < 1) return showToast('กรุณาระบุชื่อและจำนวนอุปกรณ์ให้ครบถ้วน'); items.push({name, total}); } if(items.length === 0) return showToast('กรุณาเพิ่มอุปกรณ์อย่างน้อย 1 รายการ'); const data = { isNew: isNew, id: document.getElementById('editEqId').value, image: imageUrl, location: document.getElementById('editEqLoc').value, items: items }; showLoading('กำลังบันทึกข้อมูลอุปกรณ์...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('✅ ' + res.message); document.getElementById('eqModal').style.display='none'; refreshData(true); }).withFailureHandler(showError).saveEquipmentData(data); }
   function deleteEq(id, name) { if(!confirm('ลบอุปกรณ์: ' + name + ' ?')) return; allEquipment = allEquipment.filter(eq => String(eq.id) !== String(id)); renderAdminEqData(); showLoading('กำลังลบ...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast('🗑️ ' + res.message); refreshData(true); }).deleteEquipmentData(id); }
 
   function renderAdminLocData() { const listDiv = document.getElementById('adminLocList'); if(!listDiv) return; listDiv.innerHTML = ''; allLocations.forEach(loc => { const card = document.createElement('div'); card.className = 'list-card'; card.innerHTML = '<div class="list-info"><strong>' + loc.name + '</strong></div><div style="display:flex; gap:5px;"><button class="btn-warning" onclick="editLoc(\'' + loc.id + '\')">แก้ไข</button><button class="btn-danger" onclick="deleteLoc(\'' + loc.id + '\', \'' + loc.name + '\')">ลบ</button></div>'; listDiv.appendChild(card); }); }
