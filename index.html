@@ -699,6 +699,23 @@
         </div>
       </div>
     </div>
+    
+    <!-- Equipment Checkout Modal -->
+    <div id="eqCheckoutModal" class="modal-bg">
+      <div class="modal-content">
+        <h3 style="margin-top:0;">🛒 ยืนยันเบิกอุปกรณ์</h3>
+        <label>ระบุชื่อผู้รับอุปกรณ์ <span style="color:red">*</span></label>
+        <div id="eqRecipientDropdownWrap">
+          <input type="text" id="eqBorrowRecipient" autocomplete="off" placeholder="🔍 พิมพ์ค้นหาชื่อผู้รับ..." style="width:100%; padding:10px 12px; border-radius:8px; border:1px solid #ddd; font-family:inherit; box-sizing:border-box;" oninput="filterEqRecipientList()" onfocus="filterEqRecipientList()">
+          <div id="eqRecipientDropdown" style="display:none; max-height:180px; overflow-y:auto; background:#fafafa; border:1px solid #e0e0e0; border-radius:8px; margin-top:6px;"></div>
+        </div>
+        <p style="font-size:12px; color:#666; margin-top:5px;">(หากเบิกให้ตัวเอง สามารถใส่ชื่อตัวเองได้เลย)</p>
+        <div style="display:flex; gap:10px; margin-top:15px;">
+          <button class="btn-success" style="flex:1;" onclick="confirmEqCheckout()">ยืนยันการเบิก</button>
+          <button class="btn-danger" style="flex:1;" onclick="document.getElementById('eqCheckoutModal').style.display='none'">ยกเลิก</button>
+        </div>
+      </div>
+    </div>
     <!-- Radio Add/Edit Modal -->
     <div id="radioModal" class="modal-bg">
       <div class="modal-content">
