@@ -262,11 +262,7 @@
             <div style="font-size:22px; font-weight:700;" id="shirtStatJacket">—</div>
             <div style="font-size:12px; color:#666;">Jacket (ชิ้น)</div>
           </div>
-          <div class="glass-panel" style="padding:15px; text-align:center;">
-            <div style="font-size:24px; margin-bottom:5px;">📅</div>
-            <div style="font-size:16px; font-weight:700; margin-top:5px; margin-bottom:5px;" id="shirtStatLastDate">—</div>
-            <div style="font-size:12px; color:#666;">Backup ล่าสุด</div>
-          </div>
+
         </div>
 
         <h4 style="margin-bottom:10px;">สรุปแยกตามไซส์</h4>
@@ -806,18 +802,50 @@
   let shirtData = [];
   let shirtVideoStream = null;
 
+  const NODE_SHIRT_API_URL = "https://your-ubuntu-domain.com/api/shirt"; // เปลี่ยนเป็นโดเมนของคุณ
+
   async function apiShirtPost(paramsObj) {
-    const res = await fetch(SHIRT_SCRIPT_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(paramsObj)
-    });
-    return await res.json();
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const res = await fetch(NODE_SHIRT_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(paramsObj),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error("Node API Error");
+      return await res.json();
+    } catch (err) {
+      console.warn("Node API Failed, falling back to GAS", err);
+      const res = await fetch(SHIRT_SCRIPT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(paramsObj)
+      });
+      return await res.json();
+    }
   }
 
   async function apiShirtGet(action) {
-    const res = await fetch(SHIRT_SCRIPT_URL + "?action=" + action, { redirect: 'follow' });
-    return await res.json();
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const res = await fetch(NODE_SHIRT_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: action }),
+        signal: controller.signal
+      });
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error("Node API Error");
+      return await res.json();
+    } catch (err) {
+      console.warn("Node API Failed, falling back to GAS", err);
+      const res = await fetch(SHIRT_SCRIPT_URL + "?action=" + action, { redirect: 'follow' });
+      return await res.json();
+    }
   }
 
   async function loadShirtsData(isQuiet = false) {
@@ -923,10 +951,7 @@
     let elJacket = document.getElementById('shirtStatJacket');
     if (elJacket) { elJacket.innerText = remainingJackets.toLocaleString(); elJacket.nextElementSibling.innerText = "Jacket คงเหลือ (ชิ้น)"; }
     
-    if (shirtData.length > 0 && shirtData[0][0]) {
-       let lastDateEl = document.getElementById('shirtStatLastDate');
-       if (lastDateEl) lastDateEl.innerText = String(shirtData[0][0]).split(' ')[0];
-    }
+
 
     const sizeOrder = ['XS','S','M','L','XL','2XL','3XL','4XL','5XL','6XL','7XL','8XL','9XL','10XL'];
     let sizeHtml = '';
@@ -1372,11 +1397,22 @@
     else if (actionName === 'getTransactionHistory') { payload.page = args[0]; payload.limit = args[1]; }
 
 
-    fetch(SCRIPT_URL, {
+    const NODE_API_URL = "https://your-ubuntu-domain.com/api"; // เปลี่ยนเป็นโดเมนของคุณ
+    
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+    fetch(NODE_API_URL, {
       method: 'POST',
-      body: JSON.stringify(payload)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      signal: controller.signal
     })
-    .then(res => res.json())
+    .then(res => {
+      clearTimeout(timeoutId);
+      if (!res.ok) throw new Error("Node API Error");
+      return res.json();
+    })
     .then(data => {
       if(data && data.success === false && data.message) {
          if(failureCb) failureCb(new Error(data.message));
@@ -1385,8 +1421,24 @@
       else if (successCb) successCb(data);
     })
     .catch(err => {
-      if (failureCb) failureCb(err);
-      else console.error("API Error: ", err);
+      console.warn("Node API Failed, falling back to GAS", err);
+      // Fallback
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      })
+      .then(res => res.json())
+      .then(data => {
+        if(data && data.success === false && data.message) {
+           if(failureCb) failureCb(new Error(data.message));
+           else if(successCb) successCb(data);
+        }
+        else if (successCb) successCb(data);
+      })
+      .catch(fallbackErr => {
+        if (failureCb) failureCb(fallbackErr);
+        else console.error("API Error: ", fallbackErr);
+      });
     });
   }
 
