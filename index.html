@@ -1413,7 +1413,7 @@
     else if (actionName === 'getTransactionHistory') { payload.page = args[0]; payload.limit = args[1]; }
 
 
-    const NODE_API_URL = "https://api.piodan.online/api"; // เปลี่ยนเป็นโดเมนของคุณ
+    const NODE_API_URL = "https://your-ubuntu-domain.com/api"; // เปลี่ยนเป็นโดเมนของคุณ
     
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -2702,11 +2702,28 @@
   }
 
   function openAddRadioModal() {
-    document.getElementById('radioItemsContainer').innerHTML = '';
-    addRadioItem();
-    document.querySelector('.radio-item .btn-remove-radio').style.display = 'none';
-    document.getElementById('btnAddRadioItem').style.display = 'block';
-    document.getElementById('radioModal').style.display = 'flex';
+    let maxNum = 0;
+    if (appData.radios && appData.radios.length > 0) {
+      for (const r of appData.radios) {
+        const m = r.name.match(/#(\d+)/);
+        if (m) {
+          const n = parseInt(m[1], 10);
+          if (n > maxNum) maxNum = n;
+        }
+      }
+    }
+    maxNum++;
+    const numStr = maxNum < 10 ? '0' + maxNum : '' + maxNum;
+    const name = 'วิทยุ #' + numStr;
+
+    showLoading('กำลังเพิ่มวิทยุ...');
+    google.script.run.withSuccessHandler(function(res) {
+      hideLoading();
+      showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message);
+      if (res.success) { 
+        loadRadios(true); 
+      }
+    }).withFailureHandler(showError).saveRadio({ isNew: true, items: [{ name }] });
   }
 
   function doSaveRadio() {
