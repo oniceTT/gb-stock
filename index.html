@@ -1430,11 +1430,7 @@
       return res.json();
     })
     .then(data => {
-      if(data && data.success === false && data.message) {
-         if(failureCb) failureCb(new Error(data.message));
-         else if(successCb) successCb(data);
-      }
-      else if (successCb) successCb(data);
+      if (successCb) successCb(data);
     })
     .catch(err => {
       console.warn("Node API Failed, falling back to GAS", err);
@@ -1576,12 +1572,9 @@
       } catch(e) {}
     }
     try {
-      const [initData, radData] = await Promise.all([
-        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getInitialData()),
-        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getRadios())
-      ]);
+      const initData = await new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getInitialData());
       allEquipment = initData.equipments || []; allTransactions = initData.transactions || []; allLocations = initData.locations || [];
-      if (radData && radData.success) allRadios = radData.radios || [];
+      if (initData.radios) allRadios = initData.radios;
       localStorage.setItem('cache_equip', JSON.stringify(allEquipment)); localStorage.setItem('cache_trans', JSON.stringify(allTransactions));
       localStorage.setItem('cache_loc', JSON.stringify(allLocations)); localStorage.setItem('cache_radio', JSON.stringify(allRadios));
       if (!isQuiet) hideLoading();
@@ -1673,12 +1666,9 @@
   function saveMyProfile() { const u = document.getElementById('myProfileUsername').value; const p = document.getElementById('myProfilePassword').value; const n = document.getElementById('myProfileName').value; const d = document.getElementById('myProfileDept').value; if(!u || !p || !n) return showToast('กรุณากรอก Username รหัสผ่าน และชื่อให้ครบถ้วน'); showLoading('กำลังบันทึกข้อมูล...'); google.script.run.withSuccessHandler(res => { hideLoading(); showToast(res.success ? '✅ ' + res.message : '❌ ' + res.message); if(res.success) { currentUser = res.user; safeSetStorage('myAppUser', JSON.stringify(currentUser)); let roleText = currentUser.role === 'Superadmin' ? '🌟 Superadmin: ' : (currentUser.role === 'Admin' ? 'แอดมิน: ' : 'คุณ: '); document.getElementById('welcomeText').innerText = roleText + currentUser.name; } }).withFailureHandler(showError).updateMyProfile(currentUser.id, u, n, p, d); }
   async function loadTransactions(isAdminView) { 
     try {
-      const [txData, radData] = await Promise.all([
-        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getActiveTransactions()),
-        new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getRadios())
-      ]);
-      allTransactions = txData || [];
-      if (radData && radData.success) allRadios = radData.radios || [];
+      const txData = await new Promise((res, rej) => google.script.run.withSuccessHandler(res).withFailureHandler(rej).getActiveTransactions());
+      if (txData && txData.success) allTransactions = txData.transactions || [];
+      else allTransactions = txData || [];
       hideLoading();
       if(isAdminView) renderAdminData(); else renderMyReturnData(); 
     } catch(err) { hideLoading(); showError(err); }
@@ -2703,8 +2693,8 @@
 
   function openAddRadioModal() {
     let maxNum = 0;
-    if (appData.radios && appData.radios.length > 0) {
-      for (const r of appData.radios) {
+    if (allRadios && allRadios.length > 0) {
+      for (const r of allRadios) {
         const m = r.name.match(/#(\d+)/);
         if (m) {
           const n = parseInt(m[1], 10);
