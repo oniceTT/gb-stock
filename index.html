@@ -817,12 +817,12 @@
   let shirtData = [];
   let shirtVideoStream = null;
 
-  const NODE_SHIRT_API_URL = "https://your-ubuntu-domain.com/api/shirt"; // เปลี่ยนเป็นโดเมนของคุณ
+  const NODE_SHIRT_API_URL = "https://api.piodan.online/api/shirt";
 
   async function apiShirtPost(paramsObj) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
       const res = await fetch(NODE_SHIRT_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -846,7 +846,7 @@
   async function apiShirtGet(action) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 5000);
+      const timeoutId = setTimeout(() => controller.abort(), 3000);
       const res = await fetch(NODE_SHIRT_API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1390,7 +1390,7 @@
     if (actionName === 'getInitialData' || actionName === 'getActiveTransactions' || actionName === 'getAllUsers') { } 
     else if (actionName === 'loginUser') { payload.username = args[0]; payload.password = args[1]; } 
     else if (actionName === 'registerUser') { payload.username = args[0]; payload.password = args[1]; payload.name = args[2]; payload.department = args[3]; } 
-    else if (actionName === 'updateMyProfile') { payload.userId = args[0]; payload.name = args[1]; payload.password = args[2]; payload.department = args[3]; } 
+    else if (actionName === 'updateMyProfile') { payload.userId = args[0]; payload.username = args[1]; payload.name = args[2]; payload.password = args[3]; payload.department = args[4]; } 
     else if (actionName === 'processReturn') { payload.row = args[0]; payload.eqId = args[1]; payload.qty = args[2]; payload.locId = args[3]; payload.photoUrl = args[4]; payload.eqStatus = args[5]; } 
     else if (actionName === 'uploadImageToDrive') { payload.base64Data = args[0]; payload.filename = args[1]; } 
     else if (actionName === 'deleteImageFromDrive') { payload.url = args[0]; }
