@@ -11,13 +11,13 @@
     
     <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'Kanit', "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #e5e5f7; background-image: radial-gradient(at 18% 30%, hsla(210, 100%, 85%, 0.4) 0px, transparent 50%), radial-gradient(at 80% 10%, hsla(270, 80%, 85%, 0.4) 0px, transparent 50%), radial-gradient(at 40% 80%, hsla(320, 80%, 85%, 0.4) 0px, transparent 50%), radial-gradient(at 80% 90%, hsla(180, 80%, 85%, 0.4) 0px, transparent 50%); background-attachment: fixed; color: #1d1d1f; }
-  .header { background: rgba(255, 255, 255, 0.4); backdrop-filter: blur(30px) saturate(200%); -webkit-backdrop-filter: blur(30px) saturate(200%); color: #1d1d1f; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.6); box-shadow: inset 0 -1px 10px rgba(255,255,255,0.3), 0 4px 30px rgba(0, 0, 0, 0.05); }
+  .header { background: rgba(255, 255, 255, 0.95); color: #1d1d1f; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid rgba(255,255,255,0.6); box-shadow: inset 0 -1px 10px rgba(255,255,255,0.3), 0 4px 30px rgba(0, 0, 0, 0.05); }
   .header-title { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; }
   .logout-btn { background: #e5e5ea; border: none; color: #1d1d1f; padding: 6px 14px; border-radius: 12px; cursor: pointer; display: none; font-weight: 600; transition: background 0.2s;}
   .logout-btn:hover { background: #d1d1d6; }
   .container { max-width: 800px; margin: 0 auto; padding: 20px; }
-  #authSection { text-align: center; margin-top: 50px; background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); padding: 40px 30px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 16px 40px rgba(0,0,0,0.1); }
-  input[type="text"], input[type="password"], input[type="number"], select, input[type="file"] { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; box-sizing: border-box; font-family: inherit; font-size: 16px; background-color: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s; }
+  #authSection { text-align: center; margin-top: 50px; background: rgba(255, 255, 255, 0.95); padding: 40px 30px; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.8); box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 16px 40px rgba(0,0,0,0.1); }
+  input[type="text"], input[type="password"], input[type="number"], select, input[type="file"] { width: 100%; padding: 14px; margin: 8px 0; border: 1px solid rgba(0,0,0,0.08); border-radius: 14px; box-sizing: border-box; font-family: inherit; font-size: 16px; background-color: rgba(255, 255, 255, 0.95); transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s; }
   input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus, select:focus { outline: none; border-color: #007aff; box-shadow: 0 0 0 4px rgba(0,122,255,0.15); background-color: rgba(255, 255, 255, 0.9); }
   button { font-family: inherit; font-weight: 600; transition: transform 0.1s, opacity 0.2s; }
   button:active { transform: scale(0.97); }
@@ -27,14 +27,14 @@
   button.btn-warning { background-color: #ff9500; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer;}
   button.btn-text { background: none; border: none; color: #007aff; cursor: pointer; margin-top: 15px; padding: 10px;}
   .nav-tabs { display: flex; gap: 10px; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px;}
-  .nav-btn { flex: 1; padding: 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: 12px; cursor: pointer; color: #1d1d1f; white-space: nowrap; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;}
+  .nav-btn { flex: 1; padding: 10px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.95); border-radius: 12px; cursor: pointer; color: #1d1d1f; white-space: nowrap; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;}
   .nav-btn.active { background: rgba(29, 29, 31, 0.85); color: white; border-color: transparent; }
   .controls { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
   .filters { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 5px; align-items: center;}
-  .filter-btn { padding: 8px 16px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.6); backdrop-filter: blur(10px); border-radius: 20px; cursor: pointer; white-space: nowrap; color: #1d1d1f; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;}
+  .filter-btn { padding: 8px 16px; border: 1px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.95); border-radius: 20px; cursor: pointer; white-space: nowrap; color: #1d1d1f; font-weight: 500; box-shadow: 0 2px 8px rgba(0,0,0,0.03); transition: all 0.2s;}
   .filter-btn.active { background: rgba(29, 29, 31, 0.85); color: white; border-color: transparent; }
   .equipment-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 16px; }
-  .card { background: rgba(255, 255, 255, 0.45); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 8px 32px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; }
+  .card { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; overflow: hidden; display: flex; flex-direction: column; box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.4), 0 8px 32px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; }
   .card:hover { transform: translateY(-3px); box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.6), 0 12px 40px rgba(0,0,0,0.12); }
   .card-img { width: 100%; height: 160px; background-color: rgba(255,255,255,0.5); object-fit: cover; }
   .card-body { padding: 14px; }
@@ -42,15 +42,15 @@
   .card-status { font-size: 13px; color: #86868b; margin-bottom: 8px;}
   .cart-controls { display: flex; align-items: center; justify-content: space-between; background: rgba(255,255,255,0.5); border-radius: 8px; padding: 6px; }
   .qty-btn { background: white; border: none; border-radius: 6px; width: 28px; height: 28px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.1); color: #1d1d1f; font-weight: 500;}
-  #cartFloat { position: fixed; bottom: 30px; right: 30px; background: rgba(29, 29, 31, 0.9); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); color: white; padding: 16px 24px; border-radius: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); cursor: pointer; display: none; z-index: 1000; font-weight: 600;}
-  .list-card { background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; padding: 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: inset 0 0 15px rgba(255,255,255,0.4), 0 4px 20px rgba(0,0,0,0.05); }
+  #cartFloat { position: fixed; bottom: 30px; right: 30px; background: rgba(29, 29, 31, 0.95); color: white; padding: 16px 24px; border-radius: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); cursor: pointer; display: none; z-index: 1000; font-weight: 600;}
+  .list-card { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; padding: 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; box-shadow: inset 0 0 15px rgba(255,255,255,0.4), 0 4px 20px rgba(0,0,0,0.05); }
   .list-info { font-size: 15px; line-height: 1.5; color: #1d1d1f; }
-  .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); z-index: 2000; align-items: center; justify-content: center; }
-  .modal-content { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(40px) saturate(200%); -webkit-backdrop-filter: blur(40px) saturate(200%); border: 1px solid rgba(255, 255, 255, 0.8); padding: 24px; border-radius: 24px; max-width: 400px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: inset 0 0 20px rgba(255,255,255,0.5), 0 20px 40px rgba(0,0,0,0.2); }
-  #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
+  .modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+  .modal-content { background: rgba(255, 255, 255, 0.98); border: 1px solid rgba(255, 255, 255, 0.8); padding: 24px; border-radius: 24px; max-width: 400px; width: 90%; max-height: 85vh; overflow-y: auto; box-shadow: inset 0 0 20px rgba(255,255,255,0.5), 0 20px 40px rgba(0,0,0,0.2); }
+  #loadingOverlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.85); z-index: 9999; align-items: center; justify-content: center; flex-direction: column; }
   .spinner { border: 4px solid rgba(0,122,255,0.2); border-top: 4px solid #007aff; border-radius: 50%; width: 44px; height: 44px; animation: spin 1s linear infinite; }
   @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-  .radio-card { background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(20px) saturate(180%); -webkit-backdrop-filter: blur(20px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; padding: 16px; position: relative; transition: transform 0.2s, box-shadow 0.2s; box-shadow: inset 0 0 15px rgba(255,255,255,0.4), 0 4px 20px rgba(0,0,0,0.05); }
+  .radio-card { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 255, 255, 0.7); border-radius: 20px; padding: 16px; position: relative; transition: transform 0.2s, box-shadow 0.2s; box-shadow: inset 0 0 15px rgba(255,255,255,0.4), 0 4px 20px rgba(0,0,0,0.05); }
   .radio-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
   .radio-card.is-borrowed { border: 1px solid rgba(255, 204, 0, 0.6); background: rgba(255, 253, 240, 0.8); }
   .radio-card.is-mine { border: 1px solid rgba(52, 199, 89, 0.6); background: rgba(240, 253, 244, 0.8); }
@@ -61,10 +61,10 @@
   .upload-zone { display:block; border:2px dashed #d2d2d7; border-radius:16px; padding:24px; text-align:center; cursor:pointer; background:#f5f5f7; margin-bottom:15px; font-size:15px; color:#86868b; transition: all 0.2s; }
   .upload-zone:hover { border-color:#007aff; background:#f0f8ff; color:#007aff; }
   .nav-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px; }
-  .nav-item { border: 1px solid rgba(255,255,255,0.4) !important; background: rgba(255,255,255,0.6) !important; backdrop-filter: blur(10px); color: #1d1d1f !important; border-radius: 12px !important; font-weight: 600 !important; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important; padding: 10px 5px; font-size: 13px; text-align: center; cursor: pointer; }
+  .nav-item { border: 1px solid rgba(255,255,255,0.4) !important; background: rgba(255,255,255,0.95) !important; color: #1d1d1f !important; border-radius: 12px !important; font-weight: 600 !important; transition: all 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important; padding: 10px 5px; font-size: 13px; text-align: center; cursor: pointer; }
   .nav-item.active { background: rgba(29, 29, 31, 0.85) !important; color: white !important; border-color: transparent !important; }
   .btn-outline { font-family: inherit; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s; }
-  .glass-panel { background: rgba(255, 255, 255, 0.55); backdrop-filter: blur(24px) saturate(180%); -webkit-backdrop-filter: blur(24px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 24px; padding: 24px; box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 16px 40px rgba(0,0,0,0.08); }
+  .glass-panel { background: rgba(255, 255, 255, 0.95); border: 1px solid rgba(255, 255, 255, 0.8); border-radius: 24px; padding: 24px; box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.5), 0 16px 40px rgba(0,0,0,0.08); }
 
   /* === Responsive Design === */
   @media (max-width: 480px) {
@@ -106,9 +106,7 @@
       max-width: 400px;
     }
     .toast-msg {
-      background-color: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background-color: rgba(0, 0, 0, 0.9);
       color: #fff;
       text-align: left;
       border-radius: 14px;
